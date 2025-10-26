@@ -1,0 +1,82 @@
+<?xml version="1.0" ?>
+<robot name="endeffector" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+<xacro:include filename="$(find endeffector_description)/urdf/materials.xacro" />
+<xacro:include filename="$(find endeffector_description)/urdf/endeffector.trans" />
+<xacro:include filename="$(find endeffector_description)/urdf/endeffector.gazebo" />
+<link name="base_link">
+  <inertial>
+    <origin xyz="-0.0004828492599513455 -0.03453707057398219 0.029353241599917475" rpy="0 0 0"/>
+    <mass value="0.6290446959955387"/>
+    <inertia ixx="0.001001" iyy="0.000242" izz="0.001076" ixy="9e-06" iyz="-2e-06" ixz="2e-06"/>
+  </inertial>
+  <visual>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <geometry>
+      <mesh filename="file://$(find endeffector_description)/meshes/base_link.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+    <material name="silver"/>
+  </visual>
+  <collision>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <geometry>
+      <mesh filename="file://$(find endeffector_description)/meshes/base_link.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+  </collision>
+</link>
+
+<link name="Component3_1">
+  <inertial>
+    <origin xyz="2.9393522312957596e-08 -0.014999818138314712 -0.006117760776172872" rpy="0 0 0"/>
+    <mass value="0.13979056869000012"/>
+    <inertia ixx="3.1e-05" iyy="1.5e-05" izz="4.2e-05" ixy="0.0" iyz="-0.0" ixz="0.0"/>
+  </inertial>
+  <visual>
+    <origin xyz="-0.000468 0.003253 -0.016" rpy="0 0 0"/>
+    <geometry>
+      <mesh filename="file://$(find endeffector_description)/meshes/Component3_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+    <material name="silver"/>
+  </visual>
+  <collision>
+    <origin xyz="-0.000468 0.003253 -0.016" rpy="0 0 0"/>
+    <geometry>
+      <mesh filename="file://$(find endeffector_description)/meshes/Component3_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+  </collision>
+</link>
+
+<link name="Capacative_Soil_Moisture_Sensor_v1.2_v2_1">
+  <inertial>
+    <origin xyz="0.011112529965739852 -0.023627396305211643 -0.0004500001430511394" rpy="0 0 0"/>
+    <mass value="0.01437350509781825"/>
+    <inertia ixx="1e-05" iyy="1e-06" izz="1.1e-05" ixy="0.0" iyz="0.0" ixz="0.0"/>
+  </inertial>
+  <visual>
+    <origin xyz="0.010632 0.094013 -0.02415" rpy="0 0 0"/>
+    <geometry>
+      <mesh filename="file://$(find endeffector_description)/meshes/Capacative_Soil_Moisture_Sensor_v1.2_v2_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+    <material name="silver"/>
+  </visual>
+  <collision>
+    <origin xyz="0.010632 0.094013 -0.02415" rpy="0 0 0"/>
+    <geometry>
+      <mesh filename="file://$(find endeffector_description)/meshes/Capacative_Soil_Moisture_Sensor_v1.2_v2_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+  </collision>
+</link>
+
+<joint name="Rigid 2" type="fixed">
+  <origin xyz="0.000468 -0.003253 0.016" rpy="0 0 0"/>
+  <parent link="base_link"/>
+  <child link="Component3_1"/>
+</joint>
+
+<joint name="Rigid 3" type="fixed">
+  <origin xyz="-0.010632 -0.094013 0.02415" rpy="0 0 0"/>
+  <parent link="base_link"/>
+  <child link="Capacative_Soil_Moisture_Sensor_v1.2_v2_1"/>
+</joint>
+
+</robot>
