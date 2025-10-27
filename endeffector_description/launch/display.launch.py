@@ -1,64 +1,83 @@
-from launch_ros.actions import Node
-from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument
-from launch.substitutions import LaunchConfiguration
-from launch.conditions import IfCondition, UnlessCondition
-import xacro
 import os
 from ament_index_python.packages import get_package_share_directory
+from launch import LaunchDescription
+from launch.actions import TimerAction, IncludeLaunchDescription
+from launch.substitutions import PathJoinSubstitution
+from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch_ros.substitutions import FindPackageShare
+
+# Toggle between simulated or real UR5e hardware
+use_fake = True
+use_fake_str = 'true'
+ur_type = 'ur5e'
+ip_address = 'yyy.yyy.yyy.yyy'
+
+if not use_fake:
+	ip_address = '192.168.0.100' # Change this to your robot's IP
+	use_fake_str = 'false'
+
+
+def get_ur_control_launch():
+	"""Configure UR control launch for the UR5e arm."""
+	
+	# THIS IS THE KEY: We find YOUR package and point to the
+	# combined Xacro file you created.
+	end_effector_path = os.path.join(
+		get_package_share_directory('endeffector_description'), 'urdf', 'ur_with_endeffector.xacro'
+	)
+
+	ur_control_launch_args = {
+		'ur_type': ur_type,
+		'robot_ip': ip_address,
+		'use_fake_hardware': use_fake_str,
+		'launch_rviz': 'false', # We set this to false because MoveIt will launch RViz
+		
+		# THIS ARGUMENT IS THE SOLUTION
+		# It tells the UR driver to use your combined model
+		'description_file': end_effector_path, 
+	}
+
+	# Add controller if using simulated hardware
+	if use_fake:
+		ur_control_launch_args['initial_joint_controller'] = 'joint_trajectory_controller'
+
+	return IncludeLaunchDescription(
+		PythonLaunchDescriptionSource(
+			PathJoinSubstitution([FindPackageShare('ur_robot_driver'), 'launch', 'ur_control.launch.py'])
+		),
+		launch_arguments=ur_control_launch_args.items(),
+	)
+
+
+def get_moveit_launch():
+	"""Configure MoveIt launch with a delay to ensure UR control is initialized."""
+	moveit_launch_args = {
+		'ur_type': ur_type,
+		'launch_rviz': 'true', 
+		'use_fake_hardware': use_fake_str,
+	}
+
+	return TimerAction(
+		period=10.0, # Delay to prevent conflicts
+		actions=[
+			IncludeLaunchDescription(
+				PythonLaunchDescriptionSource(
+					PathJoinSubstitution([FindPackageShare('ur_moveit_config'), 'launch', 'ur_moveit.launch.py'])
+				),
+				launch_arguments=moveit_launch_args.items(),
+			)
+		]
+	)
 
 
 def generate_launch_description():
-    share_dir = get_package_share_directory('endeffector_description')
+	"""Main function to generate the complete launch description."""
+	launch_description = [
+		get_ur_control_launch(),
+		get_moveit_launch(),
+	]
 
-    xacro_file = os.path.join(share_dir, 'urdf', 'endeffector.xacro')
-    robot_description_config = xacro.process_file(xacro_file)
-    robot_urdf = robot_description_config.toxml()
+	# David's file includes a Realsense camera. I have removed it 
+	# here because your package does not have one.
 
-    rviz_config_file = os.path.join(share_dir, 'config', 'display.rviz')
-
-    gui_arg = DeclareLaunchArgument(
-        name='gui',
-        default_value='True'
-    )
-
-    show_gui = LaunchConfiguration('gui')
-
-    robot_state_publisher_node = Node(
-        package='robot_state_publisher',
-        executable='robot_state_publisher',
-        name='robot_state_publisher',
-        parameters=[
-            {'robot_description': robot_urdf}
-        ]
-    )
-
-    joint_state_publisher_node = Node(
-        condition=UnlessCondition(show_gui),
-        package='joint_state_publisher',
-        executable='joint_state_publisher',
-        name='joint_state_publisher'
-    )
-
-    joint_state_publisher_gui_node = Node(
-        condition=IfCondition(show_gui),
-        package='joint_state_publisher_gui',
-        executable='joint_state_publisher_gui',
-        name='joint_state_publisher_gui'
-    )
-
-    rviz_node = Node(
-        package='rviz2',
-        executable='rviz2',
-        name='rviz2',
-        arguments=['-d', rviz_config_file],
-        output='screen'
-    )
-
-    return LaunchDescription([
-        gui_arg,
-        robot_state_publisher_node,
-        joint_state_publisher_node,
-        joint_state_publisher_gui_node,
-        rviz_node
-    ])
+	return LaunchDescription(launch_description)
