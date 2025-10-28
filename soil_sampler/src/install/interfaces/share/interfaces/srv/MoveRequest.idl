@@ -1,0 +1,21 @@
+// generated from rosidl_adapter/resource/srv.idl.em
+// with input from interfaces/srv/MoveRequest.srv
+// generated code does not contain a copyright notice
+
+
+module interfaces {
+  module srv {
+    @verbatim (language="comment", text=
+      "MoveRequest.srv" "\n"
+      "command - joint / cartesian" "\n"
+      "positions - target positions [x, y, z, r, p, y] or [joint1, joint2, joint3, joint4, joint5, joint6]")
+    struct MoveRequest_Request {
+      string command;
+
+      sequence<double> positions;
+    };
+    struct MoveRequest_Response {
+      boolean success;
+    };
+  };
+};

@@ -1,0 +1,2 @@
+source;share/moveit_planning_server/environment/ament_prefix_path.sh
+source;share/moveit_planning_server/environment/path.sh

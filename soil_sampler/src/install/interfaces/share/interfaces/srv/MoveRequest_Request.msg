@@ -1,0 +1,6 @@
+# MoveRequest.srv
+# command - joint / cartesian
+# positions - target positions [x, y, z, r, p, y] or [joint1, joint2, joint3, joint4, joint5, joint6]
+
+string command
+float64[] positions
