@@ -60,12 +60,25 @@ class BlueAreaDetector:
         root = tk.Tk()
         root.withdraw()
 
-        file_path = filedialog.askopenfilename(
-            title="Select Field Image",
-            filetypes=[("Image files", "*.jpg *.jpeg *.png *.bmp *.tiff")]
-        )
+        # This is for manual searching
+        # file_path = filedialog.askopenfilename(
+        #     title="Select Field Image",
+        #     filetypes=[("Image files", "*.jpg *.jpeg *.png *.bmp *.tiff")]
+        # )
 
-        if file_path and os.path.exists(file_path):
+        # if file_path and os.path.exists(file_path):
+        #     self.image = cv2.imread(file_path)
+        #     if self.image is not None:
+        #         print(f"Image loaded: {self.image.shape[1]}x{self.image.shape[0]}")
+        #         return True
+        #     else:
+        #         messagebox.showerror("Error", "Could not load image file")
+        #         return False
+        # return False
+
+        file_path = "/home/mtrn/4231/received_images/current_image.jpg"
+        
+        if file_path:
             self.image = cv2.imread(file_path)
             if self.image is not None:
                 print(f"Image loaded: {self.image.shape[1]}x{self.image.shape[0]}")
@@ -74,49 +87,6 @@ class BlueAreaDetector:
                 messagebox.showerror("Error", "Could not load image file")
                 return False
         return False
-
-    # def detect_blue_areas(self, sensitivity=30):
-    #     """Detect blue areas in the image"""
-    #     if self.image is None:
-    #         return False
-
-    #     hsv = cv2.cvtColor(self.image, cv2.COLOR_BGR2HSV)
-
-    #     # Blue hue range (~120° in HSV)
-    #     lower_blue = np.array([120 - sensitivity, 100, 50])
-    #     upper_blue = np.array([140 + sensitivity, 255, 255])
-
-    #     blue_mask = cv2.inRange(hsv, lower_blue, upper_blue)
-
-    #     # Clean mask
-    #     kernel = np.ones((5, 5), np.uint8)
-    #     blue_mask = cv2.morphologyEx(blue_mask, cv2.MORPH_CLOSE, kernel)
-    #     blue_mask = cv2.morphologyEx(blue_mask, cv2.MORPH_OPEN, kernel)
-
-    #     contours, _ = cv2.findContours(blue_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
-    #     self.blue_areas = []
-    #     for contour in contours:
-    #         area = cv2.contourArea(contour)
-    #         if area > self.min_blue_area:
-    #             x, y, w, h = cv2.boundingRect(contour)
-    #             moments = cv2.moments(contour)
-    #             if moments["m00"] != 0:
-    #                 cx = int(moments["m10"] / moments["m00"])
-    #                 cy = int(moments["m01"] / moments["m00"])
-    #             else:
-    #                 cx, cy = x + w // 2, y + h // 2
-
-    #             self.blue_areas.append({
-    #                 'contour': contour,
-    #                 'bbox': (x, y, w, h),
-    #                 'center': (cx, cy),
-    #                 'area': area,
-    #                 'pixel_count': cv2.countNonZero(blue_mask[y:y+h, x:x+w])
-    #             })
-
-    #     print(f"Detected {len(self.blue_areas)} blue areas")
-    #     return blue_mask, self.blue_areas
     
     def detect_blue_areas(self, sensitivity=10, roi=None):
     # """
@@ -128,7 +98,7 @@ class BlueAreaDetector:
 
         hsv = cv2.cvtColor(self.image, cv2.COLOR_BGR2HSV)
 
-        # If ROI is specified, crop the image
+        
         if roi:
             x, y, w, h = roi
             hsv = hsv[y:y+h, x:x+w]
@@ -216,17 +186,13 @@ class BlueAreaDetector:
         report = f"BLUE AREAS DETECTION REPORT\n"
         report += f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
         report += f"Total blue areas found: {len(self.blue_areas)}\n"
-        report += f"Minimum area considered: {self.min_blue_area} pixels\n\n"
 
-        total_area = 0
         for i, area in enumerate(self.blue_areas):
             x, y, w, h = area['bbox']
             cx, cy = area['center']
 
             report += f"BLUE AREA {i+1}:\n"
-            report += f"  Position: ({x}, {y})\n"
-            report += f"  Size: {w} x {h} pixels\n"
-            report += f"  Center: ({cx}, {cy})\n"
+            report += f"{cx}, {cy}, 0.1, 0, 0, 0\n"
 
 
         return report
@@ -238,7 +204,7 @@ class BlueAreaDetector:
         os.makedirs(output_dir, exist_ok=True)
 
         report = self.generate_report()
-        with open(f"{output_dir}/detection_report.txt", "w") as f:
+        with open(f"{output_dir}/report.txt", "w") as f:
             f.write(report)
 
         areas_data = []
@@ -261,7 +227,7 @@ class BlueAreaDetector:
         if self.image is None:
             return False
 
-        hsv = cv2.cvtColor(self.image, cv2.COLOR_BGR2HSV)
+        hsv = self.image.copy()
         # to do get size of image
         
         #desired points to cut to in image
@@ -279,84 +245,87 @@ class BlueAreaDetector:
 
 
 def main():
-    detector = BlueAreaDetector()
-
-    print("FIELD BLUE AREA DETECTION SYSTEM")
-    print("=" * 40)
-    print("1. Take screenshot from camera")
-    print("2. Load field image from file")
-
-    try:
-        choice = input("Select option (1 or 2): ").strip()
-
-        if choice == "1":
-            success = detector.take_screenshot('camera')
-        elif choice == "2":
-            success = detector.take_screenshot('file')
-        else:
-            print("Invalid choice")
-            return
-
-        if not success:
-            return
-
-        print("\nDetecting blue areas...")
-        sensitivity = 30
-        # Detect only in the middle part of the image
-        height, width = detector.image.shape[:2]
-        roi = (width//4, height//4, width//2, height//2)
-        blue_mask, blue_areas = detector.detect_blue_areas(sensitivity, roi=roi)
-        detector.perspective_image()
-
-        #blue_mask, blue_areas = detector.detect_blue_areas(sensitivity)
-
-        if not blue_areas:
-            print("No blue areas detected. Try adjusting sensitivity.")
-            return
-
-        marked_image = detector.mark_blue_areas(blue_mask)
-
-        cv2.imshow("Original Field", detector.image)
-        cv2.imshow("Blue Areas Marked", marked_image)
-        cv2.imshow("Blue Mask", blue_mask)
-
-        print("\n" + "=" * 50)
-        print(detector.generate_report())
-        print("=" * 50)
-
-        print("\nPress any key on space to continue...")
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
-
-        save = input("\nSave results? (y/n): ").strip().lower()
-        if save == 'y':
-            output_dir = detector.save_results(marked_image, blue_mask)
-            print(f"Results saved to: {output_dir}")
-
-    except KeyboardInterrupt:
-        print("\nProgram interrupted by user")
-    except Exception as e:
-        print(f"Error: {e}")
-    finally:
-        cv2.destroyAllWindows()
-
-
-def quick_blue_detection():
     """Quick blue detection without GUI"""
     detector = BlueAreaDetector()
 
     if detector.load_image_file():
+        # x_start, y_start, x_end, y_end = 400, 200, 850, 700  # Adjust as needed
+        # detector = detector[y_start:y_end, x_start:x_end]
+        
         blue_mask, blue_areas = detector.detect_blue_areas()
         marked_image = detector.mark_blue_areas(blue_mask)
-
+        
+        #detector.perspective_image()
+        
         cv2.imshow("Blue Areas Detected", marked_image)
         cv2.imshow("Blue Mask", blue_mask)
-
+        
         print(detector.generate_report())
+    
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+    
+    # """Main interactive function"""
+    # detector = BlueAreaDetector()
 
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
+    # print("FIELD BLUE AREA DETECTION SYSTEM")
+    # print("=" * 40)
+    # print("1. Take screenshot from camera")
+    # print("2. Load field image from file")
 
+    # try:
+    #     choice = input("Select option (1 or 2): ").strip()
+
+    #     if choice == "1":
+    #         success = detector.take_screenshot('camera')
+    #     elif choice == "2":
+    #         success = detector.take_screenshot('file')
+    #     else:
+    #         print("Invalid choice")
+    #         return
+
+    #     if not success:
+    #         return
+
+    #     print("\nDetecting blue areas...")
+    #     sensitivity = 30
+    #     # Detect only in the middle part of the image
+    #     height, width = detector.image.shape[:2]
+    #     roi = (width//4, height//4, width//2, height//2)
+    #     blue_mask, blue_areas = detector.detect_blue_areas(sensitivity, roi=roi)
+    #     detector.perspective_image()
+
+    #     #blue_mask, blue_areas = detector.detect_blue_areas(sensitivity)
+
+    #     if not blue_areas:
+    #         print("No blue areas detected. Try adjusting sensitivity.")
+    #         return
+
+    #     marked_image = detector.mark_blue_areas(blue_mask)
+
+    #     cv2.imshow("Original Field", detector.image)
+    #     cv2.imshow("Blue Areas Marked", marked_image)
+    #     cv2.imshow("Blue Mask", blue_mask)
+
+    #     print("\n" + "=" * 50)
+    #     print(detector.generate_report())
+    #     print("=" * 50)
+
+    #     print("\nPress any key on space to continue...")
+    #     cv2.waitKey(0)
+    #     cv2.destroyAllWindows()
+
+    #     save = input("\nSave results? (y/n): ").strip().lower()
+    #     if save == 'y':
+    #         output_dir = detector.save_results(marked_image, blue_mask)
+    #         print(f"Results saved to: {output_dir}")
+
+    # except KeyboardInterrupt:
+    #     print("\nProgram interrupted by user")
+    # except Exception as e:
+    #     print(f"Error: {e}")
+    # finally:
+    #     cv2.destroyAllWindows()
 
 if __name__ == "__main__":
     main()
