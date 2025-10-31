@@ -124,7 +124,7 @@ Visualization Manager:
         world:
           Alpha: 1
           Show Axes: false
-s         Show Trail: false
+          Show Trail: false
         wrist_1_link:
           Alpha: 1
           Show Axes: false
@@ -134,7 +134,7 @@ s         Show Trail: false
           Alpha: 1
           Show Axes: false
           Show Trail: false
-s         Value: true
+          Value: true
         wrist_3_link:
           Alpha: 1
           Show Axes: false
@@ -148,7 +148,7 @@ s         Value: true
       Update Interval: 0
       Value: true
       Visual Enabled: true
-s Enabled: true
+  Enabled: true
   Global Options:
     Background Color: 48; 48; 48
     Fixed Frame: base_link
@@ -162,7 +162,7 @@ s Enabled: true
     - Class: rviz_default_plugins/FocusCamera
     - Class: rviz_default_plugins/Measure
       Line color: 128; 128; 0
-s   - Class: rviz_default_plugins/SetInitialPose
+    - Class: rviz_default_plugins/SetInitialPose
       Covariance x: 0.25
       Covariance y: 0.25
       Covariance yaw: 0.06853891909122467
@@ -170,7 +170,7 @@ s   - Class: rviz_default_plugins/SetInitialPose
         Depth: 5
         Durability Policy: Volatile
         History Policy: Keep Last
-  J     Reliability Policy: Reliable
+        Reliability Policy: Reliable
         Value: /initialpose
     - Class: rviz_default_plugins/SetGoal
       Topic:
@@ -180,7 +180,7 @@ s   - Class: rviz_default_plugins/SetInitialPose
         Reliability Policy: Reliable
         Value: /goal_pose
     - Class: rviz_default_plugins/PublishPoint
-t     Single click: true
+      Single click: true
       Topic:
         Depth: 5
         Durability Policy: Volatile
@@ -189,9 +189,9 @@ t     Single click: true
         Value: /clicked_point
   Transformation:
     Current:
-    t Class: rviz_default_plugins/TF
+     Class: rviz_default_plugins/TF
   Value: true
-A Views:
+  Views:
     Current:
       Class: rviz_default_plugins/Orbit
       Distance: 2.8180558681488037
@@ -209,7 +209,7 @@ A Views:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-s     Pitch: 0.785398006439209
+      Pitch: 0.785398006439209
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
       Yaw: 0.785398006439209
@@ -218,7 +218,7 @@ s     Pitch: 0.785398006439209
         Distance: 2.8180558681488037
         Enable Stereo Rendering:
           Stereo Eye Separation: 0.05999999865889549
-img         Stereo Focal Distance: 1
+          Stereo Focal Distance: 1
           Swap Stereo Eyes: false
           Value: false
         Focal Point:
