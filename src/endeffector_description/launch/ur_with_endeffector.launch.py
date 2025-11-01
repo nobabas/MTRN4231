@@ -29,9 +29,6 @@ def get_ur_control_launch():
         'robot_ip': ip_address,
         'use_fake_hardware': use_fake_str,
         'launch_rviz': 'false', # We set this to false because MoveIt will launch RViz
-        
-        # THIS ARGUMENT IS THE SOLUTION
-        # It tells the UR driver to use your combined model
         'description_file': end_effector_path, 
     }
 
@@ -74,8 +71,4 @@ def generate_launch_description():
         get_ur_control_launch(),
         get_moveit_launch(),
     ]
-
-    # David's file includes a Realsense camera. I have removed it 
-    # here because your package does not have one.
-
     return LaunchDescription(launch_description)
