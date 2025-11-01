@@ -20,12 +20,14 @@
       </geometry>
       <material name="silver"/>
     </visual>
+    <!--
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
         <mesh filename="file://$(find endeffector_description)/meshes/base_link.stl" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
+    -->
   </link>
 
   <link name="$(arg prefix)Component3_1">
@@ -41,12 +43,14 @@
       </geometry>
       <material name="silver"/>
     </visual>
+    <!--
     <collision>
       <origin xyz="-0.000468 0.003253 -0.016" rpy="0 0 0"/>
       <geometry>
         <mesh filename="file://$(find endeffector_description)/meshes/Component3_1.stl" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
+    -->
   </link>
 
   <link name="$(arg prefix)Capacative_Soil_Moisture_Sensor_v1.2_v2_1">
@@ -62,12 +66,14 @@
       </geometry>
       <material name="silver"/>
     </visual>
+    <!--
     <collision>
       <origin xyz="0.010632 0.094013 -0.02415" rpy="0 0 0"/>
       <geometry>
         <mesh filename="file://$(find endeffector_description)/meshes/Capacative_Soil_Moisture_Sensor_v1.2_v2_1.stl" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
+    -->
   </link>
 
   <joint name="$(arg prefix)Rigid 2" type="fixed">
