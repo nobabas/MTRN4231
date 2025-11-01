@@ -6,6 +6,7 @@
 #include <vector>
 #include <map>
 #include <stdexcept>
+#include <cmath>
 
 #include <rclcpp/rclcpp.hpp>
 #include <geometry_msgs/msg/pose.hpp>
@@ -95,6 +96,40 @@ public:
     );
   }
 
+
+  // ----------------------------------------------
+  // Constraints
+  // ----------------------------------------------
+  moveit_msgs::msg::Constraints setContraints() {
+    moveit_msgs::msg::Constraints constraints;
+    constraints.orientation_constraints.emplace_back(setOriConstraints());
+    
+    return constraints;
+  }
+
+  // ----------------------------------------------
+  // Orientation Constraint
+  // ----------------------------------------------
+  moveit_msgs::msg::OrientationConstraint setOriConstraints() {
+    moveit_msgs::msg::OrientationConstraint constraintsOri;
+
+    constraintsOri.header.frame_id = move_group_->getPlanningFrame();
+    constraintsOri.link_name = move_group_->getEndEffectorLink();
+    constraintsOri.absolute_x_axis_tolerance = 0.001;
+    constraintsOri.absolute_y_axis_tolerance = 0.001;
+    constraintsOri.absolute_z_axis_tolerance = 0.001;
+    constraintsOri.weight = 1;
+
+    tf2::Quaternion quat;
+
+    // Facing Left
+    quat.setRPY(0, 0, M_PI_2);
+
+    constraintsOri.orientation = tf2::toMsg(quat);
+    
+    return constraintsOri;
+  }
+
   // -----------------------------------------------
   // Handle Requests
   // -----------------------------------------------
@@ -149,6 +184,9 @@ public:
       response->success = false;
       return;
     }
+
+    // Set up Joint Constraints
+    move_group_->setPathConstraints(setContraints());
 
     // Plan and execute
     response->success = planNExecute();
@@ -240,7 +278,7 @@ private:
     ));
     objects.push_back(generateCollisionObject(
       0.04, 2.4, 3.0,
-      -0.55, 0.25, 0.8,
+      -0.35, 0.25, 0.8,
       frame_id, "side_wall"
     ));
     objects.push_back(generateCollisionObject(
@@ -395,3 +433,8 @@ int main(int argc, char **argv) {
 
 // Joint Home Position
 // ros2 service call /moveit_path_plan interfaces/srv/MoveRequest "{command: 'joint', positions: [-1.3, 1.57, -1.83, -1.57, 0, 0]}"
+
+// URDF
+// gnome-terminal -t "DriverServer" -e 'ros2 launch ur_robot_driver ur_control.launch.py ur_type:=ur5e robot_ip:=yyy.yyy.yyy.yyy initial_joint_controller:=scaled_joint_trajectory_controller use_fake_hardware:=true launch_rviz:=false '
+// sleep 5
+// gnome-terminal -t "MoveitServer" -e 'ros2 launch endeffector_description display.launch.py'
