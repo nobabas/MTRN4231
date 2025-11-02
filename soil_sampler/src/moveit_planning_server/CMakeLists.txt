@@ -20,6 +20,7 @@ find_package(moveit_core REQUIRED)
 find_package(moveit_ros_planning REQUIRED)
 find_package(moveit_ros_planning_interface REQUIRED)
 find_package(interfaces REQUIRED)
+find_package(ompl REQUIRED)
 
 # Create executable
 add_executable(moveit_server_node  src/moveit_server.cpp)

@@ -58,9 +58,9 @@ public:
     );
 
     // Goal tolerances
-    node_->declare_parameter("goal_position_tolerance", 0.001);
-    node_->declare_parameter("goal_orientation_tolerance", 0.001);
-    node_->declare_parameter("goal_joint_tolerance", 0.001);
+    node_->declare_parameter("goal_position_tolerance", 0.01);
+    node_->declare_parameter("goal_orientation_tolerance", 0.01);
+    node_->declare_parameter("goal_joint_tolerance", 0.01);
 
     move_group_->setGoalPositionTolerance(
       node_->get_parameter("goal_position_tolerance").as_double()
@@ -72,11 +72,12 @@ public:
       node_->get_parameter("goal_joint_tolerance").as_double()
     );
 
+    //move_group_->setPathTo
+
     // Planner ID
     node_->declare_parameter("planner_id", "RRTConnectkConfigDefault");
-    move_group_->setPlannerId(
-      node_->get_parameter("planner_id").as_string()
-    );
+    move_group_->setPlannerId(node_->get_parameter("planner_id").as_string());
+
 
     // -------------------------------------------
     // Joint state subscriber
@@ -115,15 +116,16 @@ public:
 
     constraintsOri.header.frame_id = move_group_->getPlanningFrame();
     constraintsOri.link_name = move_group_->getEndEffectorLink();
-    constraintsOri.absolute_x_axis_tolerance = 0.001;
-    constraintsOri.absolute_y_axis_tolerance = 0.001;
-    constraintsOri.absolute_z_axis_tolerance = 0.001;
-    constraintsOri.weight = 1;
+    constraintsOri.absolute_x_axis_tolerance = 0.15;
+    constraintsOri.absolute_y_axis_tolerance = 0.15;
+    constraintsOri.absolute_z_axis_tolerance = M_PI;
+    constraintsOri.weight = 0.5;
 
     tf2::Quaternion quat;
 
-    // Facing Left
+    // Tool Flange Normal to Ground
     quat.setRPY(0, 0, M_PI_2);
+    quat.normalize();
 
     constraintsOri.orientation = tf2::toMsg(quat);
     
@@ -186,7 +188,8 @@ public:
     }
 
     // Set up Joint Constraints
-    move_group_->setPathConstraints(setContraints());
+    //move_group_->setPathConstraints(setContraints());
+    move_group_->setStartStateToCurrentState();
 
     // Plan and execute
     response->success = planNExecute();
@@ -272,22 +275,22 @@ private:
 
     std::vector<moveit_msgs::msg::CollisionObject> objects;
     objects.push_back(generateCollisionObject(
-      2.4, 0.04, 3.0,
-      0.70, -0.60, 0.5,
+      2.4, 0.02, 1.7,
+      0.70, -0.60, 0.75,
       frame_id, "back_wall"
     ));
     objects.push_back(generateCollisionObject(
-      0.04, 2.4, 3.0,
-      -0.35, 0.25, 0.8,
+      0.02, 1.6, 1.6,
+      -0.35, 0.25, 0.75,
       frame_id, "side_wall"
     ));
     objects.push_back(generateCollisionObject(
-      3.0, 3.0, 0.01,
-      0.85, 0.25, 0.0,
+      2.4, 1.7, 0.02,
+      0.85, 0.25, -0.02,
       frame_id, "table"
     ));
     objects.push_back(generateCollisionObject(
-      2.4, 2.4, 0.04,
+      2.4, 1.7, 0.02,
       0.85, 0.25, 1.5,
       frame_id, "ceiling"
     ));
@@ -429,7 +432,9 @@ int main(int argc, char **argv) {
   return 0;
 }
 
-// ros2 service call /moveit_path_plan interfaces/srv/MoveRequest "{command: 'cartesian', positions: [0.0, 0.0, 0.0, 0.0, 3.14, 0.0]}"
+// Test Positions
+// ros2 service call /moveit_path_plan interfaces/srv/MoveRequest "{command: 'cartesian', positions: [0.6, -0.35, 0.25, -1.5708, 1.5708, 0.0]}"
+
 
 // Joint Home Position
 // ros2 service call /moveit_path_plan interfaces/srv/MoveRequest "{command: 'joint', positions: [-1.3, 1.57, -1.83, -1.57, 0, 0]}"
