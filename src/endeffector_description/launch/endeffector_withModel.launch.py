@@ -14,7 +14,7 @@ def generate_launch_description():
 
     package_name = 'endeffector_description'
     xacro_path = 'urdf/ur_with_endeffector.xacro'
-    rviz_path = 'rviz/endeffector.rviz'
+    rviz_path = 'rviz/display.rviz'
 	
     xacro_file = os.path.join(get_package_share_directory(package_name), xacro_path)
     xacro_raw_description = xacro.process_file(xacro_file).toxml()
