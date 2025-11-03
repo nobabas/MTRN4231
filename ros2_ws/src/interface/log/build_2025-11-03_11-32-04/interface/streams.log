@@ -1,6 +1,0 @@
-[0.026s] Invoking command in '/home/mtrn/ros2_ws/src/interface/build/interface': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/mtrn/4231/ws_moveit2/install/moveit_configs_utils:/home/mtrn/4231/ws_moveit2/install/launch_param_builder:/opt/ros/humble /usr/bin/cmake --build /home/mtrn/ros2_ws/src/interface/build/interface -- -j4 -l4
-[0.040s] [0mCMake Error: The current CMakeCache.txt directory /home/mtrn/ros2_ws/src/interface/build/interface/CMakeCache.txt is different than the directory /home/mtrn/ros2_ws/src/blue_detector_msgs/build/interface where CMakeCache.txt was created. This may result in binaries being created in the wrong place. If you are not sure, reedit the CMakeCache.txt[0m
-[0.056s] [0mCMake Error: The source directory "/home/mtrn/ros2_ws/src/blue_detector_msgs" does not exist.
-[0.057s] Specify --help for usage, or press the help button on the CMake GUI.[0m
-[0.059s] gmake: *** [Makefile:747: cmake_check_build_system] Error 1
-[0.060s] Invoked command in '/home/mtrn/ros2_ws/src/interface/build/interface' returned '2': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/mtrn/4231/ws_moveit2/install/moveit_configs_utils:/home/mtrn/4231/ws_moveit2/install/launch_param_builder:/opt/ros/humble /usr/bin/cmake --build /home/mtrn/ros2_ws/src/interface/build/interface -- -j4 -l4

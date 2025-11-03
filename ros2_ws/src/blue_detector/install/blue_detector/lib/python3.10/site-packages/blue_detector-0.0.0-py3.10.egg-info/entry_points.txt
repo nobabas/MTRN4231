@@ -1,4 +1,0 @@
-[console_scripts]
-blue_detector_node = blue_detector.ros2node:main
-image_publisher_node = blue_detector.__init__:main
-

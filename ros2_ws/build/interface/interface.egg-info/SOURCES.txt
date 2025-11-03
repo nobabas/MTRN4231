@@ -1,9 +1,0 @@
-package.xml
-setup.cfg
-setup.py
-../../build/interface/interface.egg-info/PKG-INFO
-../../build/interface/interface.egg-info/SOURCES.txt
-../../build/interface/interface.egg-info/dependency_links.txt
-../../build/interface/interface.egg-info/requires.txt
-../../build/interface/interface.egg-info/top_level.txt
-../../build/interface/interface.egg-info/zip-safe
