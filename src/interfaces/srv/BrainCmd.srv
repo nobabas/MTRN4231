@@ -1,0 +1,6 @@
+# Request
+# A simple string command to tell the brain which routine to run
+string command
+---
+# Response
+bool success

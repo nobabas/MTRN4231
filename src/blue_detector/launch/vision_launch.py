@@ -18,5 +18,5 @@ def generate_launch_description():
             executable='ros2node',
             name='ros2node',
             output='screen',
-        )
+        ),
     ])
