@@ -1,0 +1,12 @@
+source;share/blue_detector/hook/path.ps1
+source;share/blue_detector/hook/path.dsv
+source;share/blue_detector/hook/path.sh
+source;share/blue_detector/hook/pythonpath.ps1
+source;share/blue_detector/hook/pythonpath.dsv
+source;share/blue_detector/hook/pythonpath.sh
+source;share/blue_detector/hook/pythonscriptspath.ps1
+source;share/blue_detector/hook/pythonscriptspath.dsv
+source;share/blue_detector/hook/pythonscriptspath.sh
+source;share/blue_detector/hook/ament_prefix_path.ps1
+source;share/blue_detector/hook/ament_prefix_path.dsv
+source;share/blue_detector/hook/ament_prefix_path.sh
