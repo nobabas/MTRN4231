@@ -12,11 +12,11 @@ def generate_launch_description():
             executable='PublishFinal',
             name='PublishFinal',
             output='screen',
-        )
+        ),
         Node(
             package='blue_detector',
             executable='ros2node',
             name='ros2node',
             output='screen',
-        )
+        ),
     ])

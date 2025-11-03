@@ -32,22 +32,16 @@ def generate_launch_description():
     
     vision = IncludeLaunchDescription(
             PythonLaunchDescriptionSource([os.path.join(
-                get_package_share_directory('vision'), 'launch'),
+                get_package_share_directory('blue_detector'), 'launch'),
                 '/vision_launch.py'])
             )
     
-    
-    transformations = IncludeLaunchDescription(
-            PythonLaunchDescriptionSource([os.path.join(
-                get_package_share_directory('transformations'), 'launch'),
-                '/transformations_launch.py'])
-            )
     # Should add the movement here 
     # Question: is there a launch file for the moveit server?
     arm = IncludeLaunchDescription(
             PythonLaunchDescriptionSource([os.path.join(
-                get_package_share_directory('movement'), 'launch'),
-                '/arm_launch.py'])
+                get_package_share_directory('moveit_planning_server'), 'launch'),
+                '/moveit_planning.launch.py'])
             )
     
     # Teensy bridge launch should be after the arduino launch
@@ -65,6 +59,5 @@ def generate_launch_description():
         robotAndCamera,
         vision,
         arm,
-        transformations,
         teensy_bridge,
     ])
