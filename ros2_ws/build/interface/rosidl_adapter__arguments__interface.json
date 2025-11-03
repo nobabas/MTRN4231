@@ -1,6 +1,0 @@
-{
-  "package_name": "interface",
-  "non_idl_tuples": [
-    "/home/mtrn/ros2_ws/src/interface:msg/MarkerData.msg"
-  ]
-}

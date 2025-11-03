@@ -1,6 +1,0 @@
-Invoking command in '/home/mtrn/ros2_ws/src/blue_detector_msgs/build/blue_detector_msgs': /usr/bin/cmake /home/mtrn/ros2_ws/src/blue_detector_msgs -DCATKIN_INSTALL_INTO_PREFIX_ROOT=0 -DCMAKE_INSTALL_PREFIX=/home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs
-Invoked command in '/home/mtrn/ros2_ws/src/blue_detector_msgs/build/blue_detector_msgs' returned '0': /usr/bin/cmake /home/mtrn/ros2_ws/src/blue_detector_msgs -DCATKIN_INSTALL_INTO_PREFIX_ROOT=0 -DCMAKE_INSTALL_PREFIX=/home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs
-Invoking command in '/home/mtrn/ros2_ws/src/blue_detector_msgs/build/blue_detector_msgs': /usr/bin/cmake --build /home/mtrn/ros2_ws/src/blue_detector_msgs/build/blue_detector_msgs -- -j4 -l4
-Invoked command in '/home/mtrn/ros2_ws/src/blue_detector_msgs/build/blue_detector_msgs' returned '0': /usr/bin/cmake --build /home/mtrn/ros2_ws/src/blue_detector_msgs/build/blue_detector_msgs -- -j4 -l4
-Invoking command in '/home/mtrn/ros2_ws/src/blue_detector_msgs/build/blue_detector_msgs': /usr/bin/cmake --install /home/mtrn/ros2_ws/src/blue_detector_msgs/build/blue_detector_msgs
-Invoked command in '/home/mtrn/ros2_ws/src/blue_detector_msgs/build/blue_detector_msgs' returned '0': /usr/bin/cmake --install /home/mtrn/ros2_ws/src/blue_detector_msgs/build/blue_detector_msgs

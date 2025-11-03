@@ -1,6 +1,0 @@
-setup.py
-blue_detector_msgs/__init__.py
-blue_detector_msgs.egg-info/PKG-INFO
-blue_detector_msgs.egg-info/SOURCES.txt
-blue_detector_msgs.egg-info/dependency_links.txt
-blue_detector_msgs.egg-info/top_level.txt
