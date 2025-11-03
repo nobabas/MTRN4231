@@ -1,31 +1,29 @@
-#define sensorPin A0   // Analog input pin
+/* Change these values based on your observations */
+#define wetSoil 277   // Define max value we consider soil 'wet'
+#define drySoil 380   // Define min value we consider soil 'dry'
 
-// Define thresholds
-#define airThreshold 600   // Above this value = sensor in air
+// Define pins
+#define sensorPin A0   // Analog input pin
 
 void setup() {
   Serial.begin(9600);
-  pinMode(outputPin, OUTPUT);
-  pinMode(LED_BUILTIN, OUTPUT);
+  delay(2000);
+  Serial.println("Teensy is alive");
 }
 
 void loop() {
+  // Read the Analog Input
   int moisture = analogRead(sensorPin);
+
   Serial.println(moisture);
 
-  if (moisture < airThreshold) {
-    // Sensor is in soil
-    // Change to this: digitalWrite(LED_BUILTIN, HIGH);
-    digitalWrite(LED_BUILTIN, LOW);
+  // Map the reading to PWM output range (0–255)
+  // int outputValue = map(moisture, 0, 1023, 0, 255);
 
-    delay(1000);  
-  } else {
-    // Sensor is in air
-    // Change to this digitalWrite(LED_BUILTIN, LOW); 
-    digitalWrite(LED_BUILTIN, HIGH); 
-    delay(1000);  
 
-  } 
+  //Serial.print("PWM Output Value: ");
+  //Serial.println(outputValue);
+  //Serial.println();
 
-  delay(3000);  // Check twice per second
+  delay(1000); // Take a reading every second
 }
