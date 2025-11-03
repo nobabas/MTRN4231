@@ -1,0 +1,29 @@
+[0.713s] Invoking command in '/home/mtrn/ros2_ws/src/blue_detector': PYTHONPATH=/home/mtrn/ros2_ws/build/blue_detector/prefix_override:/home/mtrn/ros2_ws/install/blue_detector/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 setup.py egg_info --egg-base ../../build/blue_detector build --build-base /home/mtrn/ros2_ws/build/blue_detector/build install --record /home/mtrn/ros2_ws/build/blue_detector/install.log --single-version-externally-managed
+[0.948s] running egg_info
+[0.949s] writing ../../build/blue_detector/blue_detector.egg-info/PKG-INFO
+[0.950s] writing dependency_links to ../../build/blue_detector/blue_detector.egg-info/dependency_links.txt
+[0.950s] writing entry points to ../../build/blue_detector/blue_detector.egg-info/entry_points.txt
+[0.950s] writing requirements to ../../build/blue_detector/blue_detector.egg-info/requires.txt
+[0.950s] writing top-level names to ../../build/blue_detector/blue_detector.egg-info/top_level.txt
+[0.952s] package init file 'blue_detector/__init__.py' not found (or not a regular file)
+[0.952s] reading manifest file '../../build/blue_detector/blue_detector.egg-info/SOURCES.txt'
+[0.952s] writing manifest file '../../build/blue_detector/blue_detector.egg-info/SOURCES.txt'
+[0.953s] /usr/lib/python3/dist-packages/setuptools/command/install.py:34: SetuptoolsDeprecationWarning: setup.py install is deprecated. Use build and pip and other standards-based tools.
+[0.953s]   warnings.warn(
+[0.954s] running build
+[0.954s] running build_py
+[0.954s] copying blue_detector/PublishFinal.py -> /home/mtrn/ros2_ws/build/blue_detector/build/lib/blue_detector
+[0.954s] running install
+[0.954s] running install_lib
+[0.954s] copying /home/mtrn/ros2_ws/build/blue_detector/build/lib/blue_detector/PublishFinal.py -> /home/mtrn/ros2_ws/install/blue_detector/lib/python3.10/site-packages/blue_detector
+[0.955s] byte-compiling /home/mtrn/ros2_ws/install/blue_detector/lib/python3.10/site-packages/blue_detector/PublishFinal.py to PublishFinal.cpython-310.pyc
+[0.956s] running install_data
+[0.956s] running install_egg_info
+[0.971s] removing '/home/mtrn/ros2_ws/install/blue_detector/lib/python3.10/site-packages/blue_detector-0.0.0-py3.10.egg-info' (and everything under it)
+[0.971s] Copying ../../build/blue_detector/blue_detector.egg-info to /home/mtrn/ros2_ws/install/blue_detector/lib/python3.10/site-packages/blue_detector-0.0.0-py3.10.egg-info
+[0.972s] running install_scripts
+[0.996s] Installing blue_detection_node script to /home/mtrn/ros2_ws/install/blue_detector/lib/blue_detector
+[0.996s] Installing final_detect_node script to /home/mtrn/ros2_ws/install/blue_detector/lib/blue_detector
+[0.996s] Installing image_convert script to /home/mtrn/ros2_ws/install/blue_detector/lib/blue_detector
+[0.996s] writing list of installed files to '/home/mtrn/ros2_ws/build/blue_detector/install.log'
+[1.021s] Invoked command in '/home/mtrn/ros2_ws/src/blue_detector' returned '0': PYTHONPATH=/home/mtrn/ros2_ws/build/blue_detector/prefix_override:/home/mtrn/ros2_ws/install/blue_detector/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 setup.py egg_info --egg-base ../../build/blue_detector build --build-base /home/mtrn/ros2_ws/build/blue_detector/build install --record /home/mtrn/ros2_ws/build/blue_detector/install.log --single-version-externally-managed

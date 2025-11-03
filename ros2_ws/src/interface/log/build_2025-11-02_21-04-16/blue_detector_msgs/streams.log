@@ -1,0 +1,241 @@
+[0.022s] Invoking command in '/home/mtrn/ros2_ws/src/blue_detector_msgs/build/blue_detector_msgs': /usr/bin/cmake /home/mtrn/ros2_ws/src/blue_detector_msgs -DCATKIN_INSTALL_INTO_PREFIX_ROOT=0 -DCMAKE_INSTALL_PREFIX=/home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs
+[0.078s] -- The C compiler identification is GNU 11.4.0
+[0.128s] -- The CXX compiler identification is GNU 11.4.0
+[0.135s] -- Detecting C compiler ABI info
+[0.209s] -- Detecting C compiler ABI info - done
+[0.215s] -- Check for working C compiler: /usr/bin/cc - skipped
+[0.215s] -- Detecting C compile features
+[0.215s] -- Detecting C compile features - done
+[0.218s] -- Detecting CXX compiler ABI info
+[0.297s] -- Detecting CXX compiler ABI info - done
+[0.304s] -- Check for working CXX compiler: /usr/bin/c++ - skipped
+[0.304s] -- Detecting CXX compile features
+[0.305s] -- Detecting CXX compile features - done
+[0.310s] -- Found ament_cmake: 1.3.5 (/opt/ros/humble/share/ament_cmake/cmake)
+[0.499s] -- Found Python3: /usr/bin/python3.10 (found version "3.10.12") found components: Interpreter 
+[0.651s] -- Found builtin_interfaces: 1.2.1 (/opt/ros/humble/share/builtin_interfaces/cmake)
+[0.715s] -- Found rosidl_generator_c: 3.1.5 (/opt/ros/humble/share/rosidl_generator_c/cmake)
+[0.726s] -- Found rosidl_adapter: 3.1.5 (/opt/ros/humble/share/rosidl_adapter/cmake)
+[0.741s] -- Found rosidl_generator_cpp: 3.1.5 (/opt/ros/humble/share/rosidl_generator_cpp/cmake)
+[0.763s] -- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c
+[0.794s] -- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp
+[0.824s] -- Found rosidl_default_generators: 1.2.0 (/opt/ros/humble/share/rosidl_default_generators/cmake)
+[1.090s] -- Found ament_cmake_ros: 0.10.0 (/opt/ros/humble/share/ament_cmake_ros/cmake)
+[1.396s] -- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c
+[1.512s] -- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp
+[1.536s] -- Found PythonInterp: /usr/bin/python3 (found suitable version "3.10.12", minimum required is "3.6") 
+[1.541s] -- Found python_cmake_module: 0.10.0 (/opt/ros/humble/share/python_cmake_module/cmake)
+[1.570s] -- Found PythonLibs: /usr/lib/x86_64-linux-gnu/libpython3.10.so (found suitable version "3.10.12", minimum required is "3.5") 
+[1.570s] -- Using PYTHON_EXECUTABLE: /usr/bin/python3
+[1.570s] -- Using PYTHON_INCLUDE_DIRS: /usr/include/python3.10
+[1.570s] -- Using PYTHON_LIBRARIES: /usr/lib/x86_64-linux-gnu/libpython3.10.so
+[1.594s] -- Found PythonExtra: .so  
+[1.673s] -- Found ament_lint_auto: 0.12.7 (/opt/ros/humble/share/ament_lint_auto/cmake)
+[1.720s] -- Added test 'cppcheck' to perform static code analysis on C / C++ code
+[1.722s] -- Configured cppcheck include dirs: $<BUILD_INTERFACE:/home/mtrn/ros2_ws/src/blue_detector_msgs/build/blue_detector_msgs/rosidl_generator_c>;$<BUILD_INTERFACE:/home/mtrn/ros2_ws/src/blue_detector_msgs/build/blue_detector_msgs/rosidl_typesupport_fastrtps_c>;$<BUILD_INTERFACE:/home/mtrn/ros2_ws/src/blue_detector_msgs/build/blue_detector_msgs/rosidl_generator_cpp>;$<BUILD_INTERFACE:/home/mtrn/ros2_ws/src/blue_detector_msgs/build/blue_detector_msgs/rosidl_typesupport_fastrtps_cpp>;$<BUILD_INTERFACE:/home/mtrn/ros2_ws/src/blue_detector_msgs/build/blue_detector_msgs/rosidl_typesupport_introspection_c>;$<BUILD_INTERFACE:/home/mtrn/ros2_ws/src/blue_detector_msgs/build/blue_detector_msgs/rosidl_typesupport_introspection_cpp>;/home/mtrn/ros2_ws/src/blue_detector_msgs/build/blue_detector_msgs/rosidl_generator_c;/home/mtrn/ros2_ws/src/blue_detector_msgs/build/blue_detector_msgs/rosidl_generator_py
+[1.722s] -- Configured cppcheck exclude dirs and/or files: 
+[1.724s] -- Added test 'flake8' to check Python code syntax and style conventions
+[1.726s] -- Added test 'lint_cmake' to check CMake code style
+[1.728s] -- Added test 'pep257' to check Python code against some of the docstring style conventions in PEP 257
+[1.734s] -- Added test 'uncrustify' to check C / C++ code style
+[1.734s] -- Configured uncrustify additional arguments: 
+[1.737s] -- Added test 'xmllint' to check XML markup files
+[1.740s] -- Configuring done
+[1.769s] -- Generating done
+[1.770s] -- Build files have been written to: /home/mtrn/ros2_ws/src/blue_detector_msgs/build/blue_detector_msgs
+[1.770s] [33mCMake Warning:
+[1.770s]   Manually-specified variables were not used by the project:
+[1.770s] 
+[1.771s]     CATKIN_INSTALL_INTO_PREFIX_ROOT
+[1.771s] 
+[1.771s] [0m
+[1.777s] Invoked command in '/home/mtrn/ros2_ws/src/blue_detector_msgs/build/blue_detector_msgs' returned '0': /usr/bin/cmake /home/mtrn/ros2_ws/src/blue_detector_msgs -DCATKIN_INSTALL_INTO_PREFIX_ROOT=0 -DCMAKE_INSTALL_PREFIX=/home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs
+[1.778s] Invoking command in '/home/mtrn/ros2_ws/src/blue_detector_msgs/build/blue_detector_msgs': /usr/bin/cmake --build /home/mtrn/ros2_ws/src/blue_detector_msgs/build/blue_detector_msgs -- -j4 -l4
+[1.822s] [  3%] [34m[1mGenerating C code for ROS interfaces[0m
+[1.835s] [  6%] [34m[1mGenerating C++ code for ROS interfaces[0m
+[1.845s] [  6%] Built target ament_cmake_python_copy_blue_detector_msgs
+[2.108s] [  6%] Built target blue_detector_msgs__cpp
+[2.110s] running egg_info
+[2.111s] creating blue_detector_msgs.egg-info
+[2.111s] writing blue_detector_msgs.egg-info/PKG-INFO
+[2.112s] writing dependency_links to blue_detector_msgs.egg-info/dependency_links.txt
+[2.112s] writing top-level names to blue_detector_msgs.egg-info/top_level.txt
+[2.112s] writing manifest file 'blue_detector_msgs.egg-info/SOURCES.txt'
+[2.114s] reading manifest file 'blue_detector_msgs.egg-info/SOURCES.txt'
+[2.116s] writing manifest file 'blue_detector_msgs.egg-info/SOURCES.txt'
+[2.116s] [  9%] [32mBuilding C object CMakeFiles/blue_detector_msgs__rosidl_generator_c.dir/rosidl_generator_c/blue_detector_msgs/msg/detail/marker_data__functions.c.o[0m
+[2.120s] [ 12%] [34m[1mGenerating C++ type support dispatch for ROS interfaces[0m
+[2.121s] [ 16%] [34m[1mGenerating C++ type support for eProsima Fast-RTPS[0m
+[2.145s] [ 16%] Built target ament_cmake_python_build_blue_detector_msgs_egg
+[2.162s] [ 19%] [34m[1mGenerating C++ introspection for ROS interfaces[0m
+[2.171s] [ 22%] [32m[1mLinking C shared library libblue_detector_msgs__rosidl_generator_c.so[0m
+[2.217s] [ 22%] Built target blue_detector_msgs__rosidl_generator_c
+[2.232s] [ 25%] [34m[1mGenerating C type support for eProsima Fast-RTPS[0m
+[2.378s] [ 29%] [32mBuilding CXX object CMakeFiles/blue_detector_msgs__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/blue_detector_msgs/msg/marker_data__type_support.cpp.o[0m
+[2.410s] [ 32%] [32mBuilding CXX object CMakeFiles/blue_detector_msgs__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/blue_detector_msgs/msg/detail/dds_fastrtps/marker_data__type_support.cpp.o[0m
+[2.459s] [ 35%] [32mBuilding CXX object CMakeFiles/blue_detector_msgs__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/blue_detector_msgs/msg/detail/marker_data__type_support.cpp.o[0m
+[2.510s] [ 38%] [32mBuilding CXX object CMakeFiles/blue_detector_msgs__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/blue_detector_msgs/msg/detail/marker_data__type_support_c.cpp.o[0m
+[2.633s] [ 41%] [32m[1mLinking CXX shared library libblue_detector_msgs__rosidl_typesupport_cpp.so[0m
+[2.681s] [ 41%] Built target blue_detector_msgs__rosidl_typesupport_cpp
+[2.694s] [ 45%] [34m[1mGenerating C introspection for ROS interfaces[0m
+[2.823s] [ 48%] [32m[1mLinking CXX shared library libblue_detector_msgs__rosidl_typesupport_fastrtps_c.so[0m
+[2.831s] [ 51%] [32m[1mLinking CXX shared library libblue_detector_msgs__rosidl_typesupport_fastrtps_cpp.so[0m
+[2.872s] [ 54%] [32m[1mLinking CXX shared library libblue_detector_msgs__rosidl_typesupport_introspection_cpp.so[0m
+[2.922s] [ 54%] Built target blue_detector_msgs__rosidl_typesupport_fastrtps_c
+[2.927s] [ 54%] Built target blue_detector_msgs__rosidl_typesupport_fastrtps_cpp
+[2.938s] [ 58%] [34m[1mGenerating C type support dispatch for ROS interfaces[0m
+[2.957s] [ 58%] Built target blue_detector_msgs__rosidl_typesupport_introspection_cpp
+[2.966s] [ 61%] [32mBuilding C object CMakeFiles/blue_detector_msgs__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/blue_detector_msgs/msg/detail/marker_data__type_support.c.o[0m
+[3.004s] [ 64%] [32m[1mLinking C shared library libblue_detector_msgs__rosidl_typesupport_introspection_c.so[0m
+[3.040s] [ 64%] Built target blue_detector_msgs__rosidl_typesupport_introspection_c
+[3.159s] [ 67%] [32mBuilding CXX object CMakeFiles/blue_detector_msgs__rosidl_typesupport_c.dir/rosidl_typesupport_c/blue_detector_msgs/msg/marker_data__type_support.cpp.o[0m
+[3.202s] [ 70%] [32m[1mLinking CXX shared library libblue_detector_msgs__rosidl_typesupport_c.so[0m
+[3.243s] [ 70%] Built target blue_detector_msgs__rosidl_typesupport_c
+[3.268s] [ 70%] Built target blue_detector_msgs
+[3.293s] [ 74%] [34m[1mGenerating Python code for ROS interfaces[0m
+[3.583s] [ 74%] Built target blue_detector_msgs__py
+[3.608s] [ 77%] [32mBuilding C object CMakeFiles/blue_detector_msgs__rosidl_generator_py.dir/rosidl_generator_py/blue_detector_msgs/msg/_marker_data_s.c.o[0m
+[3.700s] [ 80%] [32m[1mLinking C shared library rosidl_generator_py/blue_detector_msgs/libblue_detector_msgs__rosidl_generator_py.so[0m
+[3.740s] [ 80%] Built target blue_detector_msgs__rosidl_generator_py
+[3.766s] [ 83%] [32mBuilding C object CMakeFiles/blue_detector_msgs__rosidl_typesupport_fastrtps_c__pyext.dir/rosidl_generator_py/blue_detector_msgs/_blue_detector_msgs_s.ep.rosidl_typesupport_fastrtps_c.c.o[0m
+[3.769s] [ 87%] [32mBuilding C object CMakeFiles/blue_detector_msgs__rosidl_typesupport_introspection_c__pyext.dir/rosidl_generator_py/blue_detector_msgs/_blue_detector_msgs_s.ep.rosidl_typesupport_introspection_c.c.o[0m
+[3.773s] [ 90%] [32mBuilding C object CMakeFiles/blue_detector_msgs__rosidl_typesupport_c__pyext.dir/rosidl_generator_py/blue_detector_msgs/_blue_detector_msgs_s.ep.rosidl_typesupport_c.c.o[0m
+[3.856s] [ 93%] [32m[1mLinking C shared library rosidl_generator_py/blue_detector_msgs/blue_detector_msgs_s__rosidl_typesupport_fastrtps_c.cpython-310-x86_64-linux-gnu.so[0m
+[3.862s] [ 96%] [32m[1mLinking C shared library rosidl_generator_py/blue_detector_msgs/blue_detector_msgs_s__rosidl_typesupport_c.cpython-310-x86_64-linux-gnu.so[0m
+[3.867s] [100%] [32m[1mLinking C shared library rosidl_generator_py/blue_detector_msgs/blue_detector_msgs_s__rosidl_typesupport_introspection_c.cpython-310-x86_64-linux-gnu.so[0m
+[3.896s] [100%] Built target blue_detector_msgs__rosidl_typesupport_fastrtps_c__pyext
+[3.903s] [100%] Built target blue_detector_msgs__rosidl_typesupport_c__pyext
+[3.907s] [100%] Built target blue_detector_msgs__rosidl_typesupport_introspection_c__pyext
+[3.921s] Invoked command in '/home/mtrn/ros2_ws/src/blue_detector_msgs/build/blue_detector_msgs' returned '0': /usr/bin/cmake --build /home/mtrn/ros2_ws/src/blue_detector_msgs/build/blue_detector_msgs -- -j4 -l4
+[4.118s] Invoking command in '/home/mtrn/ros2_ws/src/blue_detector_msgs/build/blue_detector_msgs': /usr/bin/cmake --install /home/mtrn/ros2_ws/src/blue_detector_msgs/build/blue_detector_msgs
+[4.127s] -- Install configuration: ""
+[4.127s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/share/ament_index/resource_index/rosidl_interfaces/blue_detector_msgs
+[4.127s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/include/blue_detector_msgs/blue_detector_msgs
+[4.127s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/include/blue_detector_msgs/blue_detector_msgs/msg
+[4.127s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/include/blue_detector_msgs/blue_detector_msgs/msg/rosidl_generator_c__visibility_control.h
+[4.127s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/include/blue_detector_msgs/blue_detector_msgs/msg/detail
+[4.127s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/include/blue_detector_msgs/blue_detector_msgs/msg/detail/marker_data__functions.c
+[4.127s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/include/blue_detector_msgs/blue_detector_msgs/msg/detail/marker_data__struct.h
+[4.128s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/include/blue_detector_msgs/blue_detector_msgs/msg/detail/marker_data__functions.h
+[4.128s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/include/blue_detector_msgs/blue_detector_msgs/msg/detail/marker_data__type_support.h
+[4.128s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/include/blue_detector_msgs/blue_detector_msgs/msg/marker_data.h
+[4.128s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/share/blue_detector_msgs/environment/library_path.sh
+[4.128s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/share/blue_detector_msgs/environment/library_path.dsv
+[4.128s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/lib/libblue_detector_msgs__rosidl_generator_c.so
+[4.128s] -- Set runtime path of "/home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/lib/libblue_detector_msgs__rosidl_generator_c.so" to ""
+[4.128s] -- Up-to-date: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/include/blue_detector_msgs/blue_detector_msgs
+[4.129s] -- Up-to-date: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/include/blue_detector_msgs/blue_detector_msgs/msg
+[4.129s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/include/blue_detector_msgs/blue_detector_msgs/msg/rosidl_typesupport_fastrtps_c__visibility_control.h
+[4.129s] -- Up-to-date: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/include/blue_detector_msgs/blue_detector_msgs/msg/detail
+[4.129s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/include/blue_detector_msgs/blue_detector_msgs/msg/detail/marker_data__rosidl_typesupport_fastrtps_c.h
+[4.129s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/lib/libblue_detector_msgs__rosidl_typesupport_fastrtps_c.so
+[4.129s] -- Set runtime path of "/home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/lib/libblue_detector_msgs__rosidl_typesupport_fastrtps_c.so" to ""
+[4.129s] -- Up-to-date: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/include/blue_detector_msgs/blue_detector_msgs
+[4.129s] -- Up-to-date: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/include/blue_detector_msgs/blue_detector_msgs/msg
+[4.129s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/include/blue_detector_msgs/blue_detector_msgs/msg/marker_data.hpp
+[4.130s] -- Up-to-date: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/include/blue_detector_msgs/blue_detector_msgs/msg/detail
+[4.130s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/include/blue_detector_msgs/blue_detector_msgs/msg/detail/marker_data__builder.hpp
+[4.130s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/include/blue_detector_msgs/blue_detector_msgs/msg/detail/marker_data__traits.hpp
+[4.130s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/include/blue_detector_msgs/blue_detector_msgs/msg/detail/marker_data__struct.hpp
+[4.130s] -- Up-to-date: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/include/blue_detector_msgs/blue_detector_msgs
+[4.130s] -- Up-to-date: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/include/blue_detector_msgs/blue_detector_msgs/msg
+[4.130s] -- Up-to-date: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/include/blue_detector_msgs/blue_detector_msgs/msg/detail
+[4.130s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/include/blue_detector_msgs/blue_detector_msgs/msg/detail/marker_data__rosidl_typesupport_fastrtps_cpp.hpp
+[4.130s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/include/blue_detector_msgs/blue_detector_msgs/msg/detail/dds_fastrtps
+[4.130s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/include/blue_detector_msgs/blue_detector_msgs/msg/rosidl_typesupport_fastrtps_cpp__visibility_control.h
+[4.130s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/lib/libblue_detector_msgs__rosidl_typesupport_fastrtps_cpp.so
+[4.130s] -- Set runtime path of "/home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/lib/libblue_detector_msgs__rosidl_typesupport_fastrtps_cpp.so" to ""
+[4.130s] -- Up-to-date: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/include/blue_detector_msgs/blue_detector_msgs
+[4.130s] -- Up-to-date: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/include/blue_detector_msgs/blue_detector_msgs/msg
+[4.130s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/include/blue_detector_msgs/blue_detector_msgs/msg/rosidl_typesupport_introspection_c__visibility_control.h
+[4.130s] -- Up-to-date: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/include/blue_detector_msgs/blue_detector_msgs/msg/detail
+[4.131s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/include/blue_detector_msgs/blue_detector_msgs/msg/detail/marker_data__rosidl_typesupport_introspection_c.h
+[4.131s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/include/blue_detector_msgs/blue_detector_msgs/msg/detail/marker_data__type_support.c
+[4.131s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/lib/libblue_detector_msgs__rosidl_typesupport_introspection_c.so
+[4.131s] -- Set runtime path of "/home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/lib/libblue_detector_msgs__rosidl_typesupport_introspection_c.so" to ""
+[4.131s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/lib/libblue_detector_msgs__rosidl_typesupport_c.so
+[4.131s] -- Set runtime path of "/home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/lib/libblue_detector_msgs__rosidl_typesupport_c.so" to ""
+[4.131s] -- Up-to-date: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/include/blue_detector_msgs/blue_detector_msgs
+[4.131s] -- Up-to-date: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/include/blue_detector_msgs/blue_detector_msgs/msg
+[4.131s] -- Up-to-date: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/include/blue_detector_msgs/blue_detector_msgs/msg/detail
+[4.131s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/include/blue_detector_msgs/blue_detector_msgs/msg/detail/marker_data__type_support.cpp
+[4.131s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/include/blue_detector_msgs/blue_detector_msgs/msg/detail/marker_data__rosidl_typesupport_introspection_cpp.hpp
+[4.132s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/lib/libblue_detector_msgs__rosidl_typesupport_introspection_cpp.so
+[4.132s] -- Set runtime path of "/home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/lib/libblue_detector_msgs__rosidl_typesupport_introspection_cpp.so" to ""
+[4.132s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/lib/libblue_detector_msgs__rosidl_typesupport_cpp.so
+[4.132s] -- Set runtime path of "/home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/lib/libblue_detector_msgs__rosidl_typesupport_cpp.so" to ""
+[4.132s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/share/blue_detector_msgs/environment/pythonpath.sh
+[4.132s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/share/blue_detector_msgs/environment/pythonpath.dsv
+[4.132s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/local/lib/python3.10/dist-packages/blue_detector_msgs-0.0.0-py3.10.egg-info
+[4.132s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/local/lib/python3.10/dist-packages/blue_detector_msgs-0.0.0-py3.10.egg-info/top_level.txt
+[4.133s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/local/lib/python3.10/dist-packages/blue_detector_msgs-0.0.0-py3.10.egg-info/SOURCES.txt
+[4.133s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/local/lib/python3.10/dist-packages/blue_detector_msgs-0.0.0-py3.10.egg-info/PKG-INFO
+[4.133s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/local/lib/python3.10/dist-packages/blue_detector_msgs-0.0.0-py3.10.egg-info/dependency_links.txt
+[4.133s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/local/lib/python3.10/dist-packages/blue_detector_msgs
+[4.133s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/local/lib/python3.10/dist-packages/blue_detector_msgs/blue_detector_msgs_s__rosidl_typesupport_c.cpython-310-x86_64-linux-gnu.so
+[4.133s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/local/lib/python3.10/dist-packages/blue_detector_msgs/blue_detector_msgs_s__rosidl_typesupport_introspection_c.cpython-310-x86_64-linux-gnu.so
+[4.133s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/local/lib/python3.10/dist-packages/blue_detector_msgs/libblue_detector_msgs__rosidl_generator_py.so
+[4.133s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/local/lib/python3.10/dist-packages/blue_detector_msgs/_blue_detector_msgs_s.ep.rosidl_typesupport_introspection_c.c
+[4.133s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/local/lib/python3.10/dist-packages/blue_detector_msgs/_blue_detector_msgs_s.ep.rosidl_typesupport_c.c
+[4.133s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/local/lib/python3.10/dist-packages/blue_detector_msgs/blue_detector_msgs_s__rosidl_typesupport_fastrtps_c.cpython-310-x86_64-linux-gnu.so
+[4.134s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/local/lib/python3.10/dist-packages/blue_detector_msgs/_blue_detector_msgs_s.ep.rosidl_typesupport_fastrtps_c.c
+[4.134s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/local/lib/python3.10/dist-packages/blue_detector_msgs/msg
+[4.134s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/local/lib/python3.10/dist-packages/blue_detector_msgs/msg/_marker_data_s.c
+[4.134s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/local/lib/python3.10/dist-packages/blue_detector_msgs/msg/__init__.py
+[4.134s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/local/lib/python3.10/dist-packages/blue_detector_msgs/msg/_marker_data.py
+[4.134s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/local/lib/python3.10/dist-packages/blue_detector_msgs/__init__.py
+[4.169s] Listing '/home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/local/lib/python3.10/dist-packages/blue_detector_msgs'...
+[4.169s] Compiling '/home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/local/lib/python3.10/dist-packages/blue_detector_msgs/__init__.py'...
+[4.170s] Listing '/home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/local/lib/python3.10/dist-packages/blue_detector_msgs/msg'...
+[4.170s] Compiling '/home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/local/lib/python3.10/dist-packages/blue_detector_msgs/msg/__init__.py'...
+[4.170s] Compiling '/home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/local/lib/python3.10/dist-packages/blue_detector_msgs/msg/_marker_data.py'...
+[4.173s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/local/lib/python3.10/dist-packages/blue_detector_msgs/blue_detector_msgs_s__rosidl_typesupport_fastrtps_c.cpython-310-x86_64-linux-gnu.so
+[4.174s] -- Set runtime path of "/home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/local/lib/python3.10/dist-packages/blue_detector_msgs/blue_detector_msgs_s__rosidl_typesupport_fastrtps_c.cpython-310-x86_64-linux-gnu.so" to ""
+[4.174s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/local/lib/python3.10/dist-packages/blue_detector_msgs/blue_detector_msgs_s__rosidl_typesupport_introspection_c.cpython-310-x86_64-linux-gnu.so
+[4.174s] -- Set runtime path of "/home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/local/lib/python3.10/dist-packages/blue_detector_msgs/blue_detector_msgs_s__rosidl_typesupport_introspection_c.cpython-310-x86_64-linux-gnu.so" to ""
+[4.174s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/local/lib/python3.10/dist-packages/blue_detector_msgs/blue_detector_msgs_s__rosidl_typesupport_c.cpython-310-x86_64-linux-gnu.so
+[4.174s] -- Set runtime path of "/home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/local/lib/python3.10/dist-packages/blue_detector_msgs/blue_detector_msgs_s__rosidl_typesupport_c.cpython-310-x86_64-linux-gnu.so" to ""
+[4.175s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/lib/libblue_detector_msgs__rosidl_generator_py.so
+[4.175s] -- Set runtime path of "/home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/lib/libblue_detector_msgs__rosidl_generator_py.so" to ""
+[4.175s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/share/blue_detector_msgs/msg/MarkerData.idl
+[4.175s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/share/blue_detector_msgs/msg/MarkerData.msg
+[4.175s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/share/ament_index/resource_index/package_run_dependencies/blue_detector_msgs
+[4.176s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/share/ament_index/resource_index/parent_prefix_path/blue_detector_msgs
+[4.176s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/share/blue_detector_msgs/environment/ament_prefix_path.sh
+[4.176s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/share/blue_detector_msgs/environment/ament_prefix_path.dsv
+[4.176s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/share/blue_detector_msgs/environment/path.sh
+[4.176s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/share/blue_detector_msgs/environment/path.dsv
+[4.176s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/share/blue_detector_msgs/local_setup.bash
+[4.176s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/share/blue_detector_msgs/local_setup.sh
+[4.176s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/share/blue_detector_msgs/local_setup.zsh
+[4.177s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/share/blue_detector_msgs/local_setup.dsv
+[4.177s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/share/blue_detector_msgs/package.dsv
+[4.177s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/share/ament_index/resource_index/packages/blue_detector_msgs
+[4.177s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/share/blue_detector_msgs/cmake/export_blue_detector_msgs__rosidl_generator_cExport.cmake
+[4.177s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/share/blue_detector_msgs/cmake/export_blue_detector_msgs__rosidl_generator_cExport-noconfig.cmake
+[4.177s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/share/blue_detector_msgs/cmake/export_blue_detector_msgs__rosidl_typesupport_fastrtps_cExport.cmake
+[4.177s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/share/blue_detector_msgs/cmake/export_blue_detector_msgs__rosidl_typesupport_fastrtps_cExport-noconfig.cmake
+[4.178s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/share/blue_detector_msgs/cmake/export_blue_detector_msgs__rosidl_generator_cppExport.cmake
+[4.178s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/share/blue_detector_msgs/cmake/export_blue_detector_msgs__rosidl_typesupport_fastrtps_cppExport.cmake
+[4.178s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/share/blue_detector_msgs/cmake/export_blue_detector_msgs__rosidl_typesupport_fastrtps_cppExport-noconfig.cmake
+[4.178s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/share/blue_detector_msgs/cmake/blue_detector_msgs__rosidl_typesupport_introspection_cExport.cmake
+[4.178s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/share/blue_detector_msgs/cmake/blue_detector_msgs__rosidl_typesupport_introspection_cExport-noconfig.cmake
+[4.178s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/share/blue_detector_msgs/cmake/blue_detector_msgs__rosidl_typesupport_cExport.cmake
+[4.178s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/share/blue_detector_msgs/cmake/blue_detector_msgs__rosidl_typesupport_cExport-noconfig.cmake
+[4.179s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/share/blue_detector_msgs/cmake/blue_detector_msgs__rosidl_typesupport_introspection_cppExport.cmake
+[4.179s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/share/blue_detector_msgs/cmake/blue_detector_msgs__rosidl_typesupport_introspection_cppExport-noconfig.cmake
+[4.179s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/share/blue_detector_msgs/cmake/blue_detector_msgs__rosidl_typesupport_cppExport.cmake
+[4.179s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/share/blue_detector_msgs/cmake/blue_detector_msgs__rosidl_typesupport_cppExport-noconfig.cmake
+[4.179s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/share/blue_detector_msgs/cmake/export_blue_detector_msgs__rosidl_generator_pyExport.cmake
+[4.179s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/share/blue_detector_msgs/cmake/export_blue_detector_msgs__rosidl_generator_pyExport-noconfig.cmake
+[4.179s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/share/blue_detector_msgs/cmake/rosidl_cmake-extras.cmake
+[4.180s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/share/blue_detector_msgs/cmake/ament_cmake_export_dependencies-extras.cmake
+[4.180s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/share/blue_detector_msgs/cmake/ament_cmake_export_include_directories-extras.cmake
+[4.180s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/share/blue_detector_msgs/cmake/ament_cmake_export_libraries-extras.cmake
+[4.180s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/share/blue_detector_msgs/cmake/ament_cmake_export_targets-extras.cmake
+[4.180s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/share/blue_detector_msgs/cmake/rosidl_cmake_export_typesupport_targets-extras.cmake
+[4.180s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/share/blue_detector_msgs/cmake/rosidl_cmake_export_typesupport_libraries-extras.cmake
+[4.180s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/share/blue_detector_msgs/cmake/blue_detector_msgsConfig.cmake
+[4.180s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/share/blue_detector_msgs/cmake/blue_detector_msgsConfig-version.cmake
+[4.181s] -- Installing: /home/mtrn/ros2_ws/src/blue_detector_msgs/install/blue_detector_msgs/share/blue_detector_msgs/package.xml
+[4.182s] Invoked command in '/home/mtrn/ros2_ws/src/blue_detector_msgs/build/blue_detector_msgs' returned '0': /usr/bin/cmake --install /home/mtrn/ros2_ws/src/blue_detector_msgs/build/blue_detector_msgs
