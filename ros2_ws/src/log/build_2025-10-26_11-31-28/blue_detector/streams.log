@@ -1,0 +1,21 @@
+[0.727s] Invoking command in '/home/mtrn/ros2_ws/src/blue_detector': PYTHONPATH=/home/mtrn/ros2_ws/src/build/blue_detector/prefix_override:/home/mtrn/ros2_ws/src/install/blue_detector/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 setup.py egg_info --egg-base ../build/blue_detector build --build-base /home/mtrn/ros2_ws/src/build/blue_detector/build install --record /home/mtrn/ros2_ws/src/build/blue_detector/install.log --single-version-externally-managed
+[0.991s] running egg_info
+[0.992s] writing ../build/blue_detector/blue_detector.egg-info/PKG-INFO
+[0.993s] writing dependency_links to ../build/blue_detector/blue_detector.egg-info/dependency_links.txt
+[0.993s] writing entry points to ../build/blue_detector/blue_detector.egg-info/entry_points.txt
+[0.993s] writing requirements to ../build/blue_detector/blue_detector.egg-info/requires.txt
+[0.993s] writing top-level names to ../build/blue_detector/blue_detector.egg-info/top_level.txt
+[0.996s] reading manifest file '../build/blue_detector/blue_detector.egg-info/SOURCES.txt'
+[0.996s] writing manifest file '../build/blue_detector/blue_detector.egg-info/SOURCES.txt'
+[0.996s] running build
+[0.996s] running build_py
+[0.996s] copying blue_detector/__init__.py -> /home/mtrn/ros2_ws/src/build/blue_detector/build/lib/blue_detector
+[0.997s] running install
+[0.997s] running install_lib
+[0.997s] /usr/lib/python3/dist-packages/setuptools/command/install.py:34: SetuptoolsDeprecationWarning: setup.py install is deprecated. Use build and pip and other standards-based tools.
+[0.997s]   warnings.warn(
+[0.998s] copying /home/mtrn/ros2_ws/src/build/blue_detector/build/lib/blue_detector/__init__.py -> /home/mtrn/ros2_ws/src/install/blue_detector/lib/python3.10/site-packages/blue_detector
+[0.998s] byte-compiling /home/mtrn/ros2_ws/src/install/blue_detector/lib/python3.10/site-packages/blue_detector/__init__.py to __init__.cpython-310.pyc
+[1.000s] running install_data
+[1.000s] error: can't copy 'resource/blue_detector': doesn't exist or not a regular file
+[1.016s] Invoked command in '/home/mtrn/ros2_ws/src/blue_detector' returned '1': PYTHONPATH=/home/mtrn/ros2_ws/src/build/blue_detector/prefix_override:/home/mtrn/ros2_ws/src/install/blue_detector/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 setup.py egg_info --egg-base ../build/blue_detector build --build-base /home/mtrn/ros2_ws/src/build/blue_detector/build install --record /home/mtrn/ros2_ws/src/build/blue_detector/install.log --single-version-externally-managed

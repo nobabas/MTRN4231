@@ -1,0 +1,8 @@
+[0.000000] (-) TimerEvent: {}
+[0.001607] (interface) JobQueued: {'identifier': 'interface', 'dependencies': OrderedDict()}
+[0.003056] (blue_detector) JobQueued: {'identifier': 'blue_detector', 'dependencies': OrderedDict([('interface', '/home/mtrn/ros2_ws/install/interface')])}
+[0.003329] (interface) JobStarted: {'identifier': 'interface'}
+[0.080934] (interface) StderrLine: {'line': b'Traceback (most recent call last):\n  File "/usr/lib/python3/dist-packages/colcon_core/executor/__init__.py", line 91, in __call__\n    rc = await self.task(*args, **kwargs)\n  File "/usr/lib/python3/dist-packages/colcon_core/task/__init__.py", line 93, in __call__\n    return await task_method(*args, **kwargs)\n  File "/usr/lib/python3/dist-packages/colcon_ros/task/ament_python/build.py", line 105, in build\n    return await extension.build(additional_hooks=additional_hooks)\n  File "/usr/lib/python3/dist-packages/colcon_core/task/python/build.py", line 81, in build\n    available_commands = await self._get_available_commands(\n  File "/usr/lib/python3/dist-packages/colcon_core/task/python/build.py", line 171, in _get_available_commands\n    output = await check_output(\n  File "/usr/lib/python3/dist-packages/colcon_core/subprocess.py", line 128, in check_output\n    assert not rc, f\'Expected {args} to pass: {stderr_data}\'\nAssertionError: Expected [\'/usr/bin/python3\', \'setup.py\', \'--help-commands\'] to pass: /usr/bin/python3: can\'t open file \'/home/mtrn/ros2_ws/src/interface/setup.py\': [Errno 2] No such file or directory\n\n'}
+[0.081329] (interface) JobEnded: {'identifier': 'interface', 'rc': 1}
+[0.092564] (blue_detector) JobSkipped: {'identifier': 'blue_detector'}
+[0.092641] (-) EventReactorShutdown: {}
