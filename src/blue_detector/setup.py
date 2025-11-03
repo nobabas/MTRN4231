@@ -22,7 +22,7 @@ setup(
     entry_points={
         'console_scripts': [
             'image_convert = blue_detector.ros2node:main',
-            'blue_detection_node = blue_detector.testing:main',
+            'blue_detection_node = blue_detector.bluedetector:main',
             'final_detect_node = blue_detector.PublishFinal:main',
         ],
     },
