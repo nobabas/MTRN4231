@@ -26,7 +26,7 @@ def generate_launch_description():
     
     robotAndCamera = IncludeLaunchDescription(
             PythonLaunchDescriptionSource([os.path.join(
-                get_package_share_directory('end_effector_description'), 'launch'),
+                get_package_share_directory('endeffector_description'), 'launch'),
                 '/ur_with_endeffector.launch.py'])
             )
     
