@@ -1,4 +1,6 @@
 from setuptools import setup
+import os
+from glob import glob
 
 package_name = 'blue_detector'
 
@@ -10,20 +12,21 @@ setup(
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
-        # Include launch files
+        # Install launch files - FIXED PATH
+        (os.path.join('share', package_name, 'launch'), 
+         glob('launch/*.py')),  # Changed from *.launch.py to *.py
     ],
     install_requires=['setuptools'],
     zip_safe=True,
-    maintainer='your_name',
-    maintainer_email='your_email@example.com',
-    description='Blue area detection package',
+    maintainer='your-name',
+    maintainer_email='your-email@example.com',
+    description='Blue detection package',
     license='Apache License 2.0',
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'image_convert = blue_detector.ros2node:main',
-            'blue_detection_node = blue_detector.bluedetector:main',
-            'final_detect_node = blue_detector.PublishFinal:main',
+            'PublishFinal = PublishFinal:main',
+            'ros2node = ros2node:main',
         ],
     },
 )
