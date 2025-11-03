@@ -42,7 +42,8 @@ def generate_launch_description():
                 get_package_share_directory('transformations'), 'launch'),
                 '/transformations_launch.py'])
             )
-    
+    # Should add the movement here 
+    # Question: is there a launch file for the moveit server?
     arm = IncludeLaunchDescription(
             PythonLaunchDescriptionSource([os.path.join(
                 get_package_share_directory('movement'), 'launch'),
