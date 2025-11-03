@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>teensy_bridge</name>
+  <version>0.0.1</version>
+  <description>Bridge node for communicating with a Teensy microcontroller via USB and publishing sensor data to ROS 2 topics.</description>
+
+  <maintainer email="sampcg@todo.todo">sampcg</maintainer>
+  <license>MIT</license>
+
+  <!-- Build and runtime dependencies -->
+  <buildtool_depend>ament_python</buildtool_depend>
+
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  <exec_depend>python3-serial</exec_depend>
+
+  <!-- Test dependencies (optional) -->
+  <test_depend>ament_copyright</test_depend>
+  <test_depend>ament_flake8</test_depend>
+  <test_depend>ament_pep257</test_depend>
+  <test_depend>python3-pytest</test_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>
