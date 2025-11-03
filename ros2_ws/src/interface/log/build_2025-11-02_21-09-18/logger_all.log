@@ -1,0 +1,117 @@
+[0.400s] DEBUG:colcon:Command line arguments: ['/usr/bin/colcon', 'build']
+[0.400s] DEBUG:colcon:Parsed command line arguments: Namespace(log_base=None, log_level=None, verb_name='build', build_base='build', install_base='install', merge_install=False, symlink_install=False, test_result_base=None, continue_on_error=False, executor='parallel', parallel_workers=4, event_handlers=None, ignore_user_meta=False, metas=['./colcon.meta'], base_paths=['.'], packages_ignore=None, packages_ignore_regex=None, paths=None, packages_up_to=None, packages_up_to_regex=None, packages_above=None, packages_above_and_dependencies=None, packages_above_depth=None, packages_select_by_dep=None, packages_skip_by_dep=None, packages_skip_up_to=None, packages_select_build_failed=False, packages_skip_build_finished=False, packages_select_test_failures=False, packages_skip_test_passed=False, packages_select=None, packages_skip=None, packages_select_regex=None, packages_skip_regex=None, packages_start=None, packages_end=None, allow_overriding=[], cmake_args=None, cmake_target=None, cmake_target_skip_unavailable=False, cmake_clean_cache=False, cmake_clean_first=False, cmake_force_configure=False, ament_cmake_args=None, catkin_cmake_args=None, catkin_skip_building_tests=False, mixin_files=None, mixin=None, verb_parser=<colcon_mixin.mixin.mixin_argument.MixinArgumentDecorator object at 0x7f153d039240>, verb_extension=<colcon_core.verb.build.BuildVerb object at 0x7f153d1250c0>, main=<bound method BuildVerb.main of <colcon_core.verb.build.BuildVerb object at 0x7f153d1250c0>>, mixin_verb=('build',))
+[0.429s] Level 1:colcon.colcon_core.package_discovery:discover_packages(colcon_meta) check parameters
+[0.429s] Level 1:colcon.colcon_core.package_discovery:discover_packages(recursive) check parameters
+[0.429s] Level 1:colcon.colcon_core.package_discovery:discover_packages(ignore) check parameters
+[0.429s] Level 1:colcon.colcon_core.package_discovery:discover_packages(path) check parameters
+[0.429s] Level 1:colcon.colcon_core.package_discovery:discover_packages(colcon_meta) discover
+[0.429s] Level 1:colcon.colcon_core.package_discovery:discover_packages(recursive) discover
+[0.429s] INFO:colcon.colcon_core.package_discovery:Crawling recursively for packages in '/home/mtrn/ros2_ws/src/blue_detector_msgs'
+[0.429s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['ignore', 'ignore_ament_install']
+[0.430s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'ignore'
+[0.430s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'ignore_ament_install'
+[0.430s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['colcon_pkg']
+[0.430s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'colcon_pkg'
+[0.430s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['colcon_meta']
+[0.430s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'colcon_meta'
+[0.430s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['ros']
+[0.430s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'ros'
+[0.452s] DEBUG:colcon.colcon_core.package_identification:Package '.' with type 'ros.ament_cmake' and name 'interface'
+[0.453s] Level 1:colcon.colcon_core.package_discovery:discover_packages(recursive) using defaults
+[0.453s] Level 1:colcon.colcon_core.package_discovery:discover_packages(ignore) discover
+[0.453s] Level 1:colcon.colcon_core.package_discovery:discover_packages(ignore) using defaults
+[0.453s] Level 1:colcon.colcon_core.package_discovery:discover_packages(path) discover
+[0.453s] Level 1:colcon.colcon_core.package_discovery:discover_packages(path) using defaults
+[0.522s] Level 1:colcon.colcon_core.package_discovery:discover_packages(prefix_path) check parameters
+[0.522s] Level 1:colcon.colcon_core.package_discovery:discover_packages(prefix_path) discover
+[0.527s] DEBUG:colcon.colcon_installed_package_information.package_discovery:Found 1 installed packages in /home/mtrn/ros2_ws/src/blue_detector_msgs/install
+[0.529s] DEBUG:colcon.colcon_installed_package_information.package_discovery:Found 2 installed packages in /home/mtrn/ros2_ws/src/install
+[0.530s] DEBUG:colcon.colcon_installed_package_information.package_discovery:Found 7 installed packages in /home/mtrn/4231/ros_ur_driver/install
+[0.533s] DEBUG:colcon.colcon_installed_package_information.package_discovery:Found 55 installed packages in /home/mtrn/4231/ws_moveit2/install
+[0.535s] DEBUG:colcon.colcon_installed_package_information.package_discovery:Found 345 installed packages in /opt/ros/humble
+[0.537s] Level 1:colcon.colcon_core.package_discovery:discover_packages(prefix_path) using defaults
+[0.605s] Level 5:colcon.colcon_core.verb:set package 'interface' build argument 'cmake_args' from command line to 'None'
+[0.605s] Level 5:colcon.colcon_core.verb:set package 'interface' build argument 'cmake_target' from command line to 'None'
+[0.606s] Level 5:colcon.colcon_core.verb:set package 'interface' build argument 'cmake_target_skip_unavailable' from command line to 'False'
+[0.606s] Level 5:colcon.colcon_core.verb:set package 'interface' build argument 'cmake_clean_cache' from command line to 'False'
+[0.606s] Level 5:colcon.colcon_core.verb:set package 'interface' build argument 'cmake_clean_first' from command line to 'False'
+[0.606s] Level 5:colcon.colcon_core.verb:set package 'interface' build argument 'cmake_force_configure' from command line to 'False'
+[0.606s] Level 5:colcon.colcon_core.verb:set package 'interface' build argument 'ament_cmake_args' from command line to 'None'
+[0.606s] Level 5:colcon.colcon_core.verb:set package 'interface' build argument 'catkin_cmake_args' from command line to 'None'
+[0.606s] Level 5:colcon.colcon_core.verb:set package 'interface' build argument 'catkin_skip_building_tests' from command line to 'False'
+[0.606s] DEBUG:colcon.colcon_core.verb:Building package 'interface' with the following arguments: {'ament_cmake_args': None, 'build_base': '/home/mtrn/ros2_ws/src/blue_detector_msgs/build/interface', 'catkin_cmake_args': None, 'catkin_skip_building_tests': False, 'cmake_args': None, 'cmake_clean_cache': False, 'cmake_clean_first': False, 'cmake_force_configure': False, 'cmake_target': None, 'cmake_target_skip_unavailable': False, 'install_base': '/home/mtrn/ros2_ws/src/blue_detector_msgs/install/interface', 'merge_install': False, 'path': '/home/mtrn/ros2_ws/src/blue_detector_msgs', 'symlink_install': False, 'test_result_base': None}
+[0.607s] INFO:colcon.colcon_core.executor:Executing jobs using 'parallel' executor
+[0.613s] DEBUG:colcon.colcon_parallel_executor.executor.parallel:run_until_complete
+[0.613s] INFO:colcon.colcon_ros.task.ament_cmake.build:Building ROS package in '/home/mtrn/ros2_ws/src/blue_detector_msgs' with build type 'ament_cmake'
+[0.613s] INFO:colcon.colcon_cmake.task.cmake.build:Building CMake package in '/home/mtrn/ros2_ws/src/blue_detector_msgs'
+[0.619s] INFO:colcon.colcon_core.plugin_system:Skipping extension 'colcon_core.shell.bat': Not used on non-Windows systems
+[0.619s] INFO:colcon.colcon_core.shell:Skip shell extension 'powershell' for command environment: Not usable outside of PowerShell
+[0.619s] DEBUG:colcon.colcon_core.shell:Skip shell extension 'dsv' for command environment
+[0.642s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoking command in '/home/mtrn/ros2_ws/src/blue_detector_msgs/build/interface': CMAKE_PREFIX_PATH=/home/mtrn/ros2_ws/src/install/blue_detector:/home/mtrn/4231/ws_moveit2/install/moveit_configs_utils:/home/mtrn/4231/ws_moveit2/install/launch_param_builder:/opt/ros/humble:${CMAKE_PREFIX_PATH} /usr/bin/cmake /home/mtrn/ros2_ws/src/blue_detector_msgs -DCMAKE_INSTALL_PREFIX=/home/mtrn/ros2_ws/src/blue_detector_msgs/install/interface
+[2.277s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoked command in '/home/mtrn/ros2_ws/src/blue_detector_msgs/build/interface' returned '0': CMAKE_PREFIX_PATH=/home/mtrn/ros2_ws/src/install/blue_detector:/home/mtrn/4231/ws_moveit2/install/moveit_configs_utils:/home/mtrn/4231/ws_moveit2/install/launch_param_builder:/opt/ros/humble:${CMAKE_PREFIX_PATH} /usr/bin/cmake /home/mtrn/ros2_ws/src/blue_detector_msgs -DCMAKE_INSTALL_PREFIX=/home/mtrn/ros2_ws/src/blue_detector_msgs/install/interface
+[2.278s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoking command in '/home/mtrn/ros2_ws/src/blue_detector_msgs/build/interface': CMAKE_PREFIX_PATH=/home/mtrn/ros2_ws/src/install/blue_detector:/home/mtrn/4231/ws_moveit2/install/moveit_configs_utils:/home/mtrn/4231/ws_moveit2/install/launch_param_builder:/opt/ros/humble:${CMAKE_PREFIX_PATH} /usr/bin/cmake --build /home/mtrn/ros2_ws/src/blue_detector_msgs/build/interface -- -j4 -l4
+[4.428s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoked command in '/home/mtrn/ros2_ws/src/blue_detector_msgs/build/interface' returned '0': CMAKE_PREFIX_PATH=/home/mtrn/ros2_ws/src/install/blue_detector:/home/mtrn/4231/ws_moveit2/install/moveit_configs_utils:/home/mtrn/4231/ws_moveit2/install/launch_param_builder:/opt/ros/humble:${CMAKE_PREFIX_PATH} /usr/bin/cmake --build /home/mtrn/ros2_ws/src/blue_detector_msgs/build/interface -- -j4 -l4
+[4.536s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoking command in '/home/mtrn/ros2_ws/src/blue_detector_msgs/build/interface': CMAKE_PREFIX_PATH=/home/mtrn/ros2_ws/src/install/blue_detector:/home/mtrn/4231/ws_moveit2/install/moveit_configs_utils:/home/mtrn/4231/ws_moveit2/install/launch_param_builder:/opt/ros/humble:${CMAKE_PREFIX_PATH} /usr/bin/cmake --install /home/mtrn/ros2_ws/src/blue_detector_msgs/build/interface
+[4.600s] Level 1:colcon.colcon_core.environment:create_environment_scripts_only(interface)
+[4.602s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoked command in '/home/mtrn/ros2_ws/src/blue_detector_msgs/build/interface' returned '0': CMAKE_PREFIX_PATH=/home/mtrn/ros2_ws/src/install/blue_detector:/home/mtrn/4231/ws_moveit2/install/moveit_configs_utils:/home/mtrn/4231/ws_moveit2/install/launch_param_builder:/opt/ros/humble:${CMAKE_PREFIX_PATH} /usr/bin/cmake --install /home/mtrn/ros2_ws/src/blue_detector_msgs/build/interface
+[4.607s] Level 1:colcon.colcon_core.environment:checking '/home/mtrn/ros2_ws/src/blue_detector_msgs/install/interface' for CMake module files
+[4.608s] Level 1:colcon.colcon_core.environment:checking '/home/mtrn/ros2_ws/src/blue_detector_msgs/install/interface' for CMake config files
+[4.608s] Level 1:colcon.colcon_core.shell:create_environment_hook('interface', 'cmake_prefix_path')
+[4.610s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/mtrn/ros2_ws/src/blue_detector_msgs/install/interface/share/interface/hook/cmake_prefix_path.ps1'
+[4.611s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/mtrn/ros2_ws/src/blue_detector_msgs/install/interface/share/interface/hook/cmake_prefix_path.dsv'
+[4.611s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/mtrn/ros2_ws/src/blue_detector_msgs/install/interface/share/interface/hook/cmake_prefix_path.sh'
+[4.612s] Level 1:colcon.colcon_core.environment:checking '/home/mtrn/ros2_ws/src/blue_detector_msgs/install/interface/lib'
+[4.612s] Level 1:colcon.colcon_core.shell:create_environment_hook('interface', 'ld_library_path_lib')
+[4.615s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/mtrn/ros2_ws/src/blue_detector_msgs/install/interface/share/interface/hook/ld_library_path_lib.ps1'
+[4.615s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/mtrn/ros2_ws/src/blue_detector_msgs/install/interface/share/interface/hook/ld_library_path_lib.dsv'
+[4.615s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/mtrn/ros2_ws/src/blue_detector_msgs/install/interface/share/interface/hook/ld_library_path_lib.sh'
+[4.615s] Level 1:colcon.colcon_core.environment:checking '/home/mtrn/ros2_ws/src/blue_detector_msgs/install/interface/bin'
+[4.615s] Level 1:colcon.colcon_core.environment:checking '/home/mtrn/ros2_ws/src/blue_detector_msgs/install/interface/lib/pkgconfig/interface.pc'
+[4.616s] Level 1:colcon.colcon_core.environment:checking '/home/mtrn/ros2_ws/src/blue_detector_msgs/install/interface/lib/python3.10/site-packages'
+[4.616s] Level 1:colcon.colcon_core.environment:checking '/home/mtrn/ros2_ws/src/blue_detector_msgs/install/interface/bin'
+[4.618s] INFO:colcon.colcon_core.shell:Creating package script '/home/mtrn/ros2_ws/src/blue_detector_msgs/install/interface/share/interface/package.ps1'
+[4.619s] INFO:colcon.colcon_core.shell:Creating package descriptor '/home/mtrn/ros2_ws/src/blue_detector_msgs/install/interface/share/interface/package.dsv'
+[4.620s] INFO:colcon.colcon_core.shell:Creating package script '/home/mtrn/ros2_ws/src/blue_detector_msgs/install/interface/share/interface/package.sh'
+[4.620s] INFO:colcon.colcon_core.shell:Creating package script '/home/mtrn/ros2_ws/src/blue_detector_msgs/install/interface/share/interface/package.bash'
+[4.621s] INFO:colcon.colcon_core.shell:Creating package script '/home/mtrn/ros2_ws/src/blue_detector_msgs/install/interface/share/interface/package.zsh'
+[4.622s] Level 1:colcon.colcon_core.environment:create_file_with_runtime_dependencies(/home/mtrn/ros2_ws/src/blue_detector_msgs/install/interface/share/colcon-core/packages/interface)
+[4.715s] Level 1:colcon.colcon_core.environment:create_environment_scripts_only(interface)
+[4.718s] Level 1:colcon.colcon_core.environment:checking '/home/mtrn/ros2_ws/src/blue_detector_msgs/install/interface' for CMake module files
+[4.719s] Level 1:colcon.colcon_core.environment:checking '/home/mtrn/ros2_ws/src/blue_detector_msgs/install/interface' for CMake config files
+[4.719s] Level 1:colcon.colcon_core.shell:create_environment_hook('interface', 'cmake_prefix_path')
+[4.721s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/mtrn/ros2_ws/src/blue_detector_msgs/install/interface/share/interface/hook/cmake_prefix_path.ps1'
+[4.722s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/mtrn/ros2_ws/src/blue_detector_msgs/install/interface/share/interface/hook/cmake_prefix_path.dsv'
+[4.722s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/mtrn/ros2_ws/src/blue_detector_msgs/install/interface/share/interface/hook/cmake_prefix_path.sh'
+[4.723s] Level 1:colcon.colcon_core.environment:checking '/home/mtrn/ros2_ws/src/blue_detector_msgs/install/interface/lib'
+[4.723s] Level 1:colcon.colcon_core.shell:create_environment_hook('interface', 'ld_library_path_lib')
+[4.725s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/mtrn/ros2_ws/src/blue_detector_msgs/install/interface/share/interface/hook/ld_library_path_lib.ps1'
+[4.726s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/mtrn/ros2_ws/src/blue_detector_msgs/install/interface/share/interface/hook/ld_library_path_lib.dsv'
+[4.726s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/mtrn/ros2_ws/src/blue_detector_msgs/install/interface/share/interface/hook/ld_library_path_lib.sh'
+[4.726s] Level 1:colcon.colcon_core.environment:checking '/home/mtrn/ros2_ws/src/blue_detector_msgs/install/interface/bin'
+[4.726s] Level 1:colcon.colcon_core.environment:checking '/home/mtrn/ros2_ws/src/blue_detector_msgs/install/interface/lib/pkgconfig/interface.pc'
+[4.727s] Level 1:colcon.colcon_core.environment:checking '/home/mtrn/ros2_ws/src/blue_detector_msgs/install/interface/lib/python3.10/site-packages'
+[4.727s] Level 1:colcon.colcon_core.environment:checking '/home/mtrn/ros2_ws/src/blue_detector_msgs/install/interface/bin'
+[4.729s] INFO:colcon.colcon_core.shell:Creating package script '/home/mtrn/ros2_ws/src/blue_detector_msgs/install/interface/share/interface/package.ps1'
+[4.730s] INFO:colcon.colcon_core.shell:Creating package descriptor '/home/mtrn/ros2_ws/src/blue_detector_msgs/install/interface/share/interface/package.dsv'
+[4.730s] INFO:colcon.colcon_core.shell:Creating package script '/home/mtrn/ros2_ws/src/blue_detector_msgs/install/interface/share/interface/package.sh'
+[4.731s] INFO:colcon.colcon_core.shell:Creating package script '/home/mtrn/ros2_ws/src/blue_detector_msgs/install/interface/share/interface/package.bash'
+[4.731s] INFO:colcon.colcon_core.shell:Creating package script '/home/mtrn/ros2_ws/src/blue_detector_msgs/install/interface/share/interface/package.zsh'
+[4.731s] Level 1:colcon.colcon_core.environment:create_file_with_runtime_dependencies(/home/mtrn/ros2_ws/src/blue_detector_msgs/install/interface/share/colcon-core/packages/interface)
+[4.732s] DEBUG:colcon.colcon_parallel_executor.executor.parallel:closing loop
+[4.732s] DEBUG:colcon.colcon_parallel_executor.executor.parallel:loop closed
+[4.732s] DEBUG:colcon.colcon_parallel_executor.executor.parallel:run_until_complete finished with '0'
+[4.732s] DEBUG:colcon.colcon_core.event_reactor:joining thread
+[4.737s] INFO:colcon.colcon_core.plugin_system:Skipping extension 'colcon_notification.desktop_notification.terminal_notifier': Not used on non-Darwin systems
+[4.737s] INFO:colcon.colcon_core.plugin_system:Skipping extension 'colcon_notification.desktop_notification.win32': Not used on non-Windows systems
+[4.737s] INFO:colcon.colcon_notification.desktop_notification:Sending desktop notification using 'notify2'
+[4.747s] DEBUG:colcon.colcon_core.event_reactor:joined thread
+[4.749s] INFO:colcon.colcon_core.shell:Creating prefix script '/home/mtrn/ros2_ws/src/blue_detector_msgs/install/local_setup.ps1'
+[4.751s] INFO:colcon.colcon_core.shell:Creating prefix util module '/home/mtrn/ros2_ws/src/blue_detector_msgs/install/_local_setup_util_ps1.py'
+[4.752s] INFO:colcon.colcon_core.shell:Creating prefix chain script '/home/mtrn/ros2_ws/src/blue_detector_msgs/install/setup.ps1'
+[4.756s] INFO:colcon.colcon_core.shell:Creating prefix script '/home/mtrn/ros2_ws/src/blue_detector_msgs/install/local_setup.sh'
+[4.756s] INFO:colcon.colcon_core.shell:Creating prefix util module '/home/mtrn/ros2_ws/src/blue_detector_msgs/install/_local_setup_util_sh.py'
+[4.757s] INFO:colcon.colcon_core.shell:Creating prefix chain script '/home/mtrn/ros2_ws/src/blue_detector_msgs/install/setup.sh'
+[4.761s] INFO:colcon.colcon_core.shell:Creating prefix script '/home/mtrn/ros2_ws/src/blue_detector_msgs/install/local_setup.bash'
+[4.761s] INFO:colcon.colcon_core.shell:Creating prefix chain script '/home/mtrn/ros2_ws/src/blue_detector_msgs/install/setup.bash'
+[4.765s] INFO:colcon.colcon_core.shell:Creating prefix script '/home/mtrn/ros2_ws/src/blue_detector_msgs/install/local_setup.zsh'
+[4.766s] INFO:colcon.colcon_core.shell:Creating prefix chain script '/home/mtrn/ros2_ws/src/blue_detector_msgs/install/setup.zsh'
