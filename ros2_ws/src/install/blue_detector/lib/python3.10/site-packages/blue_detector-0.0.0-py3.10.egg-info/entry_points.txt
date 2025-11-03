@@ -1,0 +1,5 @@
+[console_scripts]
+blue_detection_node = blue_detector.testing:main
+final_detect_node = blue_detector.PublishFinal:main
+image_convert = blue_detector.ros2node:main
+
