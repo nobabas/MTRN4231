@@ -25,8 +25,8 @@ class BlueMarkerPublisher(Node):
             world_x, world_y, world_z = result['world_coords']
 
             msg = MarkerData()
-            msg.id = float(i)
-            msg.pose = [float(world_x), float(world_y), 0.1, 0.0, 0.0, 0.0]
+            msg.id = cfloat(i)
+            msg.pose = [cfloat(world_x), cfloat(world_y), 0.1, 0.0, 0.0, 0.0]
 
             self.marker_publisher.publish(msg)
             self.get_logger().info(
