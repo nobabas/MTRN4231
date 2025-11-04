@@ -34,7 +34,7 @@ def get_ur_control_launch():
 
     # Add controller if using simulated hardware
     if use_fake:
-        ur_control_launch_args['initial_joint_controller'] = 'joint_trajectory_controller'
+        ur_control_launch_args['initial_joint_controller'] = 'scaled_joint_trajectory_controller'
 
     return IncludeLaunchDescription(
         PythonLaunchDescriptionSource(

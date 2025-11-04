@@ -12,9 +12,7 @@ setup(
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
-        # Install launch files - FIXED PATH
-        (os.path.join('share', package_name, 'launch'), 
-         glob('launch/*.py')),  # Changed from *.launch.py to *.py
+        (os.path.join('share', package_name, 'launch'), glob('launch/*.py')),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
@@ -25,8 +23,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'PublishFinal = PublishFinal:main',
-            'ros2node = ros2node:main',
+            'PublishFinal = blue_detector.PublishFinal:main',
+            'ros2node = blue_detector.ros2node:main',
         ],
     },
 )
