@@ -1,9 +1,12 @@
 import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import Image
+from cv_bridge import CvBridge
 import cv2
-import numpy as np
 import os
+from datetime import datetime
+from pathlib import Path  
+
 
 class ImageSaverSubscriber(Node):
     def __init__(self):
@@ -17,7 +20,7 @@ class ImageSaverSubscriber(Node):
         self.get_logger().info("Image saver node started. Waiting for messages...")
 
         # Directory to save incoming images
-        self.save_dir = "/home/mtrn/4231/received_images"
+        self.save_dir = Path.home() / 'blue_images'
         os.makedirs(self.save_dir, exist_ok=True)
 
     def listener_callback(self, msg: Image):
