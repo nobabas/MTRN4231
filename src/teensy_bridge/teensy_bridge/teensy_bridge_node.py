@@ -1,6 +1,6 @@
 import rclpy
 from rclpy.node import Node
-from std_msgs.msg import Float3232
+from std_msgs.msg import Float32
 import serial
 import serial.tools.list_ports
 

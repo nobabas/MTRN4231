@@ -39,7 +39,10 @@ public:
         // -------------------------------
         // PARAMETERS
         // -------------------------------
-        declare_parameter("soil_threshold", 500);
+        // -------------------------------
+        // PARAMETERS
+        // -------------------------------
+        declare_parameter<double>("soil_threshold", 690.0);
         soil_threshold_ = get_parameter("soil_threshold").as_double();
         RCLCPP_INFO(get_logger(), "Brain Node started (soil_threshold = %.2f)", soil_threshold_);
 
@@ -73,7 +76,7 @@ public:
             [this](const interfaces::msg::MarkerData::SharedPtr msg) {
                 latest_marker_ = *msg;
                 if (msg->pose.size() >= 3) {
-                    RCLCPP_INFO(get_logger(), "Marker ID %.0f at [%.2f, %.2f, %.2f]",
+                    RCLCPP_INFO(get_logger(), "Brain: Marker ID %.0f at [%.2f, %.2f, %.2f]",
                                 msg->id, msg->pose[0], msg->pose[1], msg->pose[2]);
                 } else {
                     RCLCPP_WARN(get_logger(), "MarkerData.pose malformed or empty.");
@@ -106,7 +109,12 @@ private:
         }
 
         // Step 2: Move to marker position (cartesian)
-        std::vector<double> current_pose = marker.pose;
+        std::vector<float> current_pose(marker.pose.size());
+        for (size_t i = 0; i < marker.pose.size(); ++i)
+        {
+            current_pose[i] = static_cast<double>(marker.pose[i]);
+        }
+
         if (!callMovementService("cartesian", current_pose)) {
             RCLCPP_ERROR(get_logger(), "Movement to marker failed.");
             return 0;
@@ -157,11 +165,14 @@ private:
         auto result = future.get();
         return result->marker_data;
     }
-
-    bool callMovementService(const std::string &command, const std::vector<double> &positions) {
+    bool callMovementService(const std::string &command, const std::vector<float> &positions) {
         auto req = std::make_shared<interfaces::srv::MoveRequest::Request>();
         req->command = command;
-        req->positions = positions;
+
+        // Convert float → double
+        req->positions.reserve(positions.size());
+        for (float p : positions)
+            req->positions.push_back(static_cast<double>(p));
 
         if (!move_client_->wait_for_service(std::chrono::seconds(2))) {
             RCLCPP_WARN(get_logger(), "Movement service not available.");
@@ -171,6 +182,7 @@ private:
         auto result = move_client_->async_send_request(req).get();
         return result->success;
     }
+
 
     // ----------------------------------------------------
     // VARIABLES & INTERFACES

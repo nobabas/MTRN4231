@@ -27,4 +27,9 @@ install(DIRECTORY launch/
   DESTINATION share/${PROJECT_NAME}/launch
 )
 
+install(PROGRAMS
+  test_nodes/dummy_inputs.py
+  DESTINATION lib/${PROJECT_NAME}
+)
+
 ament_package()

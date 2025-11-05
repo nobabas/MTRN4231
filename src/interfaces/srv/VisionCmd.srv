@@ -9,4 +9,4 @@ string command
 # ------------------------------------------------------------
 # The vision node returns one detected marker with its ID and pose.
 # If no marker is found, marker_data.pose can be empty.
-interfaces/msg/MarkerData marker_data
+interfaces/MarkerData marker_data

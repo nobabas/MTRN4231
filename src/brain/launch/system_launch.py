@@ -19,7 +19,7 @@ def generate_launch_description():
     brain_node = Node(
             package='brain',
             executable='brain',  # Replace with the actual executable name
-            name='brain',
+            name='brain_node',
             output='screen',
             parameters=[{'use_sim_time': LaunchConfiguration('use_sim_time')}]
         )
