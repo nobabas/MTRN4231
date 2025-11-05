@@ -1,29 +1,24 @@
-/* Change these values based on your observations */
-#define wetSoil 277   // Define max value we consider soil 'wet'
-#define drySoil 380   // Define min value we consider soil 'dry'
+// Teensy Moisture Sensor Bridge
+// Reads soil moisture sensor on A0 and sends averaged analog readings (0–1023)
+// to ROS2 via serial at 9600 baud.
 
-// Define pins
-#define sensorPin A0   // Analog input pin
+#define MOISTURE_PIN A0       // Analog pin for soil moisture sensor
+#define READ_INTERVAL 100     // Time between serial outputs (ms)
+#define NUM_SAMPLES 20        // Number of samples for averaging
 
 void setup() {
-  Serial.begin(9600);
-  delay(2000);
-  Serial.println("Teensy is alive");
+  Serial.begin(9600);         // Match teensy_bridge_node.py baud rate
+  pinMode(MOISTURE_PIN, INPUT);
 }
 
 void loop() {
-  // Read the Analog Input
-  int moisture = analogRead(sensorPin);
+  long total = 0;
+  for (int i = 0; i < NUM_SAMPLES; i++) {
+    total += analogRead(MOISTURE_PIN);
+    delay(10);                 // Small delay between samples (for stability)
+  }
 
-  Serial.println(moisture);
-
-  // Map the reading to PWM output range (0–255)
-  // int outputValue = map(moisture, 0, 1023, 0, 255);
-
-
-  //Serial.print("PWM Output Value: ");
-  //Serial.println(outputValue);
-  //Serial.println();
-
-  delay(1000); // Take a reading every second
+  int averageValue = total / NUM_SAMPLES;  // Compute average
+  Serial.println(averageValue);            // Send as integer (0–1023)
+  delay(READ_INTERVAL);                    // Wait before next group of samples
 }

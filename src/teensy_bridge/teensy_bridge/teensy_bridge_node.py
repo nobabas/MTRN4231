@@ -1,6 +1,6 @@
 import rclpy
 from rclpy.node import Node
-from std_msgs.msg import Int32
+from std_msgs.msg import Float3232
 import serial
 import serial.tools.list_ports
 
@@ -22,15 +22,15 @@ class TeensyBridge(Node):
         self.get_logger().info(f"Connected to Teensy on {teensy_port}")
 
         self.ser = serial.Serial(teensy_port, 9600)
-        self.publisher = self.create_publisher(Int32, 'soil_moisture', 10)
+        self.publisher = self.create_publisher(Float32, 'soil_moisture', 10)
         self.timer = self.create_timer(0.1, self.read_serial)
 
     def read_serial(self):
         try:
             line = self.ser.readline().decode('utf-8', errors='ignore').strip()
             if line.isdigit():
-                msg = Int32()
-                msg.data = int(line)
+                msg = Float32()
+                msg.data = float(line)
                 self.publisher.publish(msg)
                 self.get_logger().debug(f"Published: {msg.data}")
         except Exception as e:

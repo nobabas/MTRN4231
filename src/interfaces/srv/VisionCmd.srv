@@ -1,0 +1,12 @@
+# Request
+# ------------------------------------------------------------
+# A command string that tells the vision node what to do.
+# Example: "detect_marker" to trigger blue marker detection.
+string command
+
+---
+# Response
+# ------------------------------------------------------------
+# The vision node returns one detected marker with its ID and pose.
+# If no marker is found, marker_data.pose can be empty.
+interfaces/msg/MarkerData marker_data
