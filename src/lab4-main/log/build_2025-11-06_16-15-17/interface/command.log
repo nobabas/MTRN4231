@@ -1,0 +1,4 @@
+Invoking command in '/home/mtrn/lab4-main/lab4-main/build/interface': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --build /home/mtrn/lab4-main/lab4-main/build/interface -- -j4 -l4
+Invoked command in '/home/mtrn/lab4-main/lab4-main/build/interface' returned '0': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --build /home/mtrn/lab4-main/lab4-main/build/interface -- -j4 -l4
+Invoking command in '/home/mtrn/lab4-main/lab4-main/build/interface': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --install /home/mtrn/lab4-main/lab4-main/build/interface
+Invoked command in '/home/mtrn/lab4-main/lab4-main/build/interface' returned '0': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --install /home/mtrn/lab4-main/lab4-main/build/interface

@@ -1,0 +1,4 @@
+[console_scripts]
+main = transformation.tf_main:main
+test = transformation.testingcode:main
+

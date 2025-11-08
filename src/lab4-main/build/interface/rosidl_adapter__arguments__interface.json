@@ -1,0 +1,6 @@
+{
+  "package_name": "interface",
+  "non_idl_tuples": [
+    "/home/mtrn/lab4-main/lab4-main/src/interface:msg/MarkerData.msg"
+  ]
+}

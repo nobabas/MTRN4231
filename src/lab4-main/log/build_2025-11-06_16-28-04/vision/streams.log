@@ -1,0 +1,25 @@
+[1.063s] Invoking command in '/home/mtrn/lab4-main/lab4-main/src/vision': PYTHONPATH=/home/mtrn/lab4-main/lab4-main/build/vision/prefix_override:/home/mtrn/lab4-main/lab4-main/install/vision/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 setup.py egg_info --egg-base ../../build/vision build --build-base /home/mtrn/lab4-main/lab4-main/build/vision/build install --record /home/mtrn/lab4-main/lab4-main/build/vision/install.log --single-version-externally-managed
+[1.340s] running egg_info
+[1.343s] writing ../../build/vision/vision.egg-info/PKG-INFO
+[1.343s] writing dependency_links to ../../build/vision/vision.egg-info/dependency_links.txt
+[1.343s] writing entry points to ../../build/vision/vision.egg-info/entry_points.txt
+[1.344s] writing requirements to ../../build/vision/vision.egg-info/requires.txt
+[1.344s] writing top-level names to ../../build/vision/vision.egg-info/top_level.txt
+[1.344s] reading manifest file '../../build/vision/vision.egg-info/SOURCES.txt'
+[1.344s] adding license file 'LICENSE'
+[1.345s] writing manifest file '../../build/vision/vision.egg-info/SOURCES.txt'
+[1.345s] running build
+[1.345s] running build_py
+[1.347s] running install
+[1.347s] /usr/lib/python3/dist-packages/setuptools/command/install.py:34: SetuptoolsDeprecationWarning: setup.py install is deprecated. Use build and pip and other standards-based tools.
+[1.347s]   warnings.warn(
+[1.350s] running install_lib
+[1.350s] running install_data
+[1.350s] running install_egg_info
+[1.368s] removing '/home/mtrn/lab4-main/lab4-main/install/vision/lib/python3.10/site-packages/vision-0.0.0-py3.10.egg-info' (and everything under it)
+[1.368s] Copying ../../build/vision/vision.egg-info to /home/mtrn/lab4-main/lab4-main/install/vision/lib/python3.10/site-packages/vision-0.0.0-py3.10.egg-info
+[1.369s] running install_scripts
+[1.396s] Installing perception_example script to /home/mtrn/lab4-main/lab4-main/install/vision/lib/vision
+[1.396s] Installing testing script to /home/mtrn/lab4-main/lab4-main/install/vision/lib/vision
+[1.396s] writing list of installed files to '/home/mtrn/lab4-main/lab4-main/build/vision/install.log'
+[1.435s] Invoked command in '/home/mtrn/lab4-main/lab4-main/src/vision' returned '0': PYTHONPATH=/home/mtrn/lab4-main/lab4-main/build/vision/prefix_override:/home/mtrn/lab4-main/lab4-main/install/vision/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 setup.py egg_info --egg-base ../../build/vision build --build-base /home/mtrn/lab4-main/lab4-main/build/vision/build install --record /home/mtrn/lab4-main/lab4-main/build/vision/install.log --single-version-externally-managed
