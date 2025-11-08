@@ -1,4 +1,0 @@
-[console_scripts]
-perception_example = vision.vision_main:main
-testing = vision.test:main
-

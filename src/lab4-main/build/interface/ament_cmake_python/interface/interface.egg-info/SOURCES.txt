@@ -1,8 +1,0 @@
-setup.py
-interface/__init__.py
-interface.egg-info/PKG-INFO
-interface.egg-info/SOURCES.txt
-interface.egg-info/dependency_links.txt
-interface.egg-info/top_level.txt
-interface/msg/__init__.py
-interface/msg/_marker_data.py

@@ -1,6 +1,0 @@
-source;share/transformation/hook/pythonpath.ps1
-source;share/transformation/hook/pythonpath.dsv
-source;share/transformation/hook/pythonpath.sh
-source;share/transformation/hook/ament_prefix_path.ps1
-source;share/transformation/hook/ament_prefix_path.dsv
-source;share/transformation/hook/ament_prefix_path.sh
