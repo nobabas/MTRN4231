@@ -37,9 +37,7 @@
 class BrainNode : public rclcpp::Node {
 public:
     BrainNode() : Node("brain_node") {
-        // -------------------------------
-        // PARAMETERS
-        // -------------------------------
+
         // -------------------------------
         // PARAMETERS
         // -------------------------------
@@ -80,7 +78,9 @@ public:
         marker_sub_ = create_subscription<interfaces::msg::MarkerData>(
             "/blue_markers_coords", 10,
             [this](const interfaces::msg::MarkerData::SharedPtr msg) {
-                latest_marker_ = *msg;
+                std::lock_guard<std::mutex> lock(marker_mutex_);
+                marker_map_[static_cast<int>(msg->id)] = *msg;
+
                 if (msg->pose.size() >= 3) {
                     RCLCPP_INFO(get_logger(), "Brain: Marker ID %.0f at [%.2f, %.2f, %.2f]",
                                 msg->id, msg->pose[0], msg->pose[1], msg->pose[2]);
@@ -104,69 +104,120 @@ public:
     // ----------------------------------------------------
     // MAIN ROUTINE
     // ----------------------------------------------------
+    // Need to put call vision service in here once it is done 
     int runSoilSamplingRoutine() {
         RCLCPP_INFO(get_logger(), "Starting soil sampling routine...");
 
-        // Step 1: Request marker coordinates
-        /*auto marker = callVisionService("detect_marker");
-        if (marker.pose.empty()) {
-            RCLCPP_ERROR(get_logger(), "No marker pose returned from Vision node.");
-            return 0;
-        }
-        */
-       interfaces::msg::MarkerData marker;
-       marker.id = 1;
+        // --------------------------------------------------------
+        // Step 1: Define hardcoded markers (temporary)
+        // --------------------------------------------------------
+        std::map<int, interfaces::msg::MarkerData> markers_copy;
 
-       marker.pose.push_back(0.6);
-       marker.pose.push_back(-0.35);
-       marker.pose.push_back(0.25);
-       marker.pose.push_back(-1.57);
-       marker.pose.push_back(1.57);
-       marker.pose.push_back(0.0);
-
-        RCLCPP_INFO(get_logger(), "Starting to move to markers");
-        // Step 2: Move to marker position (cartesian)
-        std::vector<float> current_pose(marker.pose.size());
-        for (size_t i = 0; i < marker.pose.size(); ++i)
         {
-            current_pose[i] = static_cast<float>(marker.pose[i]);
+            interfaces::msg::MarkerData m1, m2, m3;
+
+            m1.id = 1;
+            m1.pose = {0.60, -0.35, 0.25, -1.57, 1.57, 0.0};
+
+            m2.id = 2;
+            m2.pose = {0.55, -0.30, 0.25, -1.57, 1.57, 0.0};
+
+            m3.id = 3;
+            m3.pose = {0.50, -0.25, 0.25, -1.57, 1.57, 0.0};
+
+            markers_copy[m1.id] = m1;
+            markers_copy[m2.id] = m2;
+            markers_copy[m3.id] = m3;
         }
 
-        if (!callMovementService("cartesian", current_pose)) {
-            RCLCPP_ERROR(get_logger(), "Movement to marker failed.");
-            return 0;
-        }
-        RCLCPP_INFO(get_logger(), "Moving to markers succeeded");
+        RCLCPP_INFO(get_logger(), "Loaded %zu hardcoded marker(s).", markers_copy.size());
 
+        // --------------------------------------------------------
+        // Step 2: Iterate through each marker
+        // --------------------------------------------------------
+        for (const auto &pair : markers_copy) {
+            const int marker_id = pair.first;
+            const auto &marker = pair.second;
 
-        // Step 3: Lower probe incrementally until threshold reached
-        /*
-         * MOVE DOWN STRATEGY
-         * ---------------------------------------------------------
-         * The Brain tracks the current pose and updates the Z
-         * coordinate directly. Each iteration lowers Z by 5 mm
-         * (0.005 m) and sends a new MoveRequest in cartesian mode.
-         *
-         * This continues until soil_moisture ≥ soil_threshold_.
-         * ---------------------------------------------------------
-         */
-        const double step_size = 0.005; // 5mm step
-        while (latest_moisture_ < soil_threshold_) {
-            current_pose[2] -= step_size;  // Lower Z
-            RCLCPP_INFO(get_logger(),
-                        "Moisture %.2f < %.2f → moving down to z=%.3f",
-                        latest_moisture_, soil_threshold_, current_pose[2]);
-
-            if (!callMovementService("cartesian", current_pose)) {
-                RCLCPP_WARN(get_logger(), "Move down step failed, retrying...");
+            if (marker.pose.size() < 6) {
+                RCLCPP_WARN(get_logger(), "Marker %d has invalid pose size (%zu). Skipping.",
+                            marker_id, marker.pose.size());
+                continue;
             }
-            rclcpp::sleep_for(std::chrono::seconds(1));
+
+            RCLCPP_INFO(get_logger(),
+                        "\n=============================\n"
+                        " Moving to Marker %d\n"
+                        "=============================",
+                        marker_id);
+
+            std::vector<float> current_pose(marker.pose.begin(), marker.pose.end());
+
+            // Wait until movement service is available
+            while (!move_client_->wait_for_service(std::chrono::seconds(1))) {
+                RCLCPP_WARN(get_logger(), "Waiting for MoveIt service to be available...");
+            }
+
+            // --- Move to marker ---
+            if (!callMovementService("cartesian", current_pose)) {
+                RCLCPP_ERROR(get_logger(), "Movement to marker %d failed. Skipping to next.", marker_id);
+                continue;
+            }
+
+            RCLCPP_INFO(get_logger(), "Arrived at marker %d. Beginning soil sampling.", marker_id);
+
+            // ----------------------------------------------------
+            // Step 3: Lower probe until threshold reached
+            // ----------------------------------------------------
+            const double step_size = 0.005;  // 5 mm down each iteration
+            const double min_z_limit = -0.05; // safety limit below which we stop
+            double initial_z = current_pose[2];
+            latest_moisture_ = 0.0; // reset each time
+
+            while (latest_moisture_ < soil_threshold_) {
+                current_pose[2] -= step_size;
+
+                if (current_pose[2] < min_z_limit) {
+                    RCLCPP_ERROR(get_logger(),
+                                "Safety stop: Z below %.3f while sampling marker %d. Aborting sampling for this marker.",
+                                min_z_limit, marker_id);
+                    break;
+                }
+
+                RCLCPP_INFO(get_logger(),
+                            "Marker %d → Moisture %.2f < %.2f → lowering probe to z = %.3f",
+                            marker_id, latest_moisture_, soil_threshold_, current_pose[2]);
+
+                if (!callMovementService("cartesian", current_pose)) {
+                    RCLCPP_WARN(get_logger(), "Move down step failed (marker %d). Retrying...", marker_id);
+                }
+
+                rclcpp::sleep_for(std::chrono::seconds(1));
+            }
+
+            RCLCPP_INFO(get_logger(),
+                        "Marker %d sampling complete (%.2f ≥ %.2f).",
+                        marker_id, latest_moisture_, soil_threshold_);
+
+            // ----------------------------------------------------
+            // Step 4: Retract probe back to safe height
+            // ----------------------------------------------------
+            // Should do "line"
+            current_pose[2] = initial_z;
+            if (!callMovementService("cartesian", current_pose)) {
+                RCLCPP_WARN(get_logger(), "Failed to retract probe after sampling marker %d.", marker_id);
+            }
+
+            RCLCPP_INFO(get_logger(), "Probe retracted to safe Z for marker %d.", marker_id);
         }
 
-        RCLCPP_INFO(get_logger(), "Soil threshold reached (%.2f ≥ %.2f)",
-                    latest_moisture_, soil_threshold_);
+        // --------------------------------------------------------
+        // Step 5: Routine complete
+        // --------------------------------------------------------
+        RCLCPP_INFO(get_logger(), "✅ Soil sampling routine completed for all markers.");
         return 1;
     }
+
 
     // ----------------------------------------------------
     // SERVICE HELPERS
@@ -198,13 +249,12 @@ public:
         for (float p : positions)
             req->positions.push_back(static_cast<double>(p));
              RCLCPP_WARN(get_logger(), "Movement service called.3");
-        /*
+        
 
-        if (!move_client_->wait_for_service(std::chrono::seconds(2))) {
+        if (!move_client_->wait_for_service(std::chrono::seconds(1))) {
             RCLCPP_WARN(get_logger(), "Movement service not available.");
             return false;
         }
-            */
 
         auto result = move_client_->async_send_request(req).get();
         RCLCPP_WARN(get_logger(), "Movement service called.4");
@@ -217,6 +267,10 @@ public:
     // ----------------------------------------------------
     double soil_threshold_;
     double latest_moisture_;
+
+    std::map<int, interfaces::msg::MarkerData> marker_map_;
+    std::mutex marker_mutex_;
+
     interfaces::msg::MarkerData latest_marker_;
 
     rclcpp::Client<interfaces::srv::VisionCmd>::SharedPtr vision_client_;
@@ -235,7 +289,10 @@ public:
 int main(int argc, char *argv[]) {
     rclcpp::init(argc, argv);
     auto node = std::make_shared<BrainNode>();
-    rclcpp::spin(node);
+
+    rclcpp::executors::MultiThreadedExecutor executor;
+    executor.add_node(node);
+    executor.spin();
     rclcpp::shutdown();
     return 0;
 }
