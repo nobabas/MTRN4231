@@ -26,6 +26,7 @@
  */
 
 #include "rclcpp/rclcpp.hpp"
+#include "rclcpp/executors.hpp"
 #include "std_msgs/msg/float32.hpp"
 
 #include "interfaces/msg/marker_data.hpp"
@@ -46,11 +47,13 @@ public:
         soil_threshold_ = get_parameter("soil_threshold").as_double();
         RCLCPP_INFO(get_logger(), "Brain Node started (soil_threshold = %.2f)", soil_threshold_);
 
+        reentrant_group_ = create_callback_group(rclcpp::CallbackGroupType::Reentrant);
+
         // -------------------------------
         // CLIENTS
         // -------------------------------
-        vision_client_ = create_client<interfaces::srv::VisionCmd>("vision_srv");
-        move_client_   = create_client<interfaces::srv::MoveRequest>("move_srv");
+        vision_client_ = create_client<interfaces::srv::VisionCmd>("vision_srv", rmw_qos_profile_services_default, reentrant_group_) ;
+        move_client_   = create_client<interfaces::srv::MoveRequest>("/moveit_path_plan", rmw_qos_profile_services_default, reentrant_group_);
 
         // -------------------------------
         // SERVICE (External Command)
@@ -66,7 +69,10 @@ public:
                     RCLCPP_WARN(get_logger(), "Unknown brain command: %s", req->command.c_str());
                     res->success = false;
                 }
-            });
+            },
+            rmw_qos_profile_services_default,
+            reentrant_group_
+        );
 
         // -------------------------------
         // SUBSCRIPTIONS
@@ -111,11 +117,11 @@ public:
        interfaces::msg::MarkerData marker;
        marker.id = 1;
 
+       marker.pose.push_back(0.6);
+       marker.pose.push_back(-0.35);
        marker.pose.push_back(0.25);
-       marker.pose.push_back(0.10);
-       marker.pose.push_back(0.10);
-       marker.pose.push_back(0.0);
-       marker.pose.push_back(0.0);
+       marker.pose.push_back(-1.57);
+       marker.pose.push_back(1.57);
        marker.pose.push_back(0.0);
 
         RCLCPP_INFO(get_logger(), "Starting to move to markers");
@@ -178,21 +184,30 @@ public:
         auto result = future.get();
         return result->marker_data;
     }
+
     bool callMovementService(const std::string &command, const std::vector<float> &positions) {
+        RCLCPP_WARN(get_logger(), "Movement service called.");
+        
         auto req = std::make_shared<interfaces::srv::MoveRequest::Request>();
         req->command = command;
+
+        RCLCPP_WARN(get_logger(), "Movement service called.2");
 
         // Convert float → double
         req->positions.reserve(positions.size());
         for (float p : positions)
             req->positions.push_back(static_cast<double>(p));
+             RCLCPP_WARN(get_logger(), "Movement service called.3");
+        /*
 
         if (!move_client_->wait_for_service(std::chrono::seconds(2))) {
             RCLCPP_WARN(get_logger(), "Movement service not available.");
             return false;
         }
+            */
 
         auto result = move_client_->async_send_request(req).get();
+        RCLCPP_WARN(get_logger(), "Movement service called.4");
         return result->success;
     }
 
@@ -208,6 +223,7 @@ public:
     rclcpp::Client<interfaces::srv::MoveRequest>::SharedPtr move_client_;
 
     rclcpp::Service<interfaces::srv::BrainCmd>::SharedPtr brain_srv_;
+    rclcpp::CallbackGroup::SharedPtr reentrant_group_;
 
     rclcpp::Subscription<interfaces::msg::MarkerData>::SharedPtr marker_sub_;
     rclcpp::Subscription<std_msgs::msg::Float32>::SharedPtr moist_sub_;
