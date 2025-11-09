@@ -49,7 +49,7 @@ public:
         // -------------------------------
         // CLIENTS
         // -------------------------------
-        //vision_client_ = create_client<interfaces::srv::VisionCmd>("vision_srv");
+        vision_client_ = create_client<interfaces::srv::VisionCmd>("vision_srv");
         move_client_   = create_client<interfaces::srv::MoveRequest>("move_srv");
 
         // -------------------------------
@@ -94,7 +94,7 @@ public:
         latest_moisture_ = 0.0;
     }
 
-private:
+
     // ----------------------------------------------------
     // MAIN ROUTINE
     // ----------------------------------------------------
@@ -102,11 +102,21 @@ private:
         RCLCPP_INFO(get_logger(), "Starting soil sampling routine...");
 
         // Step 1: Request marker coordinates
-        auto marker = callVisionService("detect_marker");
+        /*auto marker = callVisionService("detect_marker");
         if (marker.pose.empty()) {
             RCLCPP_ERROR(get_logger(), "No marker pose returned from Vision node.");
             return 0;
         }
+        */
+       interfaces::msg::MarkerData marker;
+       marker.id = 1;
+
+       marker.pose.push_back(0.25);
+       marker.pose.push_back(0.10);
+       marker.pose.push_back(0.10);
+       marker.pose.push_back(0.0);
+       marker.pose.push_back(0.0);
+       marker.pose.push_back(0.0);
 
         RCLCPP_INFO(get_logger(), "Starting to move to markers");
         // Step 2: Move to marker position (cartesian)
