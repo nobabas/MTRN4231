@@ -49,7 +49,7 @@ public:
         // -------------------------------
         // CLIENTS
         // -------------------------------
-        vision_client_ = create_client<interfaces::srv::VisionCmd>("vision_srv");
+        //vision_client_ = create_client<interfaces::srv::VisionCmd>("vision_srv");
         move_client_   = create_client<interfaces::srv::MoveRequest>("move_srv");
 
         // -------------------------------
@@ -108,17 +108,20 @@ private:
             return 0;
         }
 
+        RCLCPP_INFO(get_logger(), "Starting to move to markers");
         // Step 2: Move to marker position (cartesian)
         std::vector<float> current_pose(marker.pose.size());
         for (size_t i = 0; i < marker.pose.size(); ++i)
         {
-            current_pose[i] = static_cast<double>(marker.pose[i]);
+            current_pose[i] = static_cast<float>(marker.pose[i]);
         }
 
         if (!callMovementService("cartesian", current_pose)) {
             RCLCPP_ERROR(get_logger(), "Movement to marker failed.");
             return 0;
         }
+        RCLCPP_INFO(get_logger(), "Moving to markers succeeded");
+
 
         // Step 3: Lower probe incrementally until threshold reached
         /*
