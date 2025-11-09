@@ -10,12 +10,14 @@ class ImageSaverSubscriber(Node):
         super().__init__('image_saver_subscriber')
         self.subscription = self.create_subscription(
             Image,
+            #Changed based on camera topic on lab computer
             '/camera/camera/color/image_raw',
             self.listener_callback,
             10)
         self.get_logger().info("Image saver node started. Waiting for one image...")
 
         # Directory to save incoming images
+        # Change to where it's needed
         self.save_dir = "/home/mtrn/4231/received_images"
         os.makedirs(self.save_dir, exist_ok=True)
 

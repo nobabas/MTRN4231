@@ -14,6 +14,8 @@ find_package(rosidl_default_generators REQUIRED)
 # Generate messages
 rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/MarkerData.msg"
+  "msg/Marker2D.msg"
+  "msg/MarkerArray2D.msg"
   DEPENDENCIES std_msgs
 )
 

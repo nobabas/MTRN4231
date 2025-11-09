@@ -1,13 +1,12 @@
-from interface.msg import MarkerData
+from interface.msg import Marker2D, MarkerArray2D
 from rclpy.node import Node
-import rclpy
 
 class BlueMarkerPublisher(Node):
     def __init__(self):
         super().__init__('blue_marker_publisher')
         
         self.marker_publisher = self.create_publisher(
-            MarkerData,
+            MarkerArray2D,
             '/blue_markers_coords', 
             10
         )
@@ -20,23 +19,25 @@ class BlueMarkerPublisher(Node):
         self.get_logger().info(f"Publisher has {subscription_count} subscribers")
     
     def publish_blue_markers(self, world_result):
-        if not world_result:
-            self.get_logger().warning("No world results to publish")
-            return
-            
-        self.get_logger().info(f"Publishing {len(world_result)} markers")
+        # Create marker array message
+        marker_array_msg = MarkerArray2D()
         
         for i, result in enumerate(world_result):
             world_x, world_y, world_z = result['world_coords']
             
-            # Create custom message
-            marker_msg = MarkerData()
+            # Create individual marker message
+            marker_msg = Marker2D()
+            marker_msg.array = [float(i), float(world_x), float(world_y)]
             
-            # Set the fields according to your interface
-            marker_msg.id = float(i)  # float32
-            # pose is float32[] - make sure it's exactly 6 elements for position + orientation
-            marker_msg.pose = [float(world_x), float(world_y), float(world_z), 0.0, 0.0, 0.0]
+            marker_array_msg.markers.append(marker_msg)
             
-            # Publish the message
-            self.marker_publisher.publish(marker_msg)
-            self.get_logger().info(f"Published marker_{i} at [{world_x:.2f}, {world_y:.2f}, {world_z:.2f}]")
+            self.get_logger().info(
+                f"Marker_{i}, x={world_x:.2f}, y={world_y:.2f}"
+            )
+
+        # Publish the structured message
+        self.marker_publisher.publish(marker_array_msg)
+        
+        self.get_logger().info(
+            f"Published {len(world_result)} markers as structured data."
+        )

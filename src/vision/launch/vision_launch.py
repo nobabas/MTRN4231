@@ -9,7 +9,7 @@ def generate_launch_description():
     return LaunchDescription([
         Node(
             package='vision',
-            executable='vision',
+            executable='vision_main',
             name='vision_main',
             output='screen',
         ),
