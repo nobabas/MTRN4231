@@ -23,6 +23,7 @@ setup(
         'console_scripts': [
             'perception_example = vision.vision_main:main',
             'testing = vision.test:main',
+            'ros2node = vision.ros2node:main',
         ],
     },
 )

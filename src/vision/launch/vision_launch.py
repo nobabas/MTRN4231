@@ -13,4 +13,10 @@ def generate_launch_description():
             name='vision_main',
             output='screen',
         ),
+        Node(
+            package='vision',
+            executable='ros2node',
+            name='ros2node',
+            output='screen',
+        ),
     ])

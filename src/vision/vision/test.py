@@ -10,6 +10,9 @@ from interface.msg import MarkerData
 # This will need to be changed
 MODEL_PATH = '/home/mtrn/lab4-main/runs/detect/train9/weights/best.pt'
 IMAGE_PATH = '/home/mtrn/lab4-main/lab4-main/my_dataset/train/images/image1.jpg'
+#####################################
+
+# Detection confidence threshold
 CONFIDENCE = 0.5
 
 # ------------------------------------
@@ -33,7 +36,7 @@ class YoloPublisher(Node):
             '/pixel_coords', 
             10
         )
-
+        
     def run_detection_and_publish(self):
         self.get_logger().info(f'Running detection on {IMAGE_PATH}...')
         
