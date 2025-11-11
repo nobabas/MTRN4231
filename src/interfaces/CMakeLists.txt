@@ -16,7 +16,9 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "srv/VisionCmd.srv"
   "msg/Marker2D.msg"
   "msg/Marker2DArray.msg"
+  "msg/MarkerData.msg"
   DEPENDENCIES geometry_msgs
 )
 
+ament_export_dependencies(rosidl_default_runtime)
 ament_package()
