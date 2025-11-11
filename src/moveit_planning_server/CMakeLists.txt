@@ -34,4 +34,6 @@ ament_target_dependencies(moveit_server_node
 
 install(TARGETS moveit_server_node DESTINATION lib/${PROJECT_NAME})
 
+install(DIRECTORY launch DESTINATION share/${PROJECT_NAME})
+
 ament_package()

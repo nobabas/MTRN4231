@@ -1,4 +1,3 @@
-
 # -----------------------------------------------------------
 # Defines information about a detected visual marker.
 #

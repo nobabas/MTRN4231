@@ -115,12 +115,14 @@ public:
 
         {
             interfaces::msg::MarkerData m1, m2, m3;
+            //ros2 service call /moveit_path_plan interfaces/srv/MoveRequest "{command: 'pose', positions: [0.60, 0.35, 0.65, -3.1415, 0.0, 1.57]}"
+            //ros2 service call /moveit_path_plan interfaces/srv/MoveRequest "{command: 'pose', positions: [0.60, 0.35, 0.35, -3.1415, 0.0, 1.57]}"
 
             m1.id = 1;
-            m1.pose = {0.60, -0.35, 0.25, -1.57, 1.57, 0.0};
+            m1.pose = {0.60, 0.35, 0.65, -3.1415, 0, 1.57};
 
             m2.id = 2;
-            m2.pose = {0.55, -0.30, 0.25, -1.57, 1.57, 0.0};
+            m2.pose = {0.60, 0.35, 0.35, -3.1415, 0, 1.57};
 
             m3.id = 3;
             m3.pose = {0.50, -0.25, 0.25, -1.57, 1.57, 0.0};
@@ -158,8 +160,9 @@ public:
                 RCLCPP_WARN(get_logger(), "Waiting for MoveIt service to be available...");
             }
 
+            //ros2 service call /moveit_path_plan interfaces/srv/MoveRequest "{command: 'pose', positions: [0.60, 0.35, 0.65, -3.1415, 0.0, 1.57]}"
             // --- Move to marker ---
-            if (!callMovementService("cartesian", current_pose)) {
+            if (!callMovementService("pose", current_pose)) {
                 RCLCPP_ERROR(get_logger(), "Movement to marker %d failed. Skipping to next.", marker_id);
                 continue;
             }
@@ -189,7 +192,7 @@ public:
                             "Marker %d → Moisture %.2f > %.2f → lowering probe to z = %.3f",
                             marker_id, latest_moisture_, soil_threshold_, current_pose[2]);
 
-                if (!callMovementService("cartesian", current_pose)) {
+                if (!callMovementService("line", current_pose)) {
                     RCLCPP_WARN(get_logger(), "Move down step failed (marker %d). Retrying...", marker_id);
                 }
 
