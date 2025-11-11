@@ -41,7 +41,7 @@ public:
         // -------------------------------
         // PARAMETERS
         // -------------------------------
-        declare_parameter<double>("soil_threshold", 690.0);
+        declare_parameter<double>("soil_threshold", 1000.0);
         soil_threshold_ = get_parameter("soil_threshold").as_double();
         RCLCPP_INFO(get_logger(), "Brain Node started (soil_threshold = %.2f)", soil_threshold_);
 
@@ -94,10 +94,10 @@ public:
             [this](const std_msgs::msg::Float32::SharedPtr msg) {
                 latest_moisture_ = msg->data;
                 RCLCPP_INFO_THROTTLE(get_logger(), *get_clock(), 2000,
-                                     "Current soil moisture: %.2f", latest_moisture_);
+                                    "Current soil moisture: %.2f", latest_moisture_);
             });
 
-        latest_moisture_ = 0.0;
+        //latest_moisture_ = 0.0;
     }
 
 
@@ -169,12 +169,13 @@ public:
             // ----------------------------------------------------
             // Step 3: Lower probe until threshold reached
             // ----------------------------------------------------
+            rclcpp::sleep_for(std::chrono::seconds(2));
             const double step_size = 0.005;  // 5 mm down each iteration
             const double min_z_limit = -0.05; // safety limit below which we stop
             double initial_z = current_pose[2];
-            latest_moisture_ = 0.0; // reset each time
+            //latest_moisture_ = 0.0; // reset each time
 
-            while (latest_moisture_ < soil_threshold_) {
+            while (latest_moisture_ > soil_threshold_) {
                 current_pose[2] -= step_size;
 
                 if (current_pose[2] < min_z_limit) {
@@ -185,7 +186,7 @@ public:
                 }
 
                 RCLCPP_INFO(get_logger(),
-                            "Marker %d → Moisture %.2f < %.2f → lowering probe to z = %.3f",
+                            "Marker %d → Moisture %.2f > %.2f → lowering probe to z = %.3f",
                             marker_id, latest_moisture_, soil_threshold_, current_pose[2]);
 
                 if (!callMovementService("cartesian", current_pose)) {
@@ -214,7 +215,7 @@ public:
         // --------------------------------------------------------
         // Step 5: Routine complete
         // --------------------------------------------------------
-        RCLCPP_INFO(get_logger(), "✅ Soil sampling routine completed for all markers.");
+        RCLCPP_INFO(get_logger(), "Soil sampling routine completed for all markers.");
         return 1;
     }
 

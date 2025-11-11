@@ -14,7 +14,8 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "srv/MoveRequest.srv"
   "srv/BrainCmd.srv"
   "srv/VisionCmd.srv"
-  "msg/MarkerData.msg"
+  "msg/Marker2D.msg"
+  "msg/Marker2DArray.msg"
   DEPENDENCIES geometry_msgs
 )
 

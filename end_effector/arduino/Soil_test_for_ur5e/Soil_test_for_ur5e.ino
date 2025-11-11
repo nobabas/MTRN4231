@@ -3,7 +3,7 @@
 // to ROS2 via serial at 9600 baud.
 
 #define MOISTURE_PIN A0       // Analog pin for soil moisture sensor
-#define READ_INTERVAL 100     // Time between serial outputs (ms)
+#define READ_INTERVAL 150     // Time between serial outputs (ms)
 #define NUM_SAMPLES 20        // Number of samples for averaging
 
 void setup() {

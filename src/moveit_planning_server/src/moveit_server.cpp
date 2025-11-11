@@ -1,31 +1,51 @@
 // -----------------------------------------------
-// moveit_server.cpp
+// moveit_server.cpp 
 // -----------------------------------------------
 #include <memory>
 #include <string>
 #include <vector>
+#include <queue>
 #include <map>
-#include <stdexcept>
 #include <cmath>
+#include <unordered_map>
+#include <Eigen/Geometry>
 
 #include <rclcpp/rclcpp.hpp>
 #include <geometry_msgs/msg/pose.hpp>
-#include <sensor_msgs/msg/joint_state.hpp>
+#include <geometry_msgs/msg/quaternion.hpp>
+#include <visualization_msgs/msg/marker.hpp>
 
 #include <moveit/move_group_interface/move_group_interface.h>
 #include <moveit/planning_scene_interface/planning_scene_interface.h>
 #include <moveit_msgs/msg/collision_object.hpp>
-#include <moveit_msgs/msg/robot_trajectory.hpp>
 #include <shape_msgs/msg/solid_primitive.hpp>
 
 #include <interfaces/srv/move_request.hpp>
+#include <interfaces/msg/marker2_d_array.hpp>
 
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 
-// -----------------------------------------------
-// Moveit Server
-// -----------------------------------------------
+// ----------------------
+// Settings
+// ----------------------
+constexpr double kPlanningTime     = 10.0;   // seconds
+constexpr int    kPlanningAttempts = 5;
+constexpr double kGoalPosTol       = 0.001;  // meters
+constexpr double kGoalOriTol       = 0.01;   // radians
+constexpr double kGoalJointTol     = 0.01;   // radians
+
+static const std::string kPlanningGroup = "ur_manipulator";
+static const std::string kBaseFrame     = "base_link";
+static const std::string kWorldFrame    = "world";
+static const std::string kEEFrame       = "tool0";
+
+inline geometry_msgs::msg::Quaternion toolDownRPY()
+{
+  tf2::Quaternion q; q.setRPY(M_PI, 0.0, 0.0); q.normalize();
+  return tf2::toMsg(q);
+}
+
 class MoveitServer {
 public:
   explicit MoveitServer(const rclcpp::Node::SharedPtr& node)
@@ -34,414 +54,423 @@ public:
     using std::placeholders::_1;
     using std::placeholders::_2;
 
-    RCLCPP_INFO(node_->get_logger(), "Starting MoveIt Server...");
+    // Params for vision → EE
+    z_above_work_ = node_->declare_parameter<double>("marker_target_z", 0.40);  // meters
+    vel_scale_    = node_->declare_parameter<double>("max_vel_scale",    0.20);  // 0..1
+    acc_scale_    = node_->declare_parameter<double>("max_acc_scale",    0.10);  // 0..1
 
-    // Initialise MoveGroupInterface
+    RCLCPP_INFO(node_->get_logger(), "Starting bare-bones MoveIt Server");
+
     move_group_ = std::make_shared<moveit::planning_interface::MoveGroupInterface>(
-      node_,
-      "ur_manipulator",
-      std::shared_ptr<tf2_ros::Buffer>(),
-      rclcpp::Duration::from_seconds(10.0)
-    );
+      node_, kPlanningGroup, std::shared_ptr<tf2_ros::Buffer>(), rclcpp::Duration::from_seconds(10.0));
 
-    // Initialise collision objects in the scene
+    // Planner / tolerances
+    move_group_->setPlanningTime(kPlanningTime);
+    move_group_->setNumPlanningAttempts(kPlanningAttempts);
+    move_group_->setGoalPositionTolerance(kGoalPosTol);
+    move_group_->setGoalOrientationTolerance(kGoalOriTol);
+    move_group_->setGoalJointTolerance(kGoalJointTol);
+    move_group_->setPlannerId("RRTConnectkConfigDefault");
+    move_group_->setMaxVelocityScalingFactor(vel_scale_);
+    move_group_->setMaxAccelerationScalingFactor(acc_scale_);
+
+    // Scene objects
     setupCollisionObjects();
 
-    // -------------------------------------------
-    // Configure MoveIt planner parameters
-    // -------------------------------------------
+    // Joint state sub
+    joint_state_sub_ = node_->create_subscription<sensor_msgs::msg::JointState>(
+      "/joint_states", rclcpp::SensorDataQoS(),
+      std::bind(&MoveitServer::jointStateCb, this, _1));
 
-    // Planning time
-    node_->declare_parameter("planning_time", 20.0);
-    move_group_->setPlanningTime(
-      node_->get_parameter("planning_time").as_double()
-    );
+    // Marker target visual
+    marker_pub_ = node_->create_publisher<visualization_msgs::msg::Marker>("visualization_marker", 10);
 
-    // Goal tolerances
-    node_->declare_parameter("goal_position_tolerance", 0.001);
-    node_->declare_parameter("goal_orientation_tolerance", 0.001);
-    node_->declare_parameter("goal_joint_tolerance", 0.001);
-
-    move_group_->setGoalPositionTolerance(
-      node_->get_parameter("goal_position_tolerance").as_double()
-    );
-    move_group_->setGoalOrientationTolerance(
-      node_->get_parameter("goal_orientation_tolerance").as_double()
-    );
-    move_group_->setGoalJointTolerance(
-      node_->get_parameter("goal_joint_tolerance").as_double()
-    );
-
-    //move_group_->setPathTo
-
-    // Planner ID
-    node_->declare_parameter("planner_id", "TRRTConnectkConfigDefault");
-    move_group_->setPlannerId(
-      node_->get_parameter("planner_id").as_string()
-    );
-
-
-    // -------------------------------------------
-    // Joint state subscriber
-    // -------------------------------------------
-    joint_state_subscriber_ = node_->create_subscription<sensor_msgs::msg::JointState>(
-      "/joint_states",
-      rclcpp::SensorDataQoS(),
-      std::bind(&MoveitServer::jointStateCallback, this, _1)
-    );
-
-    // -------------------------------------------
-    // Service
-    // -------------------------------------------
+    // Service for manual commands
     service_ = node_->create_service<interfaces::srv::MoveRequest>(
-      "/moveit_path_plan",
-      std::bind(&MoveitServer::handleRequest, this, _1, _2)
-    );
-  }
+      "/moveit_path_plan", std::bind(&MoveitServer::handleRequest, this, _1, _2));
 
+    // Subscribe to vision results (array of markers)
+    vision_sub_ = node_->create_subscription<interfaces::msg::Marker2DArray>(
+      "/vision/markers",
+      rclcpp::SensorDataQoS(),
+      std::bind(&MoveitServer::visionCb, this, _1));
 
-  // ----------------------------------------------
-  // Constraints
-  // ----------------------------------------------
-  moveit_msgs::msg::Constraints setContraints() {
-    moveit_msgs::msg::Constraints constraints;
-    constraints.orientation_constraints.emplace_back(setOriConstraints());
-    
-    return constraints;
-  }
-
-  // ----------------------------------------------
-  // Orientation Constraint
-  // ----------------------------------------------
-  moveit_msgs::msg::OrientationConstraint setOriConstraints() {
-    moveit_msgs::msg::OrientationConstraint constraintsOri;
-
-    constraintsOri.header.frame_id = move_group_->getPlanningFrame();
-    constraintsOri.link_name = move_group_->getEndEffectorLink();
-    constraintsOri.absolute_x_axis_tolerance = 0.15;
-    constraintsOri.absolute_y_axis_tolerance = 0.15;
-    constraintsOri.absolute_z_axis_tolerance = M_PI;
-    constraintsOri.weight = 0.5;
-
-    tf2::Quaternion quat;
-
-    // Tool Flange Normal to Ground
-    quat.setRPY(0, 0, M_PI_2);
-    quat.normalize();
-
-    constraintsOri.orientation = tf2::toMsg(quat);
-    
-    return constraintsOri;
-  }
-
-  // -----------------------------------------------
-  // Handle Requests
-  // -----------------------------------------------
-  void handleRequest(
-    const std::shared_ptr<interfaces::srv::MoveRequest::Request> request,
-    std::shared_ptr<interfaces::srv::MoveRequest::Response> response)
-  {
-    RCLCPP_INFO(
-      node_->get_logger(),
-      "Received MoveIt Request: command=%s, positions.size()=%zu",
-      request->command.c_str(),
-      request->positions.size()
-    );
-
-    // Positions must always be length 6
-    if (request->positions.size() < 6) {
-      RCLCPP_ERROR(
-        node_->get_logger(),
-        "Expected 6 elements in positions, got %zu",
-        request->positions.size()
-      );
-      response->success = false;
-      return;
-    }
-
-    // Clear previous targets and constraints
-    move_group_->clearPoseTargets();
-    move_group_->clearPathConstraints();
-
-    // Handle command types
-    bool target_set = false;
-    if (request->command == "joint") {
-      target_set = setJointTargets(request->positions);
-    } else if (request->command == "cartesian") {
-      target_set = setCartesianTarget(request->positions);
-    } else {
-      RCLCPP_ERROR(
-        node_->get_logger(),
-        "Unknown command: %s (expected 'joint' or 'cartesian')",
-        request->command.c_str()
-      );
-      response->success = false;
-      return;
-    }
-
-    if (!target_set) {
-      RCLCPP_ERROR(
-        node_->get_logger(),
-        "Failed to set target for command: %s",
-        request->command.c_str()
-      );
-      response->success = false;
-      return;
-    }
-
-    // Set up Joint Constraints
-    //move_group_->setPathConstraints(setContraints());
+    // Let MoveIt sync with /joint_states then set start state
+    move_group_->startStateMonitor(5.0); // up to 5s to discover joint states
+    rclcpp::sleep_for(std::chrono::seconds(1));
     move_group_->setStartStateToCurrentState();
 
-    // Plan and execute
-    response->success = planNExecute();
+    // Timer to drain the vision queue sequentially (non-blocking callback)
+    process_timer_ = node_->create_wall_timer(
+      std::chrono::milliseconds(100),
+      std::bind(&MoveitServer::processQueue, this));
   }
 
 private:
-  // -----------------------------------------------
-  // Joint State Callback
-  // -----------------------------------------------
-  void jointStateCallback(
-    const sensor_msgs::msg::JointState::SharedPtr msg)
+  // ---------------------------
+  // Service: joint / pose
+  // ---------------------------
+  void handleRequest(
+      const std::shared_ptr<interfaces::srv::MoveRequest::Request> req,
+      std::shared_ptr<interfaces::srv::MoveRequest::Response> res)
   {
-    current_joint_state_ = *msg;
+    RCLCPP_INFO(node_->get_logger(),
+                "Received MoveIt Request: command=%s, positions.size()=%zu",
+                req->command.c_str(), req->positions.size());
+
+    if (req->positions.size() < 6) {
+      RCLCPP_ERROR(node_->get_logger(), "Expected 6 values.");
+      res->success = false;
+      return;
+    }
+
+    move_group_->clearPoseTargets();
+    move_group_->clearPathConstraints();
+    move_group_->setStartStateToCurrentState();
+
+    bool ok = false;
+
+    if (req->command == "joint") {
+      ok = setJointTargets(req->positions);
+    } else if (req->command == "pose") {
+      geometry_msgs::msg::Pose pose = createPose(req->positions);
+      move_group_->setPoseTarget(pose, kEEFrame);
+      publishTargetMarker(pose);
+      ok = planAndExecute();
+    } else if (req->command == "line") {
+      // Move along Z only, with a skinny box constraint
+      // Use current X/Y & orientation; target Z from req
+      auto current = computeEEFfromJointState();
+      geometry_msgs::msg::Pose target = current;
+      target.position.z = req->positions[2];
+
+      // Build constraints: joint + a position box aligned with Z at current X,Y
+      moveit_msgs::msg::Constraints c;
+      //addJointConstraints(c);
+      addZLineConstraint(c, current, target);
+      move_group_->setPathConstraints(c);
+
+      move_group_->setPoseTarget(target, kEEFrame);
+      publishTargetMarker(target);
+      ok = planAndExecute();
+    } else {
+      RCLCPP_ERROR(node_->get_logger(), "Unknown command: %s (use 'joint' or 'pose')",
+                   req->command.c_str());
+      res->success = false;
+      return;
+    }
+    res->success = ok;
   }
 
-  // -----------------------------------------------
-  // Plan and Execute
-  // -----------------------------------------------
-  bool planNExecute() {
+  // ---------------------------
+  // Z-line constraint
+  // ---------------------------
+  // Build a thin box centered between current.z and target.z to force Z-line motion
+  void addZLineConstraint(moveit_msgs::msg::Constraints& out,
+                          const geometry_msgs::msg::Pose& current,
+                          const geometry_msgs::msg::Pose& target)  {
+    moveit_msgs::msg::PositionConstraint pc;
+    pc.header.frame_id = "base_link";
+    pc.link_name = move_group_->getEndEffectorLink();
+    pc.weight = 1.0;
+
+    RCLCPP_INFO(node_->get_logger(), "Header frame: %s", pc.header.frame_id.c_str());
+    RCLCPP_INFO(node_->get_logger(), "End effector link: %s", pc.link_name.c_str());
+
+    shape_msgs::msg::SolidPrimitive box;
+    box.type = shape_msgs::msg::SolidPrimitive::BOX;
+    // skinny in X/Y, long in Z
+    box.dimensions = {0.1, 0.1, 1.0};
+
+    geometry_msgs::msg::Pose region_pose;
+    region_pose.orientation = current.orientation;
+    region_pose.position.x = current.position.x;
+    region_pose.position.y = current.position.y;
+    region_pose.position.z = current.position.z;
+
+    pc.constraint_region.primitives.emplace_back(box);
+    pc.constraint_region.primitive_poses.emplace_back(region_pose);
+
+    out.position_constraints.emplace_back(pc);
+    out.name = "use_equality_constraints";
+  }
+
+  geometry_msgs::msg::Pose computeEEFfromJointState()  {
+    geometry_msgs::msg::Pose pose;
+    // default identity pose if no joint states yet
+    if (last_js_.name.empty() || last_js_.position.empty()) {
+      RCLCPP_WARN(node_->get_logger(), "computeEEFfromJointState: no joint_state received yet");
+      pose.position.x = pose.position.y = pose.position.z = 0.0;
+      pose.orientation.x = pose.orientation.y = pose.orientation.z = 0.0;
+      pose.orientation.w = 1.0;
+      return pose;
+    }
+
+    // RobotModel
+    moveit::core::RobotModelConstPtr model = move_group_->getRobotModel();
+    if (!model) {
+      RCLCPP_ERROR(node_->get_logger(), "computeEEFfromJointState: robot model is null");
+      pose.orientation.w = 1.0;
+      return pose;
+    }
+
+    moveit::core::RobotState state(model);
+
+    // Get the JointModelGroup for the planning group
+    const moveit::core::JointModelGroup* jmg = model->getJointModelGroup(kPlanningGroup);
+    if (!jmg) {
+      RCLCPP_ERROR(node_->get_logger(), "computeEEFfromJointState: failed to get JointModelGroup '%s'", kPlanningGroup.c_str());
+      pose.orientation.w = 1.0;
+      return pose;
+    }
+
+    // Build a name->position map from last_js_
+    std::unordered_map<std::string, double> js_map;
+    const size_t n = std::min(last_js_.name.size(), last_js_.position.size());
+    for (size_t i = 0; i < n; ++i) {
+      js_map[last_js_.name[i]] = last_js_.position[i];
+    }
+
+    // Set group variables only when present in the joint_state message
+    for (const auto &var : jmg->getVariableNames()) {
+      auto it = js_map.find(var);
+      if (it != js_map.end()) {
+        state.setVariablePosition(var, it->second);
+      }
+      // else leave state value as default
+    }
+
+    state.update();
+
+    // Get transform for end effector link
+    const std::string ee_link = move_group_->getEndEffectorLink();
+    const Eigen::Isometry3d tf = state.getGlobalLinkTransform(ee_link);
+
+    // Convert Eigen -> geometry_msgs::msg::Pose
+    const Eigen::Vector3d t = tf.translation();
+    const Eigen::Quaterniond q(tf.rotation());
+
+    pose.position.x = t.x();
+    pose.position.y = t.y();
+    pose.position.z = t.z();
+    pose.orientation.x = q.x();
+    pose.orientation.y = q.y();
+    pose.orientation.z = q.z();
+    pose.orientation.w = q.w();
+
+    return pose;
+  }
+
+  // ---------------------------
+  // Vision subscriber + queue
+  // ---------------------------
+  void visionCb(const interfaces::msg::Marker2DArray::SharedPtr msg)
+  {
+    // Enqueue all markers in the message
+    for (const auto& m : msg->markers) {
+      Target t;
+      t.id = m.id;
+      t.x  = m.x;
+      t.y  = m.y;
+      t.z  = z_above_work_;            // use configured Z height
+      t.q  = toolDownRPY();            // keep tool “down”
+      pending_.push(std::move(t));
+    }
+  }
+
+  void processQueue()
+  {
+    if (busy_ || pending_.empty()) return;
+    busy_ = true;
+
+    const auto tgt = pending_.front(); pending_.pop();
+
+    // Build pose from vision target
+    geometry_msgs::msg::Pose p;
+    p.position.x = tgt.x;
+    p.position.y = tgt.y;
+    p.position.z = tgt.z;
+    p.orientation = tgt.q;
+
+    RCLCPP_INFO(node_->get_logger(), "Moving to marker id=%.0f at (%.3f, %.3f, %.3f)",
+                tgt.id, tgt.x, tgt.y, tgt.z);
+
+    move_group_->clearPoseTargets();
+    move_group_->setStartStateToCurrentState();
+    move_group_->setPoseTarget(p, kEEFrame);
+    publishTargetMarker(p);
+
+    const bool ok = planAndExecute();
+    if (!ok) {
+      RCLCPP_WARN(node_->get_logger(), "Failed to reach marker id=%.0f", tgt.id);
+    }
+    busy_ = false;
+  }
+
+  struct Target {
+    float id{};
+    double x{}, y{}, z{};
+    geometry_msgs::msg::Quaternion q;
+  };
+
+  // ---------------------------
+  // Scene / planning helpers
+  // ---------------------------
+  void setupCollisionObjects()
+  {
+    std::vector<moveit_msgs::msg::CollisionObject> objects;
+    objects.push_back(makeBox("back_wall",  2.4, 0.04, 1.0,  0.85, -0.30, 0.50, kWorldFrame));
+    objects.push_back(makeBox("side_wall",  0.04,1.20, 1.0, -0.30,  0.25, 0.50, kWorldFrame));
+    objects.push_back(makeBox("table",      2.4, 2.40, 0.04, 0.85,  0.25, 0.013, kWorldFrame));
+    objects.push_back(makeBox("ceiling",    2.4, 2.40, 0.04, 0.85,  0.25, 1.20,  kWorldFrame));
+    planning_scene_.applyCollisionObjects(objects);
+  }
+
+  moveit_msgs::msg::CollisionObject makeBox(const std::string& id,
+                                            double sx, double sy, double sz,
+                                            double x, double y, double z,
+                                            const std::string& frame)
+  {
+    moveit_msgs::msg::CollisionObject obj;
+    obj.header.frame_id = frame;
+    obj.id = id;
+
+    shape_msgs::msg::SolidPrimitive prim;
+    prim.type = shape_msgs::msg::SolidPrimitive::BOX;
+    prim.dimensions = {sx, sy, sz};
+
+    geometry_msgs::msg::Pose pose;
+    pose.orientation.w = 1.0;
+    pose.position.x = x; pose.position.y = y; pose.position.z = z;
+
+    obj.primitives.push_back(prim);
+    obj.primitive_poses.push_back(pose);
+    obj.operation = obj.ADD;
+    return obj;
+  }
+
+  bool setJointTargets(const std::vector<double>& v)
+  {
+    if (v.size() < 6) {
+      RCLCPP_ERROR(node_->get_logger(), "Joint mode needs 6 values.");
+      return false;
+    }
+    std::map<std::string, double> joints = {
+      {"shoulder_pan_joint",   v[5]},
+      {"shoulder_lift_joint",  v[0]},
+      {"elbow_joint",          v[1]},
+      {"wrist_1_joint",        v[2]},
+      {"wrist_2_joint",        v[3]},
+      {"wrist_3_joint",        v[4]}
+    };
+    move_group_->setJointValueTarget(joints);
+    return planAndExecute();
+  }
+
+  geometry_msgs::msg::Pose createPose(const std::vector<double>& v)
+  {
+    geometry_msgs::msg::Pose p;
+    p.position.x = v[0];
+    p.position.y = v[1];
+    p.position.z = v[2];
+    tf2::Quaternion q; q.setRPY(v[3], v[4], v[5]); q.normalize();
+    p.orientation = tf2::toMsg(q);
+    return p;
+  }
+
+  void publishTargetMarker(const geometry_msgs::msg::Pose& pose)
+  {
+    visualization_msgs::msg::Marker m;
+    m.header.frame_id = kBaseFrame;
+    m.header.stamp = node_->now();
+    m.ns = "target_marker";
+    m.id = 1;
+    m.type = visualization_msgs::msg::Marker::SPHERE;
+    m.action = visualization_msgs::msg::Marker::ADD;
+    m.pose = pose;
+    m.scale.x = m.scale.y = m.scale.z = 0.05;
+    m.color.a = 1.0; m.color.r = 0.0; m.color.g = 1.0; m.color.b = 0.0;
+    marker_pub_->publish(m);
+  }
+
+  bool planAndExecute()
+  {
     moveit::planning_interface::MoveGroupInterface::Plan plan;
     bool success = false;
-    int attempts = 0;
-    const int max_attempts = 100;
 
-    while (!success && attempts < max_attempts) {
-      RCLCPP_INFO(
-        node_->get_logger(),
-        "Planning attempt: %d",
-        attempts + 1
-      );
-
-      auto code = move_group_->plan(plan);
-      success = (code == moveit::planning_interface::MoveItErrorCode::SUCCESS);
-
-      attempts++;
-
-      if (!success) {
-        RCLCPP_WARN(
-          node_->get_logger(),
-          "Planning attempt %d failed. Retrying...",
-          attempts
-        );
-
-        // Progressively relax planning time
-        move_group_->setPlanningTime(
-          move_group_->getPlanningTime() + 2.0
-        );
+    for (int i = 1; i <= kPlanningAttempts && !success; ++i) {
+      RCLCPP_INFO(node_->get_logger(), "Planning attempt: %d", i);
+      moveit::core::MoveItErrorCode code = move_group_->plan(plan);
+      success = (code == moveit::core::MoveItErrorCode::SUCCESS);
+      if (!success && i % 3 == 0) {
+        move_group_->setPlanningTime(move_group_->getPlanningTime() + 2.0);
       }
     }
 
     if (!success) {
-      RCLCPP_ERROR(
-        node_->get_logger(),
-        "Planning failed after %d attempts.",
-        max_attempts
-      );
+      RCLCPP_ERROR(node_->get_logger(), "Planning failed.");
       return false;
     }
 
-    RCLCPP_INFO(
-      node_->get_logger(),
-      "Planning successful in %d attempts. Executing plan...",
-      attempts
-    );
-
     auto exec_code = move_group_->execute(plan);
-    bool exec_ok =
-      (exec_code == moveit::planning_interface::MoveItErrorCode::SUCCESS);
-
-    if (!exec_ok) {
+    if (exec_code != moveit::core::MoveItErrorCode::SUCCESS) {
       RCLCPP_ERROR(node_->get_logger(), "Execution failed.");
       return false;
     }
-
     return true;
   }
 
-  // -----------------------------------------------
-  // Collision Obstacles
-  // -----------------------------------------------
-  void setupCollisionObjects() {
-    const std::string frame_id = "world";
-
-    std::vector<moveit_msgs::msg::CollisionObject> objects;
-    objects.push_back(generateCollisionObject(
-      2.4, 0.02, 1.7,
-      0.70, -0.60, 0.75,
-      frame_id, "back_wall"
-    ));
-    objects.push_back(generateCollisionObject(
-      0.02, 1.6, 1.6,
-      -0.35, 0.25, 0.75,
-      frame_id, "side_wall"
-    ));
-    objects.push_back(generateCollisionObject(
-      2.4, 1.7, 0.02,
-      0.85, 0.25, -0.02,
-      frame_id, "table"
-    ));
-    objects.push_back(generateCollisionObject(
-      2.4, 1.7, 0.02,
-      0.85, 0.25, 1.5,
-      frame_id, "ceiling"
-    ));
-
-    planning_scene_interface_.applyCollisionObjects(objects);
+  void jointStateCb(const sensor_msgs::msg::JointState::SharedPtr msg) {
+    last_js_ = *msg;
   }
 
-  moveit_msgs::msg::CollisionObject generateCollisionObject(
-    float sizeX, float sizeY, float sizeZ,
-    float x, float y, float z,
-    const std::string &frame_id,
-    const std::string &id)
-  {
-    moveit_msgs::msg::CollisionObject collision_object;
-    collision_object.header.frame_id = frame_id;
-    collision_object.id = id;
-
-    shape_msgs::msg::SolidPrimitive primitive;
-    primitive.type = shape_msgs::msg::SolidPrimitive::BOX;
-    primitive.dimensions.resize(3);
-    primitive.dimensions[shape_msgs::msg::SolidPrimitive::BOX_X] = sizeX;
-    primitive.dimensions[shape_msgs::msg::SolidPrimitive::BOX_Y] = sizeY;
-    primitive.dimensions[shape_msgs::msg::SolidPrimitive::BOX_Z] = sizeZ;
-
-    geometry_msgs::msg::Pose box_pose;
-    box_pose.orientation.w = 1.0;
-    box_pose.position.x = x;
-    box_pose.position.y = y;
-    box_pose.position.z = z;
-
-    collision_object.primitives.push_back(primitive);
-    collision_object.primitive_poses.push_back(box_pose);
-    collision_object.operation = collision_object.ADD;
-
-    return collision_object;
-  }
-
-  // -----------------------------------------------
-  // Target-setting helpers
-  // -----------------------------------------------
-
-  // Joint mode: interpret positions[] as joint angles
-  bool setJointTargets(const std::vector<double>& positions) {
-    try {
-      auto joints = createJointPose(positions);
-      move_group_->setJointValueTarget(joints);
-      return true;
-    } catch (const std::exception& e) {
-      RCLCPP_ERROR(
-        node_->get_logger(),
-        "Error setting joint targets: %s",
-        e.what()
-      );
-      return false;
-    }
-  }
-
-  std::map<std::string, double> createJointPose(
-    const std::vector<double>& positions)
-  {
-    if (positions.size() < 6) {
-      throw std::runtime_error("joints requires 6 joint values");
-    }
-
-    return {
-      {"shoulder_pan_joint",   positions[5]},
-      {"shoulder_lift_joint",  positions[0]},
-      {"elbow_joint",          positions[1]},
-      {"wrist_1_joint",        positions[2]},
-      {"wrist_2_joint",        positions[3]},
-      {"wrist_3_joint",        positions[4]}
-    };
-  }
-
-  // Cartesian mode: interpret positions[] as [x,y,z,roll,pitch,yaw]
-  bool setCartesianTarget(const std::vector<double>& positions) {
-    try {
-      geometry_msgs::msg::Pose target_pose = createCartesianPose(positions);
-      move_group_->setPoseTarget(target_pose);
-      return true;
-    } catch (const std::exception& e) {
-      RCLCPP_ERROR(
-        node_->get_logger(),
-        "Error setting Cartesian target: %s",
-        e.what()
-      );
-      return false;
-    }
-  }
-
-  geometry_msgs::msg::Pose createCartesianPose(
-    const std::vector<double>& positions)
-  {
-    if (positions.size() < 6) {
-      throw std::runtime_error(
-        "cartesian requires [x,y,z,roll,pitch,yaw]"
-      );
-    }
-
-    tf2::Quaternion q;
-    q.setRPY(positions[3], positions[4], positions[5]);
-    q.normalize();
-
-    geometry_msgs::msg::Pose target_pose;
-    target_pose.position.x = positions[0];
-    target_pose.position.y = positions[1];
-    target_pose.position.z = positions[2];
-    target_pose.orientation = tf2::toMsg(q);
-
-    return target_pose;
-  }
-
-  // -----------------------------------------------
   // Members
-  // -----------------------------------------------
   rclcpp::Node::SharedPtr node_;
   std::shared_ptr<moveit::planning_interface::MoveGroupInterface> move_group_;
-
+  moveit::planning_interface::PlanningSceneInterface planning_scene_;
+  rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr marker_pub_;
   rclcpp::Service<interfaces::srv::MoveRequest>::SharedPtr service_;
+  rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr joint_state_sub_;
+  sensor_msgs::msg::JointState last_js_;
 
-  rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr joint_state_subscriber_;
-  sensor_msgs::msg::JointState current_joint_state_;
+  rclcpp::Subscription<interfaces::msg::Marker2DArray>::SharedPtr vision_sub_;
+  rclcpp::TimerBase::SharedPtr process_timer_;
+  std::queue<Target> pending_;
+  bool busy_{false};
 
-  moveit::planning_interface::PlanningSceneInterface planning_scene_interface_;
+  // params
+  double z_above_work_{0.20};
+  double vel_scale_{0.2}, acc_scale_{0.1};
 };
 
 // -----------------------------------------------
 // Main
 // -----------------------------------------------
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
   rclcpp::init(argc, argv);
-
-  auto node = std::make_shared<rclcpp::Node>("moveit_server");
+  auto node   = std::make_shared<rclcpp::Node>("moveit_server");
   auto server = std::make_shared<MoveitServer>(node);
-
   rclcpp::spin(node);
-
   rclcpp::shutdown();
   return 0;
 }
 
-// Test Positions
-// ros2 service call /moveit_path_plan interfaces/srv/MoveRequest "{command: 'cartesian', positions: [0.6, -0.35, 0.25, -1.5708, 1.5708, 0.0]}"
 
 
-// Joint Home Position
-// ros2 service call /moveit_path_plan interfaces/srv/MoveRequest "{command: 'joint', positions: [-1.3, 1.57, -1.83, -1.57, 0, 0]}"
+// HOME
+// ros2 service call /moveit_path_plan interfaces/srv/MoveRequest "{command: 'joint', positions: [-1.3, 1.57, -1.83, -1.57, 0.0, 0.0]}"
 
-// URDF
-// gnome-terminal -t "DriverServer" -e 'ros2 launch ur_robot_driver ur_control.launch.py ur_type:=ur5e robot_ip:=yyy.yyy.yyy.yyy initial_joint_controller:=scaled_joint_trajectory_controller use_fake_hardware:=true launch_rviz:=false '
-// sleep 5
-// gnome-terminal -t "MoveitServer" -e 'ros2 launch endeffector_description display.launch.py'
+// POSE TEST
+// ros2 service call /moveit_path_plan interfaces/srv/MoveRequest "{command: 'pose', positions: [0.60, 0.35, 0.65, -3.1415, 0.0, 1.57]}"
+// ros2 service call /moveit_path_plan interfaces/srv/MoveRequest "{command: 'pose', positions: [0.60, 0.35, 0.35, -3.1415, 0.0, 1.57]}"
+
+// Marker Movement Test
+/*
+ros2 topic pub -1 /vision/markers interfaces/msg/Marker2DArray "
+markers:
+ - {id: 1.0, x: 0.50, y: 0.30}
+ - {id: 2.0, x: 0.55, y: 0.35}
+ - {id: 3.0, x: 0.60, y: 0.55}
+"
+*/
