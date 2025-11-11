@@ -12,7 +12,7 @@ IMAGE_PATH = "/home/mtrn/4231/received_images/current_image.jpg"
 #####################################
 
 # Detection confidence threshold
-CONFIDENCE = 0.1
+CONFIDENCE = 0.5
 
 # ------------------------------------
 
