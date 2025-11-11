@@ -1,62 +1,87 @@
-# import rclpy
-# from rclpy.node import Node
-# import cv2
-# from sensor_msgs.msg import Image, CameraInfo
-# from cv_bridge import CvBridge
-# from ultralytics import YOLO
-# import numpy as np
-
-# class vision(Node):
-#     def __init__(self):
-#         super().__init__('vision')
-#         self.bridge = CvBridge()
-#         self.model = YOLO('/home/mtrn/lab4-main/runs/detect/train9/weights/best.pt')
-#         self.model.verbose = False
-#         self.subscription = self.create_subscription(Image, '/image_raw', self.image_callback, 10)
-#         self.subscription  # prevent unused variable warning
-
-#     def image_callback(self, msg):
-#         cv_image = self.bridge.imgmsg_to_cv2(msg, 'bgr8')
-#         results = self.model(cv_image, verbose=False)
-
-#         annotated_image = results[0].plot()
-
-#         for result in results:
-#             masks = result.masks
-#             if masks is not None:
-#                 for i, mask in enumerate(masks):
-#                     if result.names[int(result.boxes[i].cls[0])] == 'person':
-#                         binary_mask = mask.data.cpu().numpy().squeeze()
-                        
-#                         contours, _ = cv2.findContours(binary_mask.astype(np.uint8), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-                        
-#                         if contours:
-#                             largest_contour = max(contours, key=cv2.contourArea)
-#                             M = cv2.moments(largest_contour)
-#                             if M["m00"] != 0:
-#                                 centroid_x = int(M["m10"] / M["m00"])
-#                                 centroid_y = int(M["m01"] / M["m00"])
-                                
-#                                 cv2.circle(annotated_image, (centroid_x, centroid_y), 5, (0, 0, 255), -1)
-
-#                                 text = f"({centroid_x}, {centroid_y})"
-#                                 text_size = cv2.getTextSize(text, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)[0]
-#                                 text_x = centroid_x - text_size[0] // 2
-#                                 text_y = centroid_y + 20 
-#                                 cv2.rectangle(annotated_image, (text_x, text_y - text_size[1] - 2), (text_x + text_size[0], text_y + 2), (0, 0, 0), -1)
-#                                 cv2.putText(annotated_image, text, (text_x, text_y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
-
-#         cv2.imshow('Segmented Image with Centroid', annotated_image)
-#         cv2.waitKey(1)
-
-# def main():
-#     rclpy.init()
-#     vision_applied = vision()
-#     rclpy.spin(vision_applied)
-#     rclpy.shutdown()
-
-
-# if __name__ == '__main__':
-#     main()
-
 #!/usr/bin/env python3
+import rclpy
+from rclpy.node import Node
+from geometry_msgs.msg import Polygon, Point32  # We'll use Polygon to send a list of points
+from ultralytics import YOLO
+import time
+from interface.msg import MarkerData
+
+# --- Your Model and Image Paths ---
+# This will need to be changed
+MODEL_PATH = '/home/mtrn/src/best.pt'
+IMAGE_PATH = "/home/mtrn/Pictures/Screenshots/testing2.png"
+#####################################
+
+# Detection confidence threshold
+CONFIDENCE = 0.1
+
+# ------------------------------------
+
+class YoloPublisher(Node):
+    def __init__(self):
+        super().__init__('yolo_publisher')
+        
+
+        # Load the YOLO model
+        self.get_logger().info(f'Loading model from {MODEL_PATH}...')
+        try:
+            self.model = YOLO(MODEL_PATH)
+            self.get_logger().info('Model loaded successfully.')
+        except Exception as e:
+            self.get_logger().error(f'Failed to load YOLO model: {e}')
+            return
+        
+        self.marker_publisher = self.create_publisher(
+            MarkerData,  # Changed this
+            '/pixel_coords', 
+            10
+        )
+        
+    def run_detection_and_publish(self):
+        self.get_logger().info(f'Running detection on {IMAGE_PATH}...')
+        #image = cv2.cvtColor(self.image, cv2.COLOR_BGR2HSV)
+        results = self.model(IMAGE_PATH, conf=CONFIDENCE)
+
+        
+        if results:
+            r = results[0]  # Get the first result
+            boxes = r.boxes.xyxy  # [x1, y1, x2, y2]
+            classes = r.boxes.cls
+            self.get_logger().info(f'Found {len(boxes)} detections.')
+
+            for i in range(len(boxes)):
+                box = boxes[i]
+                
+                
+                # Your original calculation
+                x1, y1, x2, y2 = box.tolist()
+                cx = (x1 + x2) / 2
+                cy = (y1 + y2) / 2
+
+                marker_msg = MarkerData()
+            
+                marker_msg.id = float(i)
+                marker_msg.pose = [float(cx), float(cy)]
+
+                self.marker_publisher.publish(marker_msg)
+                
+                self.get_logger().info(f'Published marker: id={marker_msg.id}, pose={marker_msg.pose}')
+
+
+def main(args=None):
+    rclpy.init(args=args)
+    
+    yolo_publisher_node = YoloPublisher()
+    
+    # Run the detection and publish
+    yolo_publisher_node.run_detection_and_publish()
+    
+    # Give a moment for the message to be sent before shutting down
+    time.sleep(100.0) 
+    
+    # Clean up
+    yolo_publisher_node.destroy_node()
+    rclpy.shutdown()
+
+if __name__ == '__main__':
+    main()

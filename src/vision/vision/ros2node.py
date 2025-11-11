@@ -33,12 +33,14 @@ class ImageSaverSubscriber(Node):
         # Convert ROS Image message → OpenCV image (numpy array)
         frame = np.frombuffer(msg.data, dtype=np.uint8)
         frame = frame.reshape((msg.height, msg.width, 3))
+        
+        frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
         # Generate a filename
         filename = os.path.join(self.save_dir, "current_image.jpg")
 
         # Save the image
-        success = cv2.imwrite(filename, frame)
+        success = cv2.imwrite(filename, frame_rgb)
         if success:
             self.get_logger().info(f"Saved image to {filename}")
             self.image_saved = True

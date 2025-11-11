@@ -16,8 +16,13 @@ def main():
     try: 
         node = rclpy.create_node('test_tf')
         tf_handler = TFHandler(node)
-        if tf_handler.intrinsics is None:
-                tf_handler.set_mock_intrinsics()
+        # if tf_handler.intrinsics is None:
+        #         tf_handler.set_mock_intrinsics()
+        # Wait until camera intrinsics are received
+        while tf_handler.intrinsics is None:
+            rclpy.spin_once(tf_handler.node, timeout_sec=0.1)
+            tf_handler.node.get_logger().warn("Waiting for camera intrinsics...")
+
 
         print("Waiting for ROS 2 node discovery...")
         time.sleep(2)
