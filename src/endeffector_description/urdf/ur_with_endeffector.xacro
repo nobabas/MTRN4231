@@ -1,18 +1,37 @@
 <?xml version="1.0"?>
 <robot name="ur_with_endeffector" xmlns:xacro="http://www.ros.org/wiki/xacro">
-  <xacro:arg name="name" default="ur5" />
-  <xacro:arg name="ur_type" default="ur5" />
-
-  <xacro:arg name="prefix" default="end_effector_" />
-
+  <xacro:arg name="name" default="ur5e" />
+  <xacro:arg name="ur_type" default="ur5e" />
   <xacro:include filename="$(find ur_description)/urdf/ur.urdf.xacro" />
 
-  <xacro:include filename="$(find endeffector_description)/urdf/endeffector.xacro" />
+  <link name="simple_ee_link">
+    <visual>
+      <geometry>
+        <box size="0.05 0.05 0.15"/>  <!-- Length, Width, Height -->
+      </geometry>
+      <material name="orange">
+        <color rgba="1.0 0.5 0.0 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.05 0.05 0.15"/>  <!-- Must match visual -->
+      </geometry>
+    </collision>
+    <inertial>
+    <mass value="2.0"/>  <!-- 2kg mass -->
+    <!-- Calculated inertia for a rectangular prism -->
+    <inertia 
+      ixx="0.01625" ixy="0.0" ixz="0.0"
+      iyy="0.0085" iyz="0.0"
+      izz="0.00425"/>
+  </inertial>
+  </link>
 
   <joint name="tool0_to_endeffector_base" type="fixed">
     <parent link="tool0"/>
-    <child link="$(arg prefix)base_link"/>
-    <origin xyz="0 0 0.08" rpy="0 0 3.14159" />
+    <child link="simple_ee_link"/>
+    <origin xyz="0 0 0.08" rpy="0 0 0" />
   </joint>
 
 </robot>

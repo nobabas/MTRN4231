@@ -12,6 +12,8 @@ find_package(geometry_msgs REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
   "srv/MoveRequest.srv"
+  "msg/Marker2D.msg"
+  "msg/Marker2DArray.msg"
   DEPENDENCIES geometry_msgs
 )
 

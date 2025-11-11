@@ -1,54 +1,37 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.5)
 project(moveit_planning_server)
 
-# Warnings
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
-#
-# Dependencies
-#
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
-find_package(sensor_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
+find_package(sensor_msgs REQUIRED)
+find_package(visualization_msgs REQUIRED)
+find_package(moveit_msgs REQUIRED)
+find_package(shape_msgs REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
-find_package(tf2_ros REQUIRED)
-find_package(moveit_core REQUIRED)
-find_package(moveit_ros_planning REQUIRED)
 find_package(moveit_ros_planning_interface REQUIRED)
 find_package(interfaces REQUIRED)
 
-# Create executable
-add_executable(moveit_server_node  src/moveit_server.cpp)
+add_executable(moveit_server_node src/moveit_server.cpp)
 
-# Include dirs so we can #include headers from dependencies
-target_include_directories(moveit_server_node PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include>
-)
-
-# Link libraries to the node
-target_link_libraries(moveit_server_node)
-
-# Add dependencies so generated headers and messages are available before build
 ament_target_dependencies(moveit_server_node
   rclcpp
-  sensor_msgs
   geometry_msgs
+  sensor_msgs
+  visualization_msgs
+  moveit_msgs
+  shape_msgs
   tf2
   tf2_geometry_msgs
-  tf2_ros
-  moveit_core
-  moveit_ros_planning
   moveit_ros_planning_interface
   interfaces
 )
 
-# Install the node into install space
-install(TARGETS moveit_server_node  DESTINATION lib/${PROJECT_NAME})
+install(TARGETS moveit_server_node DESTINATION lib/${PROJECT_NAME})
 
 ament_package()
-

@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<robot name="ur_with_endeffector" xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:arg name="name" default="ur5" />
+  <xacro:arg name="ur_type" default="ur5" />
+
+  <xacro:arg name="prefix" default="end_effector_" />
+
+  <xacro:include filename="$(find ur_description)/urdf/ur.urdf.xacro" />
+
+  <xacro:include filename="$(find endeffector_description)/urdf/endeffector.xacro" />
+
+  <joint name="tool0_to_endeffector_base" type="fixed">
+    <parent link="tool0"/>
+    <child link="$(arg prefix)base_link"/>
+    <origin xyz="0 0 0.01" rpy="0 0 3.14159" />
+  </joint>
+
+</robot>
