@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 import rclpy
 from rclpy.node import Node
 from geometry_msgs.msg import Polygon, Point32  # We'll use Polygon to send a list of points
@@ -9,7 +8,7 @@ from interface.msg import MarkerData
 # --- Your Model and Image Paths ---
 # This will need to be changed
 MODEL_PATH = '/home/mtrn/src/best.pt'
-IMAGE_PATH = "/home/mtrn/Pictures/Screenshots/testing2.png"
+IMAGE_PATH = "/home/mtrn/4231/received_images/current_image.jpg"
 #####################################
 
 # Detection confidence threshold
@@ -39,10 +38,8 @@ class YoloPublisher(Node):
         
     def run_detection_and_publish(self):
         self.get_logger().info(f'Running detection on {IMAGE_PATH}...')
-        #image = cv2.cvtColor(self.image, cv2.COLOR_BGR2HSV)
         results = self.model(IMAGE_PATH, conf=CONFIDENCE)
 
-        
         if results:
             r = results[0]  # Get the first result
             boxes = r.boxes.xyxy  # [x1, y1, x2, y2]
@@ -66,7 +63,6 @@ class YoloPublisher(Node):
                 self.marker_publisher.publish(marker_msg)
                 
                 self.get_logger().info(f'Published marker: id={marker_msg.id}, pose={marker_msg.pose}')
-
 
 def main(args=None):
     rclpy.init(args=args)

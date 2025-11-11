@@ -21,9 +21,9 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'perception_example = vision.vision_main:main',
-            'testing = vision.test:main',
+            'vision_main = vision.vision_main:main',
             'ros2node = vision.ros2node:main',
+            'camera_run = vision.camera_run:main',
         ],
     },
 )

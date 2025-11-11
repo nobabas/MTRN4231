@@ -19,4 +19,11 @@ def generate_launch_description():
             name='ros2node',
             output='screen',
         ),
+        Node(
+            package='vision',
+            executable='camera_run',
+            name='camera_run',
+            output='screen',
+        ),
+        
     ])
