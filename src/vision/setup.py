@@ -22,8 +22,6 @@ setup(
     entry_points={
         'console_scripts': [
             'vision_main = vision.vision_main:main',
-            'ros2node = vision.ros2node:main',
-            'camera_run = vision.camera_run:main',
         ],
     },
 )
