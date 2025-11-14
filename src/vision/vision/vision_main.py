@@ -4,14 +4,12 @@ from geometry_msgs.msg import Polygon, Point32  # We'll use Polygon to send a li
 from ultralytics import YOLO
 import time
 from interface.msg import MarkerData
+import cv2
 
 # --- Your Model and Image Paths ---
 # This will need to be changed
-MODEL_PATH = '/home/mtrn/src/best.pt'
-IMAGE_PATH = "/home/mtrn/4231/received_images/current_image.jpg"
-#####################################
-
-# Detection confidence threshold
+MODEL_PATH = '/home/mtrn/lab4-main/runs/detect/train9/weights/best.pt'
+IMAGE_PATH = '/home/mtrn/lab4-main/lab4-main/my_dataset/train/images/image1.jpg'
 CONFIDENCE = 0.5
 
 # ------------------------------------
@@ -35,34 +33,44 @@ class YoloPublisher(Node):
             '/pixel_coords', 
             10
         )
-        
+
     def run_detection_and_publish(self):
         self.get_logger().info(f'Running detection on {IMAGE_PATH}...')
         results = self.model(IMAGE_PATH, conf=CONFIDENCE)
 
         if results:
-            r = results[0]  # Get the first result
-            boxes = r.boxes.xyxy  # [x1, y1, x2, y2]
+            r = results[0]
+            boxes = r.boxes.xyxy
             classes = r.boxes.cls
             self.get_logger().info(f'Found {len(boxes)} detections.')
 
             for i in range(len(boxes)):
                 box = boxes[i]
-                
-                
-                # Your original calculation
                 x1, y1, x2, y2 = box.tolist()
                 cx = (x1 + x2) / 2
                 cy = (y1 + y2) / 2
 
                 marker_msg = MarkerData()
-            
                 marker_msg.id = float(i)
                 marker_msg.pose = [float(cx), float(cy)]
 
                 self.marker_publisher.publish(marker_msg)
-                
                 self.get_logger().info(f'Published marker: id={marker_msg.id}, pose={marker_msg.pose}')
+
+    def image(self):
+        results = self.model(IMAGE_PATH, conf=CONFIDENCE)
+
+        # --- SAVE ANNOTATED IMAGE ---
+        annotated = results[0].plot()  # Draw boxes, labels, masks, etc.
+        scale = 1  # change to 0.3 for smaller, 0.7 for larger
+        new_width = int(annotated.shape[1] * scale)  
+        new_height = int(annotated.shape[0] * scale)
+        resized_image = cv2.resize(annotated, (new_width, new_height))
+        cv2.imshow('Annotated Image', resized_image)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
+
+
 
 def main(args=None):
     rclpy.init(args=args)
@@ -72,8 +80,10 @@ def main(args=None):
     # Run the detection and publish
     yolo_publisher_node.run_detection_and_publish()
     
+    yolo_publisher_node.image()
+
     # Give a moment for the message to be sent before shutting down
-    time.sleep(100.0) 
+    time.sleep(10.0)
     
     # Clean up
     yolo_publisher_node.destroy_node()
