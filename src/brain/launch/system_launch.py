@@ -32,7 +32,7 @@ def generate_launch_description():
     
     vision = IncludeLaunchDescription(
             PythonLaunchDescriptionSource([os.path.join(
-                get_package_share_directory('blue_detector'), 'launch'),
+                get_package_share_directory('vision'), 'launch'),
                 '/vision_launch.py'])
             )
     
