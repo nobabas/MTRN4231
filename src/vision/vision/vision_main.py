@@ -3,13 +3,13 @@ from rclpy.node import Node
 from geometry_msgs.msg import Polygon, Point32  # We'll use Polygon to send a list of points
 from ultralytics import YOLO
 import time
-from interface.msg import MarkerData
+from interfaces.msg import MarkerData
 import cv2
 
 # --- Your Model and Image Paths ---
 # This will need to be changed
-MODEL_PATH = '/home/mtrn/lab4-main/runs/detect/train9/weights/best.pt'
-IMAGE_PATH = '/home/mtrn/lab4-main/lab4-main/my_dataset/train/images/image1.jpg'
+MODEL_PATH = '/home/samuel/MTRN4231/src/best.pt'
+IMAGE_PATH = '/home/samuel/MTRN4231/yolo_dataset/train/images/image1.jpg'
 CONFIDENCE = 0.5
 
 # ------------------------------------
@@ -62,7 +62,7 @@ class YoloPublisher(Node):
 
         # --- SAVE ANNOTATED IMAGE ---
         annotated = results[0].plot()  # Draw boxes, labels, masks, etc.
-        scale = 1  # change to 0.3 for smaller, 0.7 for larger
+        scale = 0.2  # change to 0.3 for smaller, 0.7 for larger
         new_width = int(annotated.shape[1] * scale)  
         new_height = int(annotated.shape[0] * scale)
         resized_image = cv2.resize(annotated, (new_width, new_height))
