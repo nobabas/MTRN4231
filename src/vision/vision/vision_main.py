@@ -82,8 +82,6 @@ def main(args=None):
     
     yolo_publisher_node.image()
 
-    # Give a moment for the message to be sent before shutting down
-    time.sleep(10.0)
     
     # Clean up
     yolo_publisher_node.destroy_node()

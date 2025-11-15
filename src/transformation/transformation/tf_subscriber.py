@@ -1,5 +1,5 @@
 from rclpy.node import Node
-from interface.msg import MarkerData
+from interfaces.msg import MarkerData
 import threading
 import time
 

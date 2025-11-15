@@ -1,7 +1,6 @@
 import rclpy
 import tf2_ros
 from geometry_msgs.msg import Point, Pose, TransformStamped
-import tf_transformations
 from rclpy.time import Time
 import pyrealsense2 as rs
 from sensor_msgs.msg import CameraInfo
@@ -96,12 +95,13 @@ class TFHandler:
         t.transform.translation.y = point[1]
         t.transform.translation.z = point[2]
         
+        # Update from Sam: Removed need for tf_transformation
+        #             q = tf_transformations.quaternion_from_euler(0, 0, 0)
         if orientation is None:
-            q = tf_transformations.quaternion_from_euler(0, 0, 0)
-            t.transform.rotation.x = q[0]
-            t.transform.rotation.y = q[1]
-            t.transform.rotation.z = q[2]
-            t.transform.rotation.w = q[3]
+            t.transform.rotation.x = 0.0
+            t.transform.rotation.y = 0.0
+            t.transform.rotation.z = 0.0
+            t.transform.rotation.w = 1.0
         else:
             t.transform.rotation = orientation
             

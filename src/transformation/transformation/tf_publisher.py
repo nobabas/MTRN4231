@@ -1,4 +1,4 @@
-from interface.msg import Marker2D, MarkerArray2D
+from interfaces.msg import Marker2D, Marker2DArray
 from rclpy.node import Node
 
 class BlueMarkerPublisher(Node):
@@ -6,7 +6,7 @@ class BlueMarkerPublisher(Node):
         super().__init__('blue_marker_publisher')
         
         self.marker_publisher = self.create_publisher(
-            MarkerArray2D,
+            Marker2DArray,
             '/blue_markers_coords', 
             10
         )
