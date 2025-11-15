@@ -1,27 +1,27 @@
 /*
  * ===========================================================
- *  BRAIN NODE – Soil Sampling Robot (Brain-Manages-Motion)
+ * BRAIN NODE – Soil Sampling Robot (Brain-Manages-Motion)
  * ===========================================================
- *  Coordinates Vision, Movement, and Moisture subsystems.
- *  Receives blue marker detections from the vision node,
- *  requests soil moisture from the Teensy via /soil_moisture,
- *  and commands the movement system directly.
+ * Coordinates Vision, Movement, and Moisture subsystems.
+ * Receives blue marker detections from the vision node,
+ * requests soil moisture from the Teensy via /soil_moisture,
+ * and commands the movement system directly.
  *
- *  Interfaces:
- *   - VisionCmd.srv        : Brain → Vision Node (detects blue markers)
- *   - MoveRequest.srv      : Brain → Movement Node (execute motion)
- *   - BrainCmd.srv         : External → Brain (start routines)
- *   - /soil_moisture (topic): Teensy → Brain (current moisture)
- *   - MarkerData.msg       : Published by Vision Node
+ * Interfaces:
+ * - VisionCmd.srv        : Brain → Vision Node (detects blue markers)
+ * - MoveRequest.srv      : Brain → Movement Node (execute motion)
+ * - BrainCmd.srv         : External → Brain (start routines)
+ * - /soil_moisture (topic): Teensy → Brain (current moisture)
+ * - MarkerData.msg       : Published by Vision Node
  *
- *  Routine Flow:
- *   1. Brain requests marker pose from Vision Node
- *   2. Sends MoveRequest to go to that pose (cartesian)
- *   3. Monitors /soil_moisture readings
- *   4. Lowers probe incrementally in Z until threshold reached
+ * Routine Flow:
+ * 1. Brain requests marker pose from Vision Node
+ * 2. Sends MoveRequest to go to that pose (cartesian)
+ * 3. Monitors /soil_moisture readings
+ * 4. Lowers probe incrementally in Z until threshold reached
  *
- *  Parameter:
- *   soil_threshold (default: 0.5)
+ * Parameter:
+ * soil_threshold (default: 0.5)
  * ===========================================================
  */
 
@@ -30,6 +30,7 @@
 #include "std_msgs/msg/float32.hpp"
 
 #include "interfaces/msg/marker_data.hpp"
+#include "interfaces/msg/marker2_d_array.hpp" 
 #include "interfaces/srv/vision_cmd.hpp"
 #include "interfaces/srv/move_request.hpp"
 #include "interfaces/srv/brain_cmd.hpp"
@@ -75,17 +76,42 @@ public:
         // -------------------------------
         // SUBSCRIPTIONS
         // -------------------------------
-        marker_sub_ = create_subscription<interfaces::msg::MarkerData>(
-            "/blue_markers_coords", 10,
-            [this](const interfaces::msg::MarkerData::SharedPtr msg) {
-                std::lock_guard<std::mutex> lock(marker_mutex_);
-                marker_map_[static_cast<int>(msg->id)] = *msg;
 
-                if (msg->pose.size() >= 3) {
-                    RCLCPP_INFO(get_logger(), "Brain: Marker ID %.0f at [%.2f, %.2f, %.2f]",
-                                msg->id, msg->pose[0], msg->pose[1], msg->pose[2]);
-                } else {
-                    RCLCPP_WARN(get_logger(), "MarkerData.pose malformed or empty.");
+        // --- MODIFICATION: Subscribing to Marker2DArray ---
+        marker_sub_ = create_subscription<interfaces::msg::Marker2DArray>(
+            "/blue_markers_coords", 10,
+            [this](const interfaces::msg::Marker2DArray::SharedPtr msg) {
+                std::lock_guard<std::mutex> lock(marker_mutex_);
+                
+                // Iterate through the list of 2D markers
+                for (const auto & marker_2d : msg->markers) {
+                    // Create a 3D MarkerData message
+                    interfaces::msg::MarkerData full_marker;
+                    
+                    full_marker.id = marker_2d.id;
+
+                    // Reconstruct the 6D pose from 2D data
+                    // We take X and Y from the message.
+                    // We HARDCODE Z and orientation.
+                    
+                    float world_x = marker_2d.x;
+                    float world_y = marker_2d.y;
+                    // !!! IMPORTANT: Adjust this Z value to your safe height !!!
+                    float fixed_z = 0.65; // Safe height above ground
+                    
+                    // Pose: [x, y, z, roll, pitch, yaw]
+                    full_marker.pose = {
+                        world_x, 
+                        world_y, 
+                        fixed_z, 
+                        -3.1415, 0.0, 1.57 // Hardcoded orientation (facing down)
+                    };
+
+                    // Store the converted 3D marker in our map
+                    marker_map_[static_cast<int>(full_marker.id)] = full_marker;
+
+                    RCLCPP_INFO(get_logger(), "Brain: Received Marker %.0f at [%.2f, %.2f] (Z defaulting to %.2f)",
+                                full_marker.id, world_x, world_y, fixed_z);
                 }
             });
 
@@ -109,30 +135,24 @@ public:
         RCLCPP_INFO(get_logger(), "Starting soil sampling routine...");
 
         // --------------------------------------------------------
-        // Step 1: Define hardcoded markers (temporary)
+        // Step 1: Get markers from our subscription
         // --------------------------------------------------------
+        
+        // --- MODIFICATION: Using marker_map_ instead of hardcoded markers ---
+        RCLCPP_INFO(get_logger(), "Copying markers from subscription...");
         std::map<int, interfaces::msg::MarkerData> markers_copy;
-
         {
-            interfaces::msg::MarkerData m1, m2, m3;
-            //ros2 service call /moveit_path_plan interfaces/srv/MoveRequest "{command: 'pose', positions: [0.60, 0.35, 0.65, -3.1415, 0.0, 1.57]}"
-            //ros2 service call /moveit_path_plan interfaces/srv/MoveRequest "{command: 'pose', positions: [0.60, 0.35, 0.35, -3.1415, 0.0, 1.57]}"
-
-            m1.id = 1;
-            m1.pose = {0.60, 0.35, 0.65, -3.1415, 0, 1.57};
-
-            m2.id = 2;
-            m2.pose = {0.60, 0.35, 0.35, -3.1415, 0, 1.57};
-
-            m3.id = 3;
-            m3.pose = {0.50, -0.25, 0.25, -1.57, 1.57, 0.0};
-
-            markers_copy[m1.id] = m1;
-            markers_copy[m2.id] = m2;
-            markers_copy[m3.id] = m3;
+            std::lock_guard<std::mutex> lock(marker_mutex_);
+            if (marker_map_.empty()) {
+                RCLCPP_WARN(get_logger(), "No markers received. Aborting routine.");
+                return 0; // Failure
+            }
+            // Copy the map, then clear the original so we don't re-sample old markers
+            markers_copy = marker_map_;
+            marker_map_.clear(); 
         }
+        RCLCPP_INFO(get_logger(), "Loaded %zu markers from subscription.", markers_copy.size());
 
-        RCLCPP_INFO(get_logger(), "Loaded %zu hardcoded marker(s).", markers_copy.size());
 
         // --------------------------------------------------------
         // Step 2: Iterate through each marker
@@ -283,7 +303,8 @@ public:
     rclcpp::Service<interfaces::srv::BrainCmd>::SharedPtr brain_srv_;
     rclcpp::CallbackGroup::SharedPtr reentrant_group_;
 
-    rclcpp::Subscription<interfaces::msg::MarkerData>::SharedPtr marker_sub_;
+    // --- MODIFICATION: Changed variable type ---
+    rclcpp::Subscription<interfaces::msg::Marker2DArray>::SharedPtr marker_sub_;
     rclcpp::Subscription<std_msgs::msg::Float32>::SharedPtr moist_sub_;
 };
 
@@ -300,4 +321,3 @@ int main(int argc, char *argv[]) {
     rclcpp::shutdown();
     return 0;
 }
-

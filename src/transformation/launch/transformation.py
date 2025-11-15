@@ -9,7 +9,7 @@ def generate_launch_description():
     return LaunchDescription([
         Node(
             package='transformation',
-            executable='tf_main',
+            executable='main',
             name='tf_main',
             output='screen',
         ),
