@@ -1,43 +1,51 @@
-from interfaces.msg import Marker2D, Marker2DArray
+import rclpy
 from rclpy.node import Node
+from interfaces.msg import Marker2DArray
+# --- 1. ADD QOS IMPORTS ---
+from rclpy.qos import QoSProfile, DurabilityPolicy, HistoryPolicy
 
 class BlueMarkerPublisher(Node):
     def __init__(self):
         super().__init__('blue_marker_publisher')
         
+        # --- 2. DEFINE STICKY QOS ---
+        transient_local_qos = QoSProfile(
+            history=HistoryPolicy.KEEP_LAST,
+            depth=1,
+            durability=DurabilityPolicy.TRANSIENT_LOCAL
+        )
+
+        # --- 3. CREATE PUBLISHER WITH QOS ---
         self.marker_publisher = self.create_publisher(
             Marker2DArray,
             '/blue_markers_coords', 
-            10
+            qos_profile=transient_local_qos # <-- Use the sticky profile
         )
-        
-        self.create_timer(2.0, self.check_publisher_status)
-        self.get_logger().info("BlueMarkerPublisher initialized with MarkerData message")
-    
-    def check_publisher_status(self):
-        subscription_count = self.marker_publisher.get_subscription_count()
-        self.get_logger().info(f"Publisher has {subscription_count} subscribers")
-    
-    def publish_blue_markers(self, world_result):
-        # Create marker array message
-        marker_array_msg = MarkerArray2D()
-        
-        for i, result in enumerate(world_result):
-            world_x, world_y, world_z = result['world_coords']
-            
-            # Create individual marker message
-            marker_msg = Marker2D()
-            marker_msg.array = [float(i), float(world_x), float(world_y)]
-            
-            marker_array_msg.markers.append(marker_msg)
-            
-            self.get_logger().info(
-                f"Marker_{i}, x={world_x:.2f}, y={world_y:.2f}"
-            )
 
-        # Publish the structured message
-        self.marker_publisher.publish(marker_array_msg)
+    def publish_blue_markers(self, world_result):
+        # If no markers found, just return (or publish empty array)
+        if not world_result:
+            return
+
+        msg = Marker2DArray()
         
-        self.get_logger().info(
-            f"Published {len(world_result)} markers as structured data."
-        )
+        for result in world_result:
+            # We assume 'result' has keys: 'id', 'pixel_center', 'world_coords'
+            # (This matches what we set up in tf_subscriber.py)
+            
+            # Create a temporary object to hold data
+            # Note: Marker2DArray.msg holds a list of Marker2D
+            # Marker2D.msg has fields: float32 id, float32 x, float32 y
+            
+            from interfaces.msg import Marker2D
+            marker = Marker2D()
+            
+            marker.id = float(result['id'])
+            # We send the WORLD coordinates here, not pixel coordinates
+            marker.x = float(result['world_coords'][0]) 
+            marker.y = float(result['world_coords'][1])
+            
+            msg.markers.append(marker)
+
+        self.marker_publisher.publish(msg)
+        self.get_logger().info(f'Published {len(msg.markers)} markers to /blue_markers_coords')

@@ -1,7 +1,11 @@
+import rclpy
 from rclpy.node import Node
 from interfaces.msg import MarkerData
 import threading
 import time
+
+# --- 1. ADD THE QOS IMPORTS ---
+from rclpy.qos import QoSProfile, DurabilityPolicy, HistoryPolicy
 
 TOPIC_NAME = '/pixel_coords'
 
@@ -13,12 +17,20 @@ class MarkerSubscriber(Node):
         self.data_received = False
         self.data_received_event = threading.Event()
         
-        # 2. Create the subscriber
+        # --- 2. DEFINE THE "STICKY" (TRANSIENT LOCAL) QOS PROFILE ---
+        transient_local_qos = QoSProfile(
+            history=HistoryPolicy.KEEP_LAST,
+            depth=1,
+            durability=DurabilityPolicy.TRANSIENT_LOCAL
+        )
+        
+        # --- 3. CREATE THE SUBSCRIBER USING THE QOS PROFILE ---
         self.subscription = self.create_subscription(
             MarkerData,
             TOPIC_NAME,
             self.listener_callback,  # Function to run when a message is received
-            10)
+            qos_profile=transient_local_qos  # <-- USE THE QOS PROFILE (changed from 10)
+        )
         
         self.get_logger().info(f'Subscribing to "{TOPIC_NAME}". Waiting for messages...')
 
@@ -33,7 +45,10 @@ class MarkerSubscriber(Node):
         # Convert float32 array to regular Python list for proper handling
         pose_list = list(marker_pose)
         
+        # --- ADDED ID TO THE DICTIONARY ---
+        # This is important so we can pass the ID to the brain node
         self.blue_area.append({
+            'id': marker_id,
             'center': pose_list
         })
 
@@ -71,11 +86,13 @@ class MarkerSubscriber(Node):
         
         for area in self.blue_area:
             cx, cy = area['center']
+            marker_id = area['id'] # <-- Get the ID
             
             # SINGLE FUNCTION CALL - that's all you need!
             world_coords = tf_handler.pixel_to_3d(cx, cy, depth_value)
             
             world_coordinates.append({
+                'id': marker_id, # <-- Pass the ID along
                 'pixel_center': (cx, cy),
                 'world_coords': world_coords,
             })

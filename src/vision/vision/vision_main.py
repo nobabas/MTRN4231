@@ -5,6 +5,7 @@ from ultralytics import YOLO
 import time
 from interfaces.msg import MarkerData
 import cv2
+from rclpy.qos import QoSProfile, DurabilityPolicy, HistoryPolicy
 
 # --- Your Model and Image Paths ---
 # This will need to be changed
@@ -28,10 +29,18 @@ class YoloPublisher(Node):
             self.get_logger().error(f'Failed to load YOLO model: {e}')
             return
         
+        # --- 2. DEFINE STICKY QOS ---
+        transient_local_qos = QoSProfile(
+            history=HistoryPolicy.KEEP_LAST,
+            depth=1,
+            durability=DurabilityPolicy.TRANSIENT_LOCAL
+        )
+
+        # --- 3. UPDATE PUBLISHER ---
         self.marker_publisher = self.create_publisher(
-            MarkerData,  # Changed this
+            MarkerData,
             '/pixel_coords', 
-            10
+            qos_profile=transient_local_qos
         )
 
     def run_detection_and_publish(self):
@@ -82,6 +91,8 @@ def main(args=None):
     
     yolo_publisher_node.image()
 
+    # Give a moment for the message to be sent before shutting down
+    time.sleep(10.0)
     
     # Clean up
     yolo_publisher_node.destroy_node()

@@ -77,27 +77,24 @@ public:
         // SUBSCRIPTIONS
         // -------------------------------
 
-        // --- MODIFICATION: Subscribing to Marker2DArray ---
+        // --- MODIFICATION: Define Sticky (Transient Local) QoS ---
+        rclcpp::QoS sticky_qos(rclcpp::KeepLast(1));
+        sticky_qos.transient_local();
+
         marker_sub_ = create_subscription<interfaces::msg::Marker2DArray>(
-            "/blue_markers_coords", 10,
+            "/blue_markers_coords", 
+            sticky_qos, // <-- USE THE STICKY QOS HERE
             [this](const interfaces::msg::Marker2DArray::SharedPtr msg) {
                 std::lock_guard<std::mutex> lock(marker_mutex_);
                 
-                // Iterate through the list of 2D markers
                 for (const auto & marker_2d : msg->markers) {
-                    // Create a 3D MarkerData message
                     interfaces::msg::MarkerData full_marker;
                     
                     full_marker.id = marker_2d.id;
-
-                    // Reconstruct the 6D pose from 2D data
-                    // We take X and Y from the message.
-                    // We HARDCODE Z and orientation.
                     
                     float world_x = marker_2d.x;
                     float world_y = marker_2d.y;
-                    // !!! IMPORTANT: Adjust this Z value to your safe height !!!
-                    float fixed_z = 0.65; // Safe height above ground
+                    float fixed_z = 0.65; // Safe height above ground (Hardcoded Z)
                     
                     // Pose: [x, y, z, roll, pitch, yaw]
                     full_marker.pose = {
@@ -107,10 +104,9 @@ public:
                         -3.1415, 0.0, 1.57 // Hardcoded orientation (facing down)
                     };
 
-                    // Store the converted 3D marker in our map
                     marker_map_[static_cast<int>(full_marker.id)] = full_marker;
 
-                    RCLCPP_INFO(get_logger(), "Brain: Received Marker %.0f at [%.2f, %.2f] (Z defaulting to %.2f)",
+                    RCLCPP_INFO(get_logger(), "Brain: Received Marker %.0f at [%.2f, %.2f] (Z default %.2f)",
                                 full_marker.id, world_x, world_y, fixed_z);
                 }
             });
@@ -122,10 +118,7 @@ public:
                 RCLCPP_INFO_THROTTLE(get_logger(), *get_clock(), 2000,
                                     "Current soil moisture: %.2f", latest_moisture_);
             });
-
-        //latest_moisture_ = 0.0;
     }
-
 
     // ----------------------------------------------------
     // MAIN ROUTINE
