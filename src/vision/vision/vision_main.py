@@ -10,9 +10,12 @@ from rclpy.qos import QoSProfile, DurabilityPolicy, HistoryPolicy
 # --- Your Model and Image Paths ---
 # This will need to be changed
 MODEL_PATH = '/home/samuel/MTRN4231/src/best.pt'
-IMAGE_PATH = '/home/samuel/MTRN4231/yolo_dataset/train/images/image1.jpg'
+IMAGE_PATH = '/home/samuel/MTRN4231/yolo_dataset/train/images/image2.jpg'
 CONFIDENCE = 0.5
 
+# --- Camera resolution to match mock intrinsics ---
+IMG_WIDTH = 640
+IMG_HEIGHT = 480
 # ------------------------------------
 
 class YoloPublisher(Node):
@@ -32,7 +35,7 @@ class YoloPublisher(Node):
         # --- 2. DEFINE STICKY QOS ---
         transient_local_qos = QoSProfile(
             history=HistoryPolicy.KEEP_LAST,
-            depth=1,
+            depth=10,
             durability=DurabilityPolicy.TRANSIENT_LOCAL
         )
 
@@ -45,7 +48,15 @@ class YoloPublisher(Node):
 
     def run_detection_and_publish(self):
         self.get_logger().info(f'Running detection on {IMAGE_PATH}...')
-        results = self.model(IMAGE_PATH, conf=CONFIDENCE)
+        img = cv2.imread(IMAGE_PATH)
+        if img is None:
+            self.get_logger().error(f'Failed to load image from {IMAGE_PATH}')
+            return
+            
+        # Resize to match mock camera (640x480)
+        img_resized = cv2.resize(img, (IMG_WIDTH, IMG_HEIGHT))
+        
+        results = self.model(img_resized, conf=CONFIDENCE)
 
         if results:
             r = results[0]
@@ -67,11 +78,18 @@ class YoloPublisher(Node):
                 self.get_logger().info(f'Published marker: id={marker_msg.id}, pose={marker_msg.pose}')
 
     def image(self):
-        results = self.model(IMAGE_PATH, conf=CONFIDENCE)
+        img = cv2.imread(IMAGE_PATH)
+        if img is None:
+            self.get_logger().error(f'Failed to load image from {IMAGE_PATH}')
+            return
+
+        # Resize to match mock camera (640x480)
+        img_resized = cv2.resize(img, (IMG_WIDTH, IMG_HEIGHT))
+        results = self.model(img_resized, conf=CONFIDENCE)
 
         # --- SAVE ANNOTATED IMAGE ---
         annotated = results[0].plot()  # Draw boxes, labels, masks, etc.
-        scale = 0.2  # change to 0.3 for smaller, 0.7 for larger
+        scale = 0.7  # change to 0.3 for smaller, 0.7 for larger
         new_width = int(annotated.shape[1] * scale)  
         new_height = int(annotated.shape[0] * scale)
         resized_image = cv2.resize(annotated, (new_width, new_height))

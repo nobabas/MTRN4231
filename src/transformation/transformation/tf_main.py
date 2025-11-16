@@ -35,27 +35,22 @@ def main():
         spin_thread.start()
         
         print("Subscriber is now actively listening...")
-        print("Waiting up to 10 seconds for marker data...")
+        print("Waiting 5 seconds for all markers to arrive...")
         
-        # WAIT FOR 10 SECONDS FOR MARKER DATA
-        data_received = subscriber.wait_for_data(timeout=10.0)
+        # Give the subscriber 5s to collect all messages
+        time.sleep(5.0) 
         
-        if not data_received:
-            print("No marker data received within 10 seconds. Exiting.")
-            # Shutdown the spinning thread
+        if len(subscriber.blue_area) == 0:
+            print("No marker data received. Exiting.")
             subscriber.destroy_node()
             return
-
+            
         print(f"Successfully received {len(subscriber.blue_area)} markers!")
-        
-        # Incase the scan take too long
-        time.sleep(5)
 
         world_result = subscriber.get_world_coordinates(tf_handler, depth_value=1000)
         print("Waiting 5 seconds for brain_node to connect...")
         time.sleep(5.0)  # Wait for 5 seconds
 
-        print("Publishing markers...")
         publisher.publish_blue_markers(world_result)
 
         print("\n=== WORLD COORDINATES RESULTS ===")

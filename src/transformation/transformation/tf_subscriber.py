@@ -20,7 +20,7 @@ class MarkerSubscriber(Node):
         # --- 2. DEFINE THE "STICKY" (TRANSIENT LOCAL) QOS PROFILE ---
         transient_local_qos = QoSProfile(
             history=HistoryPolicy.KEEP_LAST,
-            depth=1,
+            depth=10,
             durability=DurabilityPolicy.TRANSIENT_LOCAL
         )
         
@@ -86,7 +86,7 @@ class MarkerSubscriber(Node):
         
         for area in self.blue_area:
             cx, cy = area['center']
-            marker_id = area['id'] # <-- Get the ID
+            marker_id = area['id'] 
             
             # SINGLE FUNCTION CALL - that's all you need!
             world_coords = tf_handler.pixel_to_3d(cx, cy, depth_value)

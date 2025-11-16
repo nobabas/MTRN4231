@@ -1,7 +1,6 @@
 import rclpy
 from rclpy.node import Node
-from interfaces.msg import Marker2DArray
-# --- 1. ADD QOS IMPORTS ---
+from interfaces.msg import Marker2DArray, Marker2D
 from rclpy.qos import QoSProfile, DurabilityPolicy, HistoryPolicy
 
 class BlueMarkerPublisher(Node):
@@ -11,7 +10,7 @@ class BlueMarkerPublisher(Node):
         # --- 2. DEFINE STICKY QOS ---
         transient_local_qos = QoSProfile(
             history=HistoryPolicy.KEEP_LAST,
-            depth=1,
+            depth=10,
             durability=DurabilityPolicy.TRANSIENT_LOCAL
         )
 
@@ -37,7 +36,6 @@ class BlueMarkerPublisher(Node):
             # Note: Marker2DArray.msg holds a list of Marker2D
             # Marker2D.msg has fields: float32 id, float32 x, float32 y
             
-            from interfaces.msg import Marker2D
             marker = Marker2D()
             
             marker.id = float(result['id'])

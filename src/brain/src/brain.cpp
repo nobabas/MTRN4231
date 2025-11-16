@@ -83,7 +83,7 @@ public:
 
         marker_sub_ = create_subscription<interfaces::msg::Marker2DArray>(
             "/blue_markers_coords", 
-            sticky_qos, // <-- USE THE STICKY QOS HERE
+            sticky_qos, 
             [this](const interfaces::msg::Marker2DArray::SharedPtr msg) {
                 std::lock_guard<std::mutex> lock(marker_mutex_);
                 
@@ -296,7 +296,6 @@ public:
     rclcpp::Service<interfaces::srv::BrainCmd>::SharedPtr brain_srv_;
     rclcpp::CallbackGroup::SharedPtr reentrant_group_;
 
-    // --- MODIFICATION: Changed variable type ---
     rclcpp::Subscription<interfaces::msg::Marker2DArray>::SharedPtr marker_sub_;
     rclcpp::Subscription<std_msgs::msg::Float32>::SharedPtr moist_sub_;
 };
