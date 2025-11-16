@@ -111,8 +111,8 @@ class TFHandler:
         """Custom transformation from camera to world coordinates."""
         return [
             point[2],   # Camera Z -> World X (forward)
-            -point[0] + 0,   # this is -(robot x)
-            -point[1] + 0.20,  # this is -(robot y)
+            -point[0] + 0.038 + 0.20,   # this is -(robot x)
+            -point[1] + 0.18,  # this is -(robot y)
         ]
 
     def pixel_to_3d(self, pixel_x, pixel_y, depth_value):
