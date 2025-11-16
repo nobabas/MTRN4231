@@ -94,8 +94,11 @@ public:
                     
                     float world_x = marker_2d.x;
                     float world_y = marker_2d.y;
-                    float fixed_z = 0.65; // Safe height above ground (Hardcoded Z)
+                    float fixed_z = 0.35; // Safe height above ground (Hardcoded Z)
                     
+                    // This command works: 
+                    // ros2 service call /moveit_path_plan interfaces/srv/MoveRequest "{command: 'pose', positions: [0.60, 0.35, 0.35, -3.1415, 0.0, 1.57]}"
+
                     // Pose: [x, y, z, roll, pitch, yaw]
                     full_marker.pose = {
                         world_x, 

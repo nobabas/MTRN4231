@@ -30,7 +30,7 @@
 // Settings
 // ----------------------
 constexpr double kPlanningTime     = 10.0;   // seconds
-constexpr int    kPlanningAttempts = 5;
+constexpr int    kPlanningAttempts = 10;
 constexpr double kGoalPosTol       = 0.001;  // meters
 constexpr double kGoalOriTol       = 0.01;   // radians
 constexpr double kGoalJointTol     = 0.01;   // radians
