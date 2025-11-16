@@ -35,6 +35,9 @@
 #include "interfaces/srv/move_request.hpp"
 #include "interfaces/srv/brain_cmd.hpp"
 
+// --- CONTROL SWITCH: Set to 1 for Vision, 0 for Hardcoded ---
+#define USE_VISION 0
+
 class BrainNode : public rclcpp::Node {
 public:
     BrainNode() : Node("brain_node") {
@@ -77,7 +80,6 @@ public:
         // SUBSCRIPTIONS
         // -------------------------------
 
-        // --- MODIFICATION: Define Sticky (Transient Local) QoS ---
         rclcpp::QoS sticky_qos(rclcpp::KeepLast(1));
         sticky_qos.transient_local();
 
@@ -126,30 +128,53 @@ public:
     // ----------------------------------------------------
     // MAIN ROUTINE
     // ----------------------------------------------------
-    // Need to put call vision service in here once it is done 
     int runSoilSamplingRoutine() {
         RCLCPP_INFO(get_logger(), "Starting soil sampling routine...");
 
         // --------------------------------------------------------
-        // Step 1: Get markers from our subscription
+        // Step 1: Get markers based on the USE_VISION flag
         // --------------------------------------------------------
-        
-        // --- MODIFICATION: Using marker_map_ instead of hardcoded markers ---
-        RCLCPP_INFO(get_logger(), "Copying markers from subscription...");
         std::map<int, interfaces::msg::MarkerData> markers_copy;
-        {
-            std::lock_guard<std::mutex> lock(marker_mutex_);
-            if (marker_map_.empty()) {
-                RCLCPP_WARN(get_logger(), "No markers received. Aborting routine.");
-                return 0; // Failure
+
+        #if USE_VISION
+            // --- Using VISION markers ---
+            RCLCPP_INFO(get_logger(), "Copying markers from subscription...");
+            {
+                std::lock_guard<std::mutex> lock(marker_mutex_);
+                if (marker_map_.empty()) {
+                    RCLCPP_WARN(get_logger(), "No markers received. Aborting routine.");
+                    return 0; // Failure
+                }
+                // Copy the map, then clear the original so we don't re-sample old markers
+                markers_copy = marker_map_;
+                marker_map_.clear(); 
             }
-            // Copy the map, then clear the original so we don't re-sample old markers
-            markers_copy = marker_map_;
-            marker_map_.clear(); 
-        }
-        RCLCPP_INFO(get_logger(), "Loaded %zu markers from subscription.", markers_copy.size());
+            RCLCPP_INFO(get_logger(), "Loaded %zu markers from subscription.", markers_copy.size());
+        
+        #else
+            // --- Using HARDCODED markers ---
+            RCLCPP_INFO(get_logger(), "Loading hardcoded markers...");
+            {
+                interfaces::msg::MarkerData m1, m2, m3;
+                //ros2 service call /moveit_path_plan interfaces/srv/MoveRequest "{command: 'pose', positions: [0.60, 0.35, 0.65, -3.1415, 0.0, 1.57]}"
+                //ros2 service call /moveit_path_plan interfaces/srv/MoveRequest "{command: 'pose', positions: [0.60, 0.35, 0.35, -3.1415, 0.0, 1.57]}"
 
+                m1.id = 1;
+                m1.pose = {0.50, 0.35, 0.5, -3.1415, 0, 1.57};
 
+                m2.id = 2;
+                m2.pose = {0.3, 0.2, 0.5, -3.1415, 0, 1.57};
+
+                m3.id = 3;
+                m3.pose = {0.40, 0.25, 0.5, -3.1415, 0, 1.57};
+
+                markers_copy[m1.id] = m1;
+                markers_copy[m2.id] = m2;
+                markers_copy[m3.id] = m3;
+            }
+            RCLCPP_INFO(get_logger(), "Loaded %zu hardcoded marker(s).", markers_copy.size());
+        #endif
+       
         // --------------------------------------------------------
         // Step 2: Iterate through each marker
         // --------------------------------------------------------
@@ -176,8 +201,16 @@ public:
                 RCLCPP_WARN(get_logger(), "Waiting for MoveIt service to be available...");
             }
 
-            //ros2 service call /moveit_path_plan interfaces/srv/MoveRequest "{command: 'pose', positions: [0.60, 0.35, 0.65, -3.1415, 0.0, 1.57]}"
             // --- Move to marker ---
+
+            // Go home first
+            std::vector<float> home_position = {-1.3, 1.57, -1.83, -1.57, 0.0, 0.0};
+            if (!callMovementService("joint", home_position)) {
+                RCLCPP_ERROR(get_logger(), "Moving to home failed. Skipping marker.");
+                continue;
+            }
+            
+            // Then move to pose
             if (!callMovementService("pose", current_pose)) {
                 RCLCPP_ERROR(get_logger(), "Movement to marker %d failed. Skipping to next.", marker_id);
                 continue;
@@ -189,12 +222,12 @@ public:
             // Step 3: Lower probe until threshold reached
             // ----------------------------------------------------
             rclcpp::sleep_for(std::chrono::seconds(2));
-            const double step_size = 0.005;  // 5 mm down each iteration
+            const double step_size = 0.05;  // 5 cm down each iteration
             const double min_z_limit = -0.05; // safety limit below which we stop
             double initial_z = current_pose[2];
             //latest_moisture_ = 0.0; // reset each time
 
-            while (latest_moisture_ > soil_threshold_) {
+            while (latest_moisture_ < soil_threshold_) {
                 current_pose[2] -= step_size;
 
                 if (current_pose[2] < min_z_limit) {
@@ -222,9 +255,8 @@ public:
             // ----------------------------------------------------
             // Step 4: Retract probe back to safe height
             // ----------------------------------------------------
-            // Should do "line"
             current_pose[2] = initial_z;
-            if (!callMovementService("cartesian", current_pose)) {
+            if (!callMovementService("line", current_pose)) {
                 RCLCPP_WARN(get_logger(), "Failed to retract probe after sampling marker %d.", marker_id);
             }
 
@@ -233,7 +265,10 @@ public:
 
         // --------------------------------------------------------
         // Step 5: Routine complete
-        // --------------------------------------------------------
+        // --------------------------------------------------------  
+        std::vector<float> home_position = {-1.3, 1.57, -1.83, -1.57, 0.0, 0.0};
+        callMovementService("joint", home_position);
+
         RCLCPP_INFO(get_logger(), "Soil sampling routine completed for all markers.");
         return 1;
     }

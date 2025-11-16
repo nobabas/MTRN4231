@@ -19,6 +19,8 @@
 #include <moveit/planning_scene_interface/planning_scene_interface.h>
 #include <moveit_msgs/msg/collision_object.hpp>
 #include <shape_msgs/msg/solid_primitive.hpp>
+#include "moveit_msgs/msg/constraints.hpp"
+#include "moveit_msgs/msg/joint_constraint.hpp"
 
 #include <interfaces/srv/move_request.hpp>
 #include <interfaces/msg/marker2_d_array.hpp>
@@ -30,7 +32,7 @@
 // Settings
 // ----------------------
 constexpr double kPlanningTime     = 10.0;   // seconds
-constexpr int    kPlanningAttempts = 10;
+constexpr int    kPlanningAttempts = 100;
 constexpr double kGoalPosTol       = 0.001;  // meters
 constexpr double kGoalOriTol       = 0.01;   // radians
 constexpr double kGoalJointTol     = 0.01;   // radians
@@ -124,35 +126,65 @@ private:
       return;
     }
 
+    // Clear any previous goals and constraints
     move_group_->clearPoseTargets();
     move_group_->clearPathConstraints();
     move_group_->setStartStateToCurrentState();
 
     bool ok = false;
 
+    // =================================================================
+    // JOINT CONSTRAINT LOGIC
+    // =================================================================
+
+// 1. Create a constraints object to hold all our constraints
+    moveit_msgs::msg::Constraints path_constraints;
+
+    // 3. Create the constraint for the shoulder_lift_joint
+    moveit_msgs::msg::JointConstraint shoulder_lift_constraint;
+    shoulder_lift_constraint.joint_name = "shoulder_lift_joint";
+    
+    // Example: Limit lift joint to be between -2.57 and -0.57 radians
+    // (This is centered at -1.57, or -90 degrees)
+    shoulder_lift_constraint.position = -1.57;
+    shoulder_lift_constraint.tolerance_below = 1.2; // 1.0 rad tolerance
+    shoulder_lift_constraint.tolerance_above = 1.2; // 1.0 rad tolerance
+    shoulder_lift_constraint.weight = 1.0;
+    path_constraints.joint_constraints.push_back(shoulder_lift_constraint);
+
     if (req->command == "joint") {
+      // Apply the constraints before planning
+      move_group_->setPathConstraints(path_constraints);
       ok = setJointTargets(req->positions);
+    
     } else if (req->command == "pose") {
+      // Apply the constraints before planning
+      move_group_->setPathConstraints(path_constraints);
+      
       geometry_msgs::msg::Pose pose = createPose(req->positions);
       move_group_->setPoseTarget(pose, kEEFrame);
       publishTargetMarker(pose);
       ok = planAndExecute();
+    
     } else if (req->command == "line") {
-      // Move along Z only, with a skinny box constraint
-      // Use current X/Y & orientation; target Z from req
+      // For "line", we must ADD our joint constraint to the existing Z-line constraint
       auto current = computeEEFfromJointState();
       geometry_msgs::msg::Pose target = current;
       target.position.z = req->positions[2];
 
-      // Build constraints: joint + a position box aligned with Z at current X,Y
-      moveit_msgs::msg::Constraints c;
-      //addJointConstraints(c);
+      // Start with the path_constraints we just defined (which has the joint limit)
+      moveit_msgs::msg::Constraints c = path_constraints; 
+      
+      // Now, add the Z-line constraint to it as well
       addZLineConstraint(c, current, target);
+      
+      // Set both constraints
       move_group_->setPathConstraints(c);
 
       move_group_->setPoseTarget(target, kEEFrame);
       publishTargetMarker(target);
       ok = planAndExecute();
+    
     } else {
       RCLCPP_ERROR(node_->get_logger(), "Unknown command: %s (use 'joint' or 'pose')",
                    req->command.c_str());

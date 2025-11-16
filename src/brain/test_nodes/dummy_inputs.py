@@ -20,7 +20,7 @@ class DummyMoisture(Node):
 
     def publish_moisture(self):
         # Simulate rising soil moisture until ~750
-        if self.moisture < 750:
+        if self.moisture < 1200:
             self.moisture += random.uniform(20.0, 40.0)
         else:
             # Reset periodically to simulate dry soil again

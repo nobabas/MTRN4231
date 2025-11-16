@@ -53,7 +53,7 @@ def get_moveit_launch():
     }
 
     return TimerAction(
-        period=10.0, # Delay to prevent conflicts
+        period=20.0, # Delay to prevent conflicts
         actions=[
             IncludeLaunchDescription(
                 PythonLaunchDescriptionSource(
