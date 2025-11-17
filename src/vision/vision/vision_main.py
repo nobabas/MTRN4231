@@ -40,7 +40,7 @@ class YoloPublisher(Node):
 
         # Draw annotated detections
         annotated = r.plot()
-        annotated = cv2.cvtColor(annotated, cv2.COLOR_BGR2RGB)
+        #annotated = cv2.cvtColor(annotated, cv2.COLOR_BGR2RGB)
         # Show the live YOLO feed
         cv2.imshow("YOLO Live Annotated", annotated)
         cv2.waitKey(1)
