@@ -554,12 +554,16 @@ int main(int argc, char **argv)
 
 
 
-// HOME
+// HOME - NEED TO RUN THIS FIRST OR MOVEIT WILL FAIL
 // ros2 service call /moveit_path_plan interfaces/srv/MoveRequest "{command: 'joint', positions: [-1.3, 1.57, -1.83, -1.57, 0.0, 0.0]}"
 
 // POSE TEST
 // ros2 service call /moveit_path_plan interfaces/srv/MoveRequest "{command: 'pose', positions: [0.60, 0.35, 0.65, -3.1415, 0.0, 1.57]}"
 // ros2 service call /moveit_path_plan interfaces/srv/MoveRequest "{command: 'pose', positions: [0.60, 0.35, 0.35, -3.1415, 0.0, 1.57]}"
+
+// Cartesian TEST
+// ros2 service call /moveit_path_plan interfaces/srv/MoveRequest "{command: 'pose', positions: [0.50, 0.35, 0.65, -3.1415, 0.0, 1.57]}"
+// ros2 service call /moveit_path_plan interfaces/srv/MoveRequest "{command: 'cartesian', positions: [0.50, 0.35, 0.30, -3.1415, 0.0, 1.57]}" (line down in Z)
 
 // Marker Movement Test
 /*
