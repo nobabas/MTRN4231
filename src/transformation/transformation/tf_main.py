@@ -44,6 +44,7 @@ def main():
         
 
         world_result = subscriber.get_world_coordinates(tf_handler, depth_value=400)
+        # world_result = world_result.transform_camera_to_world1(world_result)
         print("Waiting 5 seconds for brain_node to connect...")
         time.sleep(5.0)  # Wait for 5 seconds
 

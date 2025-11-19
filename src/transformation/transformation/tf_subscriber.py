@@ -39,8 +39,8 @@ class MarkerSubscriber(Node):
             })
             # 3. Log the received data
             self.get_logger().info(f'Received marker: ID={marker_id:.1f}, Pose={pose_list}')
-        else:
-            self.get_logger().info("Maximum of 4 markers already collected, ignoring extra markers.")
+        # else:
+            #self.get_logger().info("Maximum of 4 markers already collected, ignoring extra markers.")
         
         # Set flags to indicate data was received
         self.data_received = True

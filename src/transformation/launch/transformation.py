@@ -19,8 +19,8 @@ def generate_launch_description():
             name='camera_link_broadcaster',
             output='screen',
             arguments=[
-                "1.27354", "0.0326318", "0.681138",
-                "-0.397486", "-0.00834818", "0.91757", "-0.000592307",
+                "1.30317", "0.0174152", "0.675776",
+                "-0.388123", "-0.0054127", "0.92155", "0.0087602",
                 "base_link", "camera_link"
             ],
         ),
