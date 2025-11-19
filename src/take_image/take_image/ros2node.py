@@ -6,6 +6,7 @@ import cv2
 import os
 from datetime import datetime
 from pathlib import Path  
+import numpy as np
 
 
 class ImageSaverSubscriber(Node):

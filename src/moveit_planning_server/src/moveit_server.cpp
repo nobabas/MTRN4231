@@ -21,8 +21,6 @@
 #include <shape_msgs/msg/solid_primitive.hpp>
 #include "moveit_msgs/msg/constraints.hpp"
 #include "moveit_msgs/msg/joint_constraint.hpp"
-#include <moveit_msgs/msg/robot_trajectory.hpp>
-
 
 #include <interfaces/srv/move_request.hpp>
 #include <interfaces/msg/marker2_d_array.hpp>
@@ -139,20 +137,37 @@ private:
     // JOINT CONSTRAINT LOGIC
     // =================================================================
 
-    // 1. Create a constraints object to hold all our constraints
+// 1. Create a constraints object to hold all our constraints
     moveit_msgs::msg::Constraints path_constraints;
 
+    {
     // 3. Create the constraint for the shoulder_lift_joint
-    moveit_msgs::msg::JointConstraint shoulder_lift_constraint;
-    shoulder_lift_constraint.joint_name = "shoulder_lift_joint";
+    moveit_msgs::msg::JointConstraint jc;
+    jc.joint_name = "shoulder_lift_joint";
     
     // Example: Limit lift joint to be between -2.57 and -0.57 radians
     // (This is centered at -1.57, or -90 degrees)
-    shoulder_lift_constraint.position = -1.57;
-    shoulder_lift_constraint.tolerance_below = 1.2; // 1.0 rad tolerance
-    shoulder_lift_constraint.tolerance_above = 1.2; // 1.0 rad tolerance
-    shoulder_lift_constraint.weight = 1.0;
-    path_constraints.joint_constraints.push_back(shoulder_lift_constraint);
+    jc.position = -1.57;
+    jc.tolerance_below = 1.1; // 1.0 rad tolerance
+    jc.tolerance_above = 1.1; // 1.0 rad tolerance
+    jc.weight = 1.0;
+    path_constraints.joint_constraints.push_back(jc);
+    }
+
+    {
+    // 3. Create the constraint for the shoulder_lift_joint
+    moveit_msgs::msg::JointConstraint jc;
+    jc.joint_name = "shoulder_pan_joint";
+    
+    // Example: Limit lift joint to be between -2.57 and -0.57 radians
+    // (This is centered at -1.57, or -90 degrees)
+    jc.position = 0;
+    jc.tolerance_below = 2; // 1.0 rad tolerance
+    jc.tolerance_above = 2; // 1.0 rad tolerance
+    jc.weight = 1.0;
+    path_constraints.joint_constraints.push_back(jc);
+    }
+
 
     if (req->command == "joint") {
       // Apply the constraints before planning
@@ -187,19 +202,8 @@ private:
       publishTargetMarker(target);
       ok = planAndExecute();
     
-    } else if (req->command == "cartesian") {
-      // Optional Cartesian move using joint-state-based EE pose
-      move_group_->clearPoseTargets();
-      move_group_->clearPathConstraints();
-      move_group_->setStartStateToCurrentState();
-
-      geometry_msgs::msg::Pose pose = createPose(req->positions);
-      publishTargetMarker(pose);
-      ok = computeCartesianPose(pose);
-
     } else {
-      RCLCPP_ERROR(node_->get_logger(),
-                   "Unknown command: %s (use 'joint', 'pose', 'line', or 'cartesian')",
+      RCLCPP_ERROR(node_->get_logger(), "Unknown command: %s (use 'joint' or 'pose')",
                    req->command.c_str());
       res->success = false;
       return;
@@ -305,56 +309,6 @@ private:
 
     return pose;
   }
-
-  // ---------------------------
-  // Compute Cartesian Path
-  // ---------------------------
-  bool computeCartesianPose(const geometry_msgs::msg::Pose& target)
-  {
-    // Use joint-state-based FK instead of move_group_->getCurrentPose()
-    geometry_msgs::msg::Pose start = computeEEFfromJointState();
-
-    // If we never received joint states, computeEEFfromJointState()
-    // will give you an identity-ish pose. You can bail early if you want:
-    if (last_js_.name.empty() || last_js_.position.empty()) {
-      RCLCPP_ERROR(node_->get_logger(),
-                   "computeCartesianPose: no joint_state received yet, aborting.");
-      return false;
-    }
-
-    std::vector<geometry_msgs::msg::Pose> waypoints;
-    waypoints.push_back(start);
-    waypoints.push_back(target);
-
-    moveit_msgs::msg::RobotTrajectory trajectory;
-    const double eef_step       = 0.01;  // path resolution (m)
-    const double jump_threshold = 0.0;   // disable jump detection
-
-    double fraction = move_group_->computeCartesianPath(
-      waypoints, eef_step, jump_threshold, trajectory, true);
-
-    RCLCPP_INFO(node_->get_logger(),
-                "computeCartesianPose: Cartesian path fraction = %.3f", fraction);
-
-    if (fraction < 0.99) {
-      RCLCPP_ERROR(node_->get_logger(),
-                   "computeCartesianPose: Failed to compute full Cartesian path.");
-      return false;
-    }
-
-    moveit::planning_interface::MoveGroupInterface::Plan plan;
-    plan.trajectory_ = trajectory;
-
-    auto exec_code = move_group_->execute(plan);
-    if (exec_code != moveit::core::MoveItErrorCode::SUCCESS) {
-      RCLCPP_ERROR(node_->get_logger(),
-                   "computeCartesianPose: Execution failed.");
-      return false;
-    }
-
-    return true;
-  }
-
 
   // ---------------------------
   // Vision subscriber + queue
@@ -519,7 +473,6 @@ private:
     last_js_ = *msg;
   }
 
-
   // Members
   rclcpp::Node::SharedPtr node_;
   std::shared_ptr<moveit::planning_interface::MoveGroupInterface> move_group_;
@@ -554,17 +507,17 @@ int main(int argc, char **argv)
 
 
 
-// HOME - NEED TO RUN THIS FIRST OR MOVEIT WILL FAIL
+// HOME
 // ros2 service call /moveit_path_plan interfaces/srv/MoveRequest "{command: 'joint', positions: [-1.3, 1.57, -1.83, -1.57, 0.0, 0.0]}"
 
 // POSE TEST
-// ros2 service call /moveit_path_plan interfaces/srv/MoveRequest "{command: 'pose', positions: [0.60, 0.35, 0.65, -3.1415, 0.0, 1.57]}"
+// ros2 service call /moveit_path_plan interfaces/srv/MoveRequest "{command: 'pose', positions: [0.584, 0.154, 0.40, -3.1415, 0.0, -1.57]}"
+
+// World: X=0.584m, Y=0.154m, Z=0.400m
+
 // ros2 service call /moveit_path_plan interfaces/srv/MoveRequest "{command: 'pose', positions: [0.60, 0.35, 0.35, -3.1415, 0.0, 1.57]}"
-
-// Cartesian TEST
-// ros2 service call /moveit_path_plan interfaces/srv/MoveRequest "{command: 'pose', positions: [0.50, 0.35, 0.65, -3.1415, 0.0, 1.57]}"
-// ros2 service call /moveit_path_plan interfaces/srv/MoveRequest "{command: 'cartesian', positions: [0.50, 0.35, 0.30, -3.1415, 0.0, 1.57]}" (line down in Z)
-
+// ros2 service call /moveit_path_plan interfaces/srv/MoveRequest "{command: 'pose', positions: [0.60, 0.48, 0.35, -3.1415, 0.0, 0]}"
+// ros2 service call /moveit_path_plan interfaces/srv/MoveRequest "{command: 'pose', positions: [0.50, 0.35, 0.35, -3.1415, 0.0, 1.57]}"
 // Marker Movement Test
 /*
 ros2 topic pub -1 /vision/markers interfaces/msg/Marker2DArray "

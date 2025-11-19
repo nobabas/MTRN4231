@@ -4,11 +4,11 @@ from ultralytics import YOLO
 
 # Load your trained model
 # Copy path file
-model = YOLO('/home/mtrn/lab4-main/runs/detect/train2/weights/best.pt')
+model = YOLO('/home/mtrn/MTRN4231_soil/src/best.pt')
 
 # Load a local image file
 # Copy path file of desired image in dataset
-image_path = '/home/mtrn/lab4-main/lab4-main/my_dataset/train/images/Screenshot from 2025-11-10 12-35-49.png'
+image_path = '/home/mtrn/Pictures/Screenshots/Picture.png'
 cv_image = cv2.imread(image_path)
 
 # Run YOLO detection

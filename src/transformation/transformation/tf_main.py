@@ -17,8 +17,8 @@ def main():
         node = rclpy.create_node('test_tf')
         tf_handler = TFHandler(node)
         # Enable mock intrinsics 
-        if tf_handler.intrinsics is None:
-                tf_handler.set_mock_intrinsics()
+        #if tf_handler.intrinsics is None:
+        #        tf_handler.set_mock_intrinsics()
         # Wait until camera intrinsics are received
         while tf_handler.intrinsics is None:
             rclpy.spin_once(tf_handler.node, timeout_sec=0.1)
@@ -39,15 +39,11 @@ def main():
         
         # Give the subscriber 5s to collect all messages
         time.sleep(5.0) 
-        
-        if len(subscriber.blue_area) == 0:
-            print("No marker data received. Exiting.")
-            subscriber.destroy_node()
-            return
-            
+                   
         print(f"Successfully received {len(subscriber.blue_area)} markers!")
+        
 
-        world_result = subscriber.get_world_coordinates(tf_handler, depth_value=1000)
+        world_result = subscriber.get_world_coordinates(tf_handler, depth_value=400)
         print("Waiting 5 seconds for brain_node to connect...")
         time.sleep(5.0)  # Wait for 5 seconds
 
@@ -65,7 +61,6 @@ def main():
     except KeyboardInterrupt:
         print("Shutting down...")
     finally:
-        cv2.waitKey(0)
         publisher.destroy_node()
         subscriber.destroy_node()
         node.destroy_node()
