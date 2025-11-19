@@ -21,6 +21,8 @@
 #include <shape_msgs/msg/solid_primitive.hpp>
 #include "moveit_msgs/msg/constraints.hpp"
 #include "moveit_msgs/msg/joint_constraint.hpp"
+#include <moveit_msgs/msg/robot_trajectory.hpp>
+
 
 #include <interfaces/srv/move_request.hpp>
 #include <interfaces/msg/marker2_d_array.hpp>
@@ -137,7 +139,7 @@ private:
     // JOINT CONSTRAINT LOGIC
     // =================================================================
 
-// 1. Create a constraints object to hold all our constraints
+    // 1. Create a constraints object to hold all our constraints
     moveit_msgs::msg::Constraints path_constraints;
 
     // 3. Create the constraint for the shoulder_lift_joint
@@ -185,8 +187,19 @@ private:
       publishTargetMarker(target);
       ok = planAndExecute();
     
+    } else if (req->command == "cartesian") {
+      // Optional Cartesian move using joint-state-based EE pose
+      move_group_->clearPoseTargets();
+      move_group_->clearPathConstraints();
+      move_group_->setStartStateToCurrentState();
+
+      geometry_msgs::msg::Pose pose = createPose(req->positions);
+      publishTargetMarker(pose);
+      ok = computeCartesianPose(pose);
+
     } else {
-      RCLCPP_ERROR(node_->get_logger(), "Unknown command: %s (use 'joint' or 'pose')",
+      RCLCPP_ERROR(node_->get_logger(),
+                   "Unknown command: %s (use 'joint', 'pose', 'line', or 'cartesian')",
                    req->command.c_str());
       res->success = false;
       return;
@@ -292,6 +305,56 @@ private:
 
     return pose;
   }
+
+  // ---------------------------
+  // Compute Cartesian Path
+  // ---------------------------
+  bool computeCartesianPose(const geometry_msgs::msg::Pose& target)
+  {
+    // Use joint-state-based FK instead of move_group_->getCurrentPose()
+    geometry_msgs::msg::Pose start = computeEEFfromJointState();
+
+    // If we never received joint states, computeEEFfromJointState()
+    // will give you an identity-ish pose. You can bail early if you want:
+    if (last_js_.name.empty() || last_js_.position.empty()) {
+      RCLCPP_ERROR(node_->get_logger(),
+                   "computeCartesianPose: no joint_state received yet, aborting.");
+      return false;
+    }
+
+    std::vector<geometry_msgs::msg::Pose> waypoints;
+    waypoints.push_back(start);
+    waypoints.push_back(target);
+
+    moveit_msgs::msg::RobotTrajectory trajectory;
+    const double eef_step       = 0.01;  // path resolution (m)
+    const double jump_threshold = 0.0;   // disable jump detection
+
+    double fraction = move_group_->computeCartesianPath(
+      waypoints, eef_step, jump_threshold, trajectory, true);
+
+    RCLCPP_INFO(node_->get_logger(),
+                "computeCartesianPose: Cartesian path fraction = %.3f", fraction);
+
+    if (fraction < 0.99) {
+      RCLCPP_ERROR(node_->get_logger(),
+                   "computeCartesianPose: Failed to compute full Cartesian path.");
+      return false;
+    }
+
+    moveit::planning_interface::MoveGroupInterface::Plan plan;
+    plan.trajectory_ = trajectory;
+
+    auto exec_code = move_group_->execute(plan);
+    if (exec_code != moveit::core::MoveItErrorCode::SUCCESS) {
+      RCLCPP_ERROR(node_->get_logger(),
+                   "computeCartesianPose: Execution failed.");
+      return false;
+    }
+
+    return true;
+  }
+
 
   // ---------------------------
   // Vision subscriber + queue
@@ -455,6 +518,7 @@ private:
   void jointStateCb(const sensor_msgs::msg::JointState::SharedPtr msg) {
     last_js_ = *msg;
   }
+
 
   // Members
   rclcpp::Node::SharedPtr node_;
