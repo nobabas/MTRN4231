@@ -17,8 +17,8 @@ def main():
         node = rclpy.create_node('test_tf')
         tf_handler = TFHandler(node)
         # Enable mock intrinsics 
-        #if tf_handler.intrinsics is None:
-        #        tf_handler.set_mock_intrinsics()
+        if tf_handler.intrinsics is None:
+               tf_handler.set_mock_intrinsics()
         # Wait until camera intrinsics are received
         while tf_handler.intrinsics is None:
             rclpy.spin_once(tf_handler.node, timeout_sec=0.1)
