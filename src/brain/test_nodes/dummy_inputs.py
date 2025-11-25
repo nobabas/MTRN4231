@@ -14,17 +14,20 @@ class DummyMoisture(Node):
         # Publish every second
         self.create_timer(1.0, self.publish_moisture)
 
-        # Start with low initial value
-        self.moisture = 200.0
+        # Start with low initial valueif(future.wait_for(std::chrono::milliseconds(10)) == std::future_status::ready) {
+                    RCLCPP_INFO(get_logger(), "Reached bottom limit without triggering moisture stop.");
+                    break; 
+                }
+        self.moisture = 800
         self.get_logger().info("DummyMoisture started — publishing fake soil moisture readings")
 
     def publish_moisture(self):
         # Simulate rising soil moisture until ~750
-        if self.moisture < 1200:
+        if self.moisture < 1000:
             self.moisture += random.uniform(20.0, 40.0)
         else:
             # Reset periodically to simulate dry soil again
-            self.moisture = 200.0
+            self.moisture = 800
 
         msg = Float32()
         msg.data = float(self.moisture)

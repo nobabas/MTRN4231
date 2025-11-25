@@ -638,7 +638,7 @@ int main(int argc, char **argv)
 // ros2 service call /moveit_path_plan interfaces/srv/MoveRequest "{command: 'pose', positions: [0.60, 0.35, 0.35, -3.1415, 0.0, 1.57]}"
 
 // Cartesian TEST
-// ros2 service call /moveit_path_plan interfaces/srv/MoveRequest "{command: 'pose', positions: [0.50, 0.35, 0.65, -3.1415, 0.0, 1.57]}"
+// ros2 service call /moveit_path_plan interfaces/srv/MoveRequest "{command: 'cartesian', positions: [0.50, 0.35, 0.65, -3.1415, 0.0, 1.57]}"
 // ros2 service call /moveit_path_plan interfaces/srv/MoveRequest "{command: 'cartesian', positions: [0.50, 0.35, 0.30, -3.1415, 0.0, 1.57]}"  # line down in Z
 
 // STOP TEST (while arm is moving)

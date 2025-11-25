@@ -6,7 +6,8 @@ from ultralytics import YOLO
 import cv2
 import numpy as np
 
-MODEL_PATH = '/home/mtrn/MTRN4231/src/best.pt'
+# Change model_path
+MODEL_PATH = '/home/samuel/MTRN4231/src/best.pt'
 
 CONFIDENCE = 0.3
 
