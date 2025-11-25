@@ -76,7 +76,7 @@ class TFHandler:
                     timeout=rclpy.duration.Duration(seconds=2.0))
                 
                 pose = Pose()
-                pose.position = point
+                pose.position = point   
                 pose.orientation = Quaternion()  # Add this line to prevent NoneType errors
                 
                 transformed = tf2_geometry_msgs.do_transform_pose(pose, transform)
@@ -109,39 +109,40 @@ class TFHandler:
             
         self.broadcaster.sendTransform(t)
         
-    def transform_camera_to_world(self, point):
-        """Custom transformation from camera to world coordinates."""
-        return [
+    # def transform_camera_to_world(self, point):
+    #     """Custom transformation from camera to world coordinates."""
+    #     return [
             
-            -point[0] + 0.48802, #+ 0.57,   # this is -(robot x)
-            point[1] + 0.02131, #- 0.691,  # this is -(robot y)
-            point[2],   # Camera Z -> World X (forward)
-        ]
+    #         -point[0] + 0.48802, #+ 0.57,   # this is -(robot x)
+    #         point[1] + 0.02131, #- 0.691,  # this is -(robot y)
+    #         point[2],   # Camera Z -> World X (forward)
+    #     ]
     
-    # def transform_camera_to_world(self, point_3d, from_frame='camera_link', to_frame='base_link'):
-    #     """
-    #     Transform a 3D point given in camera frame to the world/base frame.
-    #     point_3d: tuple or list (x, y, z) in the camera frame
-    #     from_frame: source frame id (default 'camera_link')
-    #     to_frame: target frame id (default 'base_link')
-    #     returns: (x, y, z) in target frame
-    #     """
-    #     ps = PointStamped()
-    #     ps.header.frame_id = from_frame
-    #     # use zero time to get latest transform
-    #     ps.header.stamp = rclpy.time.Time().to_msg()
-    #     ps.point.x, ps.point.y, ps.point.z = point_3d
+    def transform_camera_to_world(self, point_3d, from_frame='camera_link', to_frame='base_link'):
+        """
+        Transform a 3D point given in camera frame to the world/base frame.
+        point_3d: tuple or list (x, y, z) in the camera frame
+        from_frame: source frame id (default 'camera_link')S
+        to_frame: target frame id (default 'base_link')
+        returns: (x, y, z) in target frame
+        """
+        ps = PointStamped()
+        ps.header.frame_id = from_frame
+        # use zero time to get latest transform
+        ps.header.stamp = rclpy.time.Time().to_msg()
+        ps.point.x, ps.point.y, ps.point.z = point_3d
 
-    #     try:
-    #         # assumes self.tf_buffer is an instance of tf2_ros.Buffer
-    #         transform = self.tf_buffer.lookup_transform(
-    #             to_frame,
-    #             from_frame,
-    #             rclpy.time.Time())  # latest
+        try:
+            # assumes self.tf_buffer is an instance of tf2_ros.Buffer
+            transform = self.tf_buffer.lookup_transform(
+                to_frame,
+                from_frame,
+                rclpy.time.Time())  # latest
             
-    #         return (transform.transform.translation.x, transform.transform.translation.y, transform.transform.translation.z)
-    #     except Exception as e:
-    #         raise RuntimeError(f"Failed to transform point from {from_frame} to {to_frame}: {e}")
+            transformed = tf2_geometry.do_transform_point(ps, transform)
+            return transformed.point
+        except Exception as e:
+            raise RuntimeError(f"Failed to transform point from {from_frame} to {to_frame}: {e}")
 
     def pixel_to_3d(self, pixel_x, pixel_y, depth_value):
         """Convert pixel+depth to 3D point in camera frame"""            
@@ -151,4 +152,9 @@ class TFHandler:
             [pixel_x,pixel_y],
             depth_value * 0.001  # mm to meters
         )
-        return self.transform_camera_to_world(point_3d)
+        world_point = self.camera_point_to_world(point_3d)
+        if world_point is None:
+            return None
+        return [world_point.x, world_point.y, world_point.z]
+
+    
