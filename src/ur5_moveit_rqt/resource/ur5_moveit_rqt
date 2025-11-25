@@ -1,0 +1,10 @@
+<library path="ur5_moveit_rqt">
+  <class
+    name="UR5 MoveIt Control"
+    type="ur5_moveit_rqt.ur5_moveit_plugin.UR5MoveItPlugin"
+    base_class_type="rqt_gui_py::Plugin">
+    <description>
+      Simple UR5 MoveIt control panel with buttons and status.
+    </description>
+  </class>
+</library>
