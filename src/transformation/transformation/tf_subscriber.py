@@ -1,11 +1,7 @@
-import rclpy
 from rclpy.node import Node
 from interfaces.msg import MarkerData
 import threading
 import time
-
-# --- 1. ADD THE QOS IMPORTS ---
-from rclpy.qos import QoSProfile, DurabilityPolicy, HistoryPolicy
 
 TOPIC_NAME = '/pixel_coords'
 
@@ -17,20 +13,12 @@ class MarkerSubscriber(Node):
         self.data_received = False
         self.data_received_event = threading.Event()
         
-        # --- 2. DEFINE THE "STICKY" (TRANSIENT LOCAL) QOS PROFILE ---
-        transient_local_qos = QoSProfile(
-            history=HistoryPolicy.KEEP_LAST,
-            depth=10,
-            durability=DurabilityPolicy.TRANSIENT_LOCAL
-        )
-        
-        # --- 3. CREATE THE SUBSCRIBER USING THE QOS PROFILE ---
+        # 2. Create the subscriber
         self.subscription = self.create_subscription(
             MarkerData,
             TOPIC_NAME,
             self.listener_callback,  # Function to run when a message is received
-            qos_profile=transient_local_qos  # <-- USE THE QOS PROFILE (changed from 10)
-        )
+            10)
         
         self.get_logger().info(f'Subscribing to "{TOPIC_NAME}". Waiting for messages...')
 
@@ -44,16 +32,15 @@ class MarkerSubscriber(Node):
         
         # Convert float32 array to regular Python list for proper handling
         pose_list = list(marker_pose)
-        
-        # --- ADDED ID TO THE DICTIONARY ---
-        # This is important so we can pass the ID to the brain node
-        self.blue_area.append({
-            'id': marker_id,
-            'center': pose_list
-        })
-
-        # 3. Log the received data to the console
-        self.get_logger().info(f'Received marker: ID={marker_id:.1f}, Pose={pose_list}')
+        # Only add a new marker if we have less than 4
+        if len(self.blue_area) < 4:
+            self.blue_area.append({
+                'center': pose_list
+            })
+            # 3. Log the received data
+            self.get_logger().info(f'Received marker: ID={marker_id:.1f}, Pose={pose_list}')
+        # else:
+            #self.get_logger().info("Maximum of 4 markers already collected, ignoring extra markers.")
         
         # Set flags to indicate data was received
         self.data_received = True
@@ -78,21 +65,21 @@ class MarkerSubscriber(Node):
         return received
 
     def get_world_coordinates(self, tf_handler, depth_value):
+        markerLimit = 4
         if not self.blue_area:
             self.get_logger().warning('No marker data available for conversion')
             return []
-            
+        markerdata = self.blue_area[:markerLimit]
         world_coordinates = []
         
-        for area in self.blue_area:
+        for i, area in enumerate(markerdata):
             cx, cy = area['center']
-            marker_id = area['id'] 
             
             # SINGLE FUNCTION CALL - that's all you need!
             world_coords = tf_handler.pixel_to_3d(cx, cy, depth_value)
             
             world_coordinates.append({
-                'id': marker_id, # <-- Pass the ID along
+                'id': i,
                 'pixel_center': (cx, cy),
                 'world_coords': world_coords,
             })

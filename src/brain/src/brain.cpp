@@ -156,17 +156,18 @@ public:
             RCLCPP_INFO(get_logger(), "Loading hardcoded markers...");
             {
                 interfaces::msg::MarkerData m1, m2, m3;
-                //ros2 service call /moveit_path_plan interfaces/srv/MoveRequest "{command: 'pose', positions: [0.60, 0.35, 0.65, -3.1415, 0.0, 1.57]}"
+                // X=0.106m, Y=0.835m, Z=0.400m
+                //ros2 service call /moveit_path_plan interfaces/srv/MoveRequest "{command: 'pose', positions: [0.435, 0.626, 0.35, -3.1415, 0.0, 0]}"
                 //ros2 service call /moveit_path_plan interfaces/srv/MoveRequest "{command: 'pose', positions: [0.60, 0.35, 0.35, -3.1415, 0.0, 1.57]}"
 
                 m1.id = 1;
-                m1.pose = {0.50, 0.35, 0.5, -3.1415, 0, 1.57};
+                m1.pose = {0.205, -0.826, 0.5, -3.1415, 0, 0};
 
                 m2.id = 2;
-                m2.pose = {0.3, 0.2, 0.5, -3.1415, 0, 1.57};
+                m2.pose = {0.143, 0.881, 0.5, -3.1415, 0, 0};
 
                 m3.id = 3;
-                m3.pose = {0.40, 0.25, 0.5, -3.1415, 0, 1.57};
+                m3.pose = {0.40, 0.25, 0.5, -3.1415, 0, 0};
 
                 markers_copy[m1.id] = m1;
                 markers_copy[m2.id] = m2;

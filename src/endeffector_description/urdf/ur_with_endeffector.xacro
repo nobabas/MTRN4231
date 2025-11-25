@@ -28,6 +28,8 @@
   </inertial>
   </link>
 
+
+
   <joint name="tool0_to_endeffector_base" type="fixed">
     <parent link="tool0"/>
     <child link="simple_ee_link"/>

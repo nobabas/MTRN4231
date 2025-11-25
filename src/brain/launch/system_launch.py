@@ -29,6 +29,13 @@ def generate_launch_description():
                 get_package_share_directory('endeffector_description'), 'launch'),
                 '/ur_with_endeffector.launch.py'])
             )
+            
+    take_image = IncludeLaunchDescription(
+            PythonLaunchDescriptionSource([os.path.join(
+                get_package_share_directory('take_image'), 'launch'),
+                '/take_image_launch.py'])
+            )
+    
     
     vision = IncludeLaunchDescription(
             PythonLaunchDescriptionSource([os.path.join(
@@ -63,6 +70,7 @@ def generate_launch_description():
 
         brain_node,
         robotAndCamera,
+        take_image,
         vision,
         arm,
         teensy_bridge,
