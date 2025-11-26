@@ -28,9 +28,10 @@
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp/executors.hpp"
 #include "std_msgs/msg/float32.hpp"
+#include "std_srvs/srv/trigger.hpp"
 
 #include "interfaces/msg/marker_data.hpp"
-#include "interfaces/msg/marker2_d_array.hpp" 
+#include "interfaces/msg/marker2_d_array.hpp"
 #include "interfaces/srv/vision_cmd.hpp"
 #include "interfaces/srv/move_request.hpp"
 #include "interfaces/srv/brain_cmd.hpp"
@@ -38,9 +39,11 @@
 // --- CONTROL SWITCH: Set to 1 for Vision, 0 for Hardcoded ---
 #define USE_VISION 0
 
-class BrainNode : public rclcpp::Node {
+class BrainNode : public rclcpp::Node
+{
 public:
-    BrainNode() : Node("brain_node") {
+    BrainNode() : Node("brain_node")
+    {
 
         // -------------------------------
         // PARAMETERS
@@ -54,8 +57,9 @@ public:
         // -------------------------------
         // CLIENTS
         // -------------------------------
-        vision_client_ = create_client<interfaces::srv::VisionCmd>("vision_srv", rmw_qos_profile_services_default, reentrant_group_) ;
-        move_client_   = create_client<interfaces::srv::MoveRequest>("/moveit_path_plan", rmw_qos_profile_services_default, reentrant_group_);
+        vision_client_ = create_client<interfaces::srv::VisionCmd>("vision_srv", rmw_qos_profile_services_default, reentrant_group_);
+        move_client_ = create_client<interfaces::srv::MoveRequest>("/moveit_path_plan", rmw_qos_profile_services_default, reentrant_group_);
+        stop_client_ = create_client<std_srvs::srv::Trigger>("moveit_stop", rmw_qos_profile_services_default, reentrant_group_);
 
         // -------------------------------
         // SERVICE (External Command)
@@ -63,18 +67,21 @@ public:
         brain_srv_ = create_service<interfaces::srv::BrainCmd>(
             "brain_srv",
             [this](const std::shared_ptr<interfaces::srv::BrainCmd::Request> req,
-                   std::shared_ptr<interfaces::srv::BrainCmd::Response> res) {
+                   std::shared_ptr<interfaces::srv::BrainCmd::Response> res)
+            {
                 RCLCPP_INFO(get_logger(), "Brain received command: %s", req->command.c_str());
-                if (req->command == "soil_sampling") {
+                if (req->command == "soil_sampling")
+                {
                     res->success = (runSoilSamplingRoutine() == 1);
-                } else {
+                }
+                else
+                {
                     RCLCPP_WARN(get_logger(), "Unknown brain command: %s", req->command.c_str());
                     res->success = false;
                 }
             },
             rmw_qos_profile_services_default,
-            reentrant_group_
-        );
+            reentrant_group_);
 
         // -------------------------------
         // SUBSCRIPTIONS
@@ -84,28 +91,30 @@ public:
         sticky_qos.transient_local();
 
         marker_sub_ = create_subscription<interfaces::msg::Marker2DArray>(
-            "/blue_markers_coords", 
-            sticky_qos, 
-            [this](const interfaces::msg::Marker2DArray::SharedPtr msg) {
+            "/blue_markers_coords",
+            sticky_qos,
+            [this](const interfaces::msg::Marker2DArray::SharedPtr msg)
+            {
                 std::lock_guard<std::mutex> lock(marker_mutex_);
-                
-                for (const auto & marker_2d : msg->markers) {
+
+                for (const auto &marker_2d : msg->markers)
+                {
                     interfaces::msg::MarkerData full_marker;
-                    
+
                     full_marker.id = marker_2d.id;
-                    
+
                     float world_x = marker_2d.x;
                     float world_y = marker_2d.y;
                     float fixed_z = 0.35; // Safe height above ground (Hardcoded Z)
-                    
-                    // This command works: 
+
+                    // This command works:
                     // ros2 service call /moveit_path_plan interfaces/srv/MoveRequest "{command: 'pose', positions: [0.60, 0.35, 0.35, -3.1415, 0.0, 1.57]}"
 
                     // Pose: [x, y, z, roll, pitch, yaw]
                     full_marker.pose = {
-                        world_x, 
-                        world_y, 
-                        fixed_z, 
+                        world_x,
+                        world_y,
+                        fixed_z,
                         -3.1415, 0.0, 1.57 // Hardcoded orientation (facing down)
                     };
 
@@ -118,72 +127,79 @@ public:
 
         moist_sub_ = create_subscription<std_msgs::msg::Float32>(
             "/soil_moisture", 10,
-            [this](const std_msgs::msg::Float32::SharedPtr msg) {
+            [this](const std_msgs::msg::Float32::SharedPtr msg)
+            {
                 latest_moisture_ = msg->data;
                 RCLCPP_INFO_THROTTLE(get_logger(), *get_clock(), 2000,
-                                    "Current soil moisture: %.2f", latest_moisture_);
+                                     "Current soil moisture: %.2f", latest_moisture_);
             });
     }
 
     // ----------------------------------------------------
     // MAIN ROUTINE
     // ----------------------------------------------------
-    int runSoilSamplingRoutine() {
+    int runSoilSamplingRoutine()
+    {
         RCLCPP_INFO(get_logger(), "Starting soil sampling routine...");
+        
+        double min_z_limit = 0.25; // Should change 
 
         // --------------------------------------------------------
         // Step 1: Get markers based on the USE_VISION flag
         // --------------------------------------------------------
         std::map<int, interfaces::msg::MarkerData> markers_copy;
 
-        #if USE_VISION
-            // --- Using VISION markers ---
-            RCLCPP_INFO(get_logger(), "Copying markers from subscription...");
+#if USE_VISION
+        // --- Using VISION markers ---
+        RCLCPP_INFO(get_logger(), "Copying markers from subscription...");
+        {
+            std::lock_guard<std::mutex> lock(marker_mutex_);
+            if (marker_map_.empty())
             {
-                std::lock_guard<std::mutex> lock(marker_mutex_);
-                if (marker_map_.empty()) {
-                    RCLCPP_WARN(get_logger(), "No markers received. Aborting routine.");
-                    return 0; // Failure
-                }
-                // Copy the map, then clear the original so we don't re-sample old markers
-                markers_copy = marker_map_;
-                marker_map_.clear(); 
+                RCLCPP_WARN(get_logger(), "No markers received. Aborting routine.");
+                return 0; // Failure
             }
-            RCLCPP_INFO(get_logger(), "Loaded %zu markers from subscription.", markers_copy.size());
-        
-        #else
-            // --- Using HARDCODED markers ---
-            RCLCPP_INFO(get_logger(), "Loading hardcoded markers...");
-            {
-                interfaces::msg::MarkerData m1, m2, m3;
-                // X=0.106m, Y=0.835m, Z=0.400m
-                //ros2 service call /moveit_path_plan interfaces/srv/MoveRequest "{command: 'pose', positions: [0.435, 0.626, 0.35, -3.1415, 0.0, 0]}"
-                //ros2 service call /moveit_path_plan interfaces/srv/MoveRequest "{command: 'pose', positions: [0.60, 0.35, 0.35, -3.1415, 0.0, 1.57]}"
+            // Copy the map, then clear the original so we don't re-sample old markers
+            markers_copy = marker_map_;
+            marker_map_.clear();
+        }
+        RCLCPP_INFO(get_logger(), "Loaded %zu markers from subscription.", markers_copy.size());
 
-                m1.id = 1;
-                m1.pose = {0.205, -0.826, 0.5, -3.1415, 0, 0};
+#else
+        // --- Using HARDCODED markers ---
+        RCLCPP_INFO(get_logger(), "Loading hardcoded markers...");
+        {
+            interfaces::msg::MarkerData m1, m2, m3;
+            // X=0.106m, Y=0.835m, Z=0.400m
+            // ros2 service call /moveit_path_plan interfaces/srv/MoveRequest "{command: 'pose', positions: [0.435, 0.626, 0.35, -3.1415, 0.0, 0]}"
+            // ros2 service call /moveit_path_plan interfaces/srv/MoveRequest "{command: 'pose', positions: [0.60, 0.35, 0.35, -3.1415, 0.0, 1.57]}"
 
-                m2.id = 2;
-                m2.pose = {0.143, 0.881, 0.5, -3.1415, 0, 0};
+            m1.id = 1;
+            m1.pose = {0.205, 0.62, 0.5, -3.1415, 0, 0};
 
-                m3.id = 3;
-                m3.pose = {0.40, 0.25, 0.5, -3.1415, 0, 0};
+            m2.id = 2;
+            m2.pose = {0.60, 0.35, 0.5, -3.1415, 0, 0};
 
-                markers_copy[m1.id] = m1;
-                markers_copy[m2.id] = m2;
-                markers_copy[m3.id] = m3;
-            }
-            RCLCPP_INFO(get_logger(), "Loaded %zu hardcoded marker(s).", markers_copy.size());
-        #endif
-       
+            m3.id = 3;
+            m3.pose = {0.40, 0.25, 0.5, -3.1415, 0, 0};
+
+            markers_copy[m1.id] = m1;
+            markers_copy[m2.id] = m2;
+            markers_copy[m3.id] = m3;
+        }
+        RCLCPP_INFO(get_logger(), "Loaded %zu hardcoded marker(s).", markers_copy.size());
+#endif
+
         // --------------------------------------------------------
         // Step 2: Iterate through each marker
         // --------------------------------------------------------
-        for (const auto &pair : markers_copy) {
+        for (const auto &pair : markers_copy)
+        {
             const int marker_id = pair.first;
             const auto &marker = pair.second;
 
-            if (marker.pose.size() < 6) {
+            if (marker.pose.size() < 6)
+            {
                 RCLCPP_WARN(get_logger(), "Marker %d has invalid pose size (%zu). Skipping.",
                             marker_id, marker.pose.size());
                 continue;
@@ -198,21 +214,22 @@ public:
             std::vector<float> current_pose(marker.pose.begin(), marker.pose.end());
 
             // Wait until movement service is available
-            while (!move_client_->wait_for_service(std::chrono::seconds(1))) {
+            while (!move_client_->wait_for_service(std::chrono::seconds(1)))
+            {
                 RCLCPP_WARN(get_logger(), "Waiting for MoveIt service to be available...");
             }
 
-            // --- Move to marker ---
-
             // Go home first
             std::vector<float> home_position = {-1.3, 1.57, -1.83, -1.57, 0.0, 0.0};
-            if (!callMovementService("joint", home_position)) {
+            if (!callMovementService("joint", home_position))
+            {
                 RCLCPP_ERROR(get_logger(), "Moving to home failed. Skipping marker.");
                 continue;
             }
-            
+
             // Then move to pose
-            if (!callMovementService("pose", current_pose)) {
+            if (!callMovementService("cartesian", current_pose))
+            {
                 RCLCPP_ERROR(get_logger(), "Movement to marker %d failed. Skipping to next.", marker_id);
                 continue;
             }
@@ -221,128 +238,128 @@ public:
 
             // ----------------------------------------------------
             // Step 3: Lower probe until threshold reached
-            // ----------------------------------------------------
-            rclcpp::sleep_for(std::chrono::seconds(2));
-            const double step_size = 0.05;  // 5 cm down each iteration
-            const double min_z_limit = -0.05; // safety limit below which we stop
-            double initial_z = current_pose[2];
-            //latest_moisture_ = 0.0; // reset each time
+            // ---------------------------------------------------
+            double safe_z = current_pose[2];
+            std::vector<float> target = current_pose;
+            target[2] = min_z_limit;
 
-            while (latest_moisture_ < soil_threshold_) {
-                current_pose[2] -= step_size;
+            // 1. Send command asynchronously
+            auto req = std::make_shared<interfaces::srv::MoveRequest::Request>();
+            req->command = "cartesian"; 
+            for(float p : target) req->positions.push_back((double)p);
+            
+            RCLCPP_INFO(get_logger(), "Descending to %.2f. Stop if moisture < %.2f", min_z_limit, soil_threshold_);
+            auto future = move_client_->async_send_request(req);
 
-                if (current_pose[2] < min_z_limit) {
-                    RCLCPP_ERROR(get_logger(),
-                                "Safety stop: Z below %.3f while sampling marker %d. Aborting sampling for this marker.",
-                                min_z_limit, marker_id);
+            // 2. Monitor Loop (The "Interrupt" Logic)
+            while(rclcpp::ok()) {
+                
+                // Check if move finished on its own (hit bottom)
+                if(future.wait_for(std::chrono::milliseconds(10)) == std::future_status::ready) {
+                    RCLCPP_INFO(get_logger(), "Reached bottom limit without triggering moisture stop.");
+                    break; 
+                }
+
+                // Check Moisture Condition
+                // Question to ask: 
+                // Will this work for soil moistures tested in the irl. Maybe change to being bigger? 
+                if(latest_moisture_ < soil_threshold_) {
+                    RCLCPP_WARN(get_logger(), "!!! MOISTURE TRIGGER (%.2f < %.2f) !!! STOPPING.", latest_moisture_, soil_threshold_);
+                    
+                    // CALL STOP SERVICE
+                    auto stop_req = std::make_shared<std_srvs::srv::Trigger::Request>();
+                    auto stop_future = stop_client_->async_send_request(stop_req);
+                    stop_future.wait(); 
+                    rclcpp::sleep_for(std::chrono::milliseconds(500));
+                    
                     break;
                 }
-
-                RCLCPP_INFO(get_logger(),
-                            "Marker %d → Moisture %.2f > %.2f → lowering probe to z = %.3f",
-                            marker_id, latest_moisture_, soil_threshold_, current_pose[2]);
-
-                if (!callMovementService("line", current_pose)) {
-                    RCLCPP_WARN(get_logger(), "Move down step failed (marker %d). Retrying...", marker_id);
-                }
-
-                rclcpp::sleep_for(std::chrono::seconds(1));
             }
 
-            RCLCPP_INFO(get_logger(),
-                        "Marker %d sampling complete (%.2f ≥ %.2f).",
-                        marker_id, latest_moisture_, soil_threshold_);
-
-            // ----------------------------------------------------
-            // Step 4: Retract probe back to safe height
-            // ----------------------------------------------------
-            current_pose[2] = initial_z;
-            if (!callMovementService("line", current_pose)) {
-                RCLCPP_WARN(get_logger(), "Failed to retract probe after sampling marker %d.", marker_id);
-            }
-
-            RCLCPP_INFO(get_logger(), "Probe retracted to safe Z for marker %d.", marker_id);
+            // ---------------------------------------------------------
+            // D. Retract (CARTESIAN)
+            // ---------------------------------------------------------
+            target[2] = safe_z;
+            rclcpp::sleep_for(std::chrono::milliseconds(500));
+            callMovementService("cartesian", target);
         }
-
-        // --------------------------------------------------------
-        // Step 5: Routine complete
-        // --------------------------------------------------------  
-        std::vector<float> home_position = {-1.3, 1.57, -1.83, -1.57, 0.0, 0.0};
-        callMovementService("joint", home_position);
-
-        RCLCPP_INFO(get_logger(), "Soil sampling routine completed for all markers.");
+        
+        // Final Home (JOINT)
+        callMovementService("joint", {-1.3, 1.57, -1.83, -1.57, 0.0, 0.0});
+        
+        RCLCPP_INFO(get_logger(), "Routine Complete.");
         return 1;
     }
 
+interfaces::msg::MarkerData callVisionService(const std::string &command)
+{
+    auto req = std::make_shared<interfaces::srv::VisionCmd::Request>();
+    req->command = command;
 
-    // ----------------------------------------------------
-    // SERVICE HELPERS
-    // ----------------------------------------------------
-    interfaces::msg::MarkerData callVisionService(const std::string &command) {
-        auto req = std::make_shared<interfaces::srv::VisionCmd::Request>();
-        req->command = command;
-
-        if (!vision_client_->wait_for_service(std::chrono::seconds(2))) {
-            RCLCPP_WARN(get_logger(), "Vision service not available.");
-            return interfaces::msg::MarkerData();
-        }
-
-        auto future = vision_client_->async_send_request(req);
-        auto result = future.get();
-        return result->marker_data;
+    if (!vision_client_->wait_for_service(std::chrono::seconds(2)))
+    {
+        RCLCPP_WARN(get_logger(), "Vision service not available.");
+        return interfaces::msg::MarkerData();
     }
 
-    bool callMovementService(const std::string &command, const std::vector<float> &positions) {
-        RCLCPP_WARN(get_logger(), "Movement service called.");
-        
-        auto req = std::make_shared<interfaces::srv::MoveRequest::Request>();
-        req->command = command;
+    auto future = vision_client_->async_send_request(req);
+    auto result = future.get();
+    return result->marker_data;
+}
 
-        RCLCPP_WARN(get_logger(), "Movement service called.2");
+bool callMovementService(const std::string &command, const std::vector<float> &positions)
+{
+    RCLCPP_WARN(get_logger(), "Movement service called.");
 
-        // Convert float → double
-        req->positions.reserve(positions.size());
-        for (float p : positions)
-            req->positions.push_back(static_cast<double>(p));
-             RCLCPP_WARN(get_logger(), "Movement service called.3");
-        
+    auto req = std::make_shared<interfaces::srv::MoveRequest::Request>();
+    req->command = command;
 
-        if (!move_client_->wait_for_service(std::chrono::seconds(1))) {
-            RCLCPP_WARN(get_logger(), "Movement service not available.");
-            return false;
-        }
+    RCLCPP_WARN(get_logger(), "Movement service called.2");
 
-        auto result = move_client_->async_send_request(req).get();
-        RCLCPP_WARN(get_logger(), "Movement service called.4");
-        return result->success;
+    // Convert float → double
+    req->positions.reserve(positions.size());
+    for (float p : positions)
+        req->positions.push_back(static_cast<double>(p));
+    RCLCPP_WARN(get_logger(), "Movement service called.3");
+
+    if (!move_client_->wait_for_service(std::chrono::seconds(1)))
+    {
+        RCLCPP_WARN(get_logger(), "Movement service not available.");
+        return false;
     }
 
+    auto result = move_client_->async_send_request(req).get();
+    RCLCPP_WARN(get_logger(), "Movement service called.4");
+    return result->success;
+}
 
-    // ----------------------------------------------------
-    // VARIABLES & INTERFACES
-    // ----------------------------------------------------
-    double soil_threshold_;
-    double latest_moisture_;
+// ----------------------------------------------------
+// VARIABLES & INTERFACES
+// ----------------------------------------------------
+double soil_threshold_;
+double latest_moisture_;
 
-    std::map<int, interfaces::msg::MarkerData> marker_map_;
-    std::mutex marker_mutex_;
+std::map<int, interfaces::msg::MarkerData> marker_map_;
+std::mutex marker_mutex_;
 
-    interfaces::msg::MarkerData latest_marker_;
+interfaces::msg::MarkerData latest_marker_;
 
-    rclcpp::Client<interfaces::srv::VisionCmd>::SharedPtr vision_client_;
-    rclcpp::Client<interfaces::srv::MoveRequest>::SharedPtr move_client_;
+rclcpp::Client<interfaces::srv::VisionCmd>::SharedPtr vision_client_;
+rclcpp::Client<interfaces::srv::MoveRequest>::SharedPtr move_client_;
+rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr stop_client_;
 
-    rclcpp::Service<interfaces::srv::BrainCmd>::SharedPtr brain_srv_;
-    rclcpp::CallbackGroup::SharedPtr reentrant_group_;
+rclcpp::Service<interfaces::srv::BrainCmd>::SharedPtr brain_srv_;
+rclcpp::CallbackGroup::SharedPtr reentrant_group_;
 
-    rclcpp::Subscription<interfaces::msg::Marker2DArray>::SharedPtr marker_sub_;
-    rclcpp::Subscription<std_msgs::msg::Float32>::SharedPtr moist_sub_;
+rclcpp::Subscription<interfaces::msg::Marker2DArray>::SharedPtr marker_sub_;
+rclcpp::Subscription<std_msgs::msg::Float32>::SharedPtr moist_sub_;
 };
 
 // ----------------------------------------------------
 // MAIN
 // ----------------------------------------------------
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
     rclcpp::init(argc, argv);
     auto node = std::make_shared<BrainNode>();
 

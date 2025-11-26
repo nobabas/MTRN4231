@@ -11,13 +11,14 @@ find_package(std_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_ros REQUIRED)
+find_package(std_srvs REQUIRED)
 find_package(interfaces REQUIRED)
 find_package(visualization_msgs REQUIRED)
 
 add_executable(brain src/brain.cpp)
 
 ament_target_dependencies(
-  brain rclcpp tf2 tf2_ros geometry_msgs interfaces tf2_ros)
+  brain rclcpp tf2 tf2_ros geometry_msgs interfaces std_msgs std_srvs)
 
 install(TARGETS
 brain
