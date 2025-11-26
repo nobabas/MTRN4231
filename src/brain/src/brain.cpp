@@ -219,8 +219,6 @@ public:
                 RCLCPP_WARN(get_logger(), "Waiting for MoveIt service to be available...");
             }
 
-            // --- Move to marker ---
-
             // Go home first
             std::vector<float> home_position = {-1.3, 1.57, -1.83, -1.57, 0.0, 0.0};
             if (!callMovementService("joint", home_position))
@@ -242,7 +240,6 @@ public:
             // Step 3: Lower probe until threshold reached
             // ---------------------------------------------------
             double safe_z = current_pose[2];
-
             std::vector<float> target = current_pose;
             target[2] = min_z_limit;
 
@@ -272,10 +269,10 @@ public:
                     // CALL STOP SERVICE
                     auto stop_req = std::make_shared<std_srvs::srv::Trigger::Request>();
                     auto stop_future = stop_client_->async_send_request(stop_req);
-                    stop_future.wait(); // Block until stop is sent
+                    stop_future.wait(); 
                     rclcpp::sleep_for(std::chrono::milliseconds(500));
                     
-                    break; // Break the monitoring loop
+                    break;
                 }
             }
 
