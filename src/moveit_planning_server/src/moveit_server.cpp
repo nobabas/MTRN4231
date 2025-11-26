@@ -118,6 +118,18 @@ public:
       rclcpp::SensorDataQoS(),
       std::bind(&MoveitServer::visionCb, this, _1));
 
+    // Obstacle sub
+    obstacle_sub_ = node_->create_subscription<moveit_msgs::msg::CollisionObject>(
+      "/vision/obstacles", rclcpp::SystemDefaultsQoS(),
+      [this](const moveit_msgs::msg::CollisionObject::SharedPtr msg) {
+        RCLCPP_INFO(node_->get_logger(), "Received dynamic obstacle: %s", msg->id.c_str());
+        // Add object to this planning scene
+        std::vector<moveit_msgs::msg::CollisionObject> collision_objects;
+        collision_objects.push_back(*msg);
+        planning_scene_.applyCollisionObjects(collision_objects);
+    });
+
+
     // Let MoveIt sync with /joint_states then set start state
     move_group_->startStateMonitor(5.0); // up to 5s to discover joint states
     rclcpp::sleep_for(std::chrono::seconds(1));
@@ -596,6 +608,7 @@ private:
   sensor_msgs::msg::JointState last_js_;
 
   rclcpp::Subscription<interfaces::msg::Marker2DArray>::SharedPtr vision_sub_;
+  rclcpp::Subscription<moveit_msgs::msg::CollisionObject>::SharedPtr obstacle_sub_;
   rclcpp::TimerBase::SharedPtr process_timer_;
   std::queue<Target> pending_;
   bool busy_{false};
