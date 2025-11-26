@@ -39,8 +39,8 @@ class MarkerSubscriber(Node):
             })
             # 3. Log the received data
             self.get_logger().info(f'Received marker: ID={marker_id:.1f}, Pose={pose_list}')
-        else:
-            self.get_logger().info("Maximum of 4 markers already collected, ignoring extra markers.")
+        # else:
+            #self.get_logger().info("Maximum of 4 markers already collected, ignoring extra markers.")
         
         # Set flags to indicate data was received
         self.data_received = True
@@ -64,7 +64,7 @@ class MarkerSubscriber(Node):
             
         return received
 
-    def get_world_coordinates(self, tf_handler, depth_value):
+    def get_world_coordinates(self, tf_handler):
         markerLimit = 4
         if not self.blue_area:
             self.get_logger().warning('No marker data available for conversion')
@@ -75,8 +75,9 @@ class MarkerSubscriber(Node):
         for i, area in enumerate(markerdata):
             cx, cy = area['center']
             
-            # SINGLE FUNCTION CALL - that's all you need!
-            world_coords = tf_handler.pixel_to_3d(cx, cy, depth_value)
+            # depth_value = tf_handler.get_depth_at_pixel(cy, cx)
+
+            world_coords = tf_handler.pixel_to_3d(cx, cy)
             
             world_coordinates.append({
                 'id': i,

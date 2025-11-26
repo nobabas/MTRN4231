@@ -16,9 +16,10 @@ def main():
     try: 
         node = rclpy.create_node('test_tf')
         tf_handler = TFHandler(node)
+
         # Enable mock intrinsics 
-        if tf_handler.intrinsics is None:
-               tf_handler.set_mock_intrinsics()
+        #if tf_handler.intrinsics is None:
+        #        tf_handler.set_mock_intrinsics()
         # Wait until camera intrinsics are received
         while tf_handler.intrinsics is None:
             rclpy.spin_once(tf_handler.node, timeout_sec=0.1)
@@ -43,7 +44,8 @@ def main():
         print(f"Successfully received {len(subscriber.blue_area)} markers!")
         
 
-        world_result = subscriber.get_world_coordinates(tf_handler, depth_value=400)
+        world_result = subscriber.get_world_coordinates(tf_handler)
+        # world_result = world_result.transform_camera_to_world1(world_result)
         print("Waiting 5 seconds for brain_node to connect...")
         time.sleep(5.0)  # Wait for 5 seconds
 
@@ -53,7 +55,7 @@ def main():
         for i, result in enumerate(world_result):
             pixel_x, pixel_y = result['pixel_center']
             world_x, world_y, world_z = result['world_coords']
-            print(f"Blue Area {i+1}:")
+            print(f"Blue Area {i}:")
             print(f"  Pixel: ({pixel_x}, {pixel_y})")
             print(f"  World: X={world_x:.3f}m, Y={world_y:.3f}m, Z={world_z:.3f}m")
             print()

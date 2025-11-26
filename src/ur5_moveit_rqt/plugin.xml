@@ -1,0 +1,18 @@
+<library path="ur5_moveit_rqt">
+  <class
+    name="UR5 MoveIt Control"
+    type="ur5_moveit_rqt.ur5_moveit_plugin.UR5MoveItPlugin"
+    base_class_type="rqt_gui_py::Plugin">
+    <description>
+      Simple UR5 MoveIt control panel with buttons and status.
+    </description>
+    <qtgui>
+      <group>
+        <label>Robot Tools</label>
+      </group>
+      <label>UR5 MoveIt Control</label>
+      <icon type="theme">system-run</icon>
+      <statustip>Control UR5 MoveIt services.</statustip>
+    </qtgui>
+  </class>
+</library>

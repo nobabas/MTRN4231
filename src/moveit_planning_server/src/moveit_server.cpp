@@ -8,12 +8,14 @@
 #include <map>
 #include <cmath>
 #include <unordered_map>
+#include <atomic>
 #include <Eigen/Geometry>
 
 #include <rclcpp/rclcpp.hpp>
 #include <geometry_msgs/msg/pose.hpp>
 #include <geometry_msgs/msg/quaternion.hpp>
 #include <visualization_msgs/msg/marker.hpp>
+#include <sensor_msgs/msg/joint_state.hpp>
 
 #include <moveit/move_group_interface/move_group_interface.h>
 #include <moveit/planning_scene_interface/planning_scene_interface.h>
@@ -23,12 +25,14 @@
 #include "moveit_msgs/msg/joint_constraint.hpp"
 #include <moveit_msgs/msg/robot_trajectory.hpp>
 
-
 #include <interfaces/srv/move_request.hpp>
 #include <interfaces/msg/marker2_d_array.hpp>
 
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
+
+#include <std_srvs/srv/trigger.hpp>
+#include <rmw/qos_profiles.h>   // for rmw_qos_profile_services_default
 
 // ----------------------
 // Settings
@@ -89,9 +93,24 @@ public:
     // Marker target visual
     marker_pub_ = node_->create_publisher<visualization_msgs::msg::Marker>("visualization_marker", 10);
 
+    // Callback groups for services (allow concurrent callbacks)
+    move_service_group_ = node_->create_callback_group(rclcpp::CallbackGroupType::Reentrant);
+    stop_service_group_ = node_->create_callback_group(rclcpp::CallbackGroupType::Reentrant);
+
     // Service for manual commands
     service_ = node_->create_service<interfaces::srv::MoveRequest>(
-      "/moveit_path_plan", std::bind(&MoveitServer::handleRequest, this, _1, _2));
+      "/moveit_path_plan",
+      std::bind(&MoveitServer::handleRequest, this, _1, _2),
+      rmw_qos_profile_services_default,
+      move_service_group_);
+
+    // Stop service
+    stop_service_ = node_->create_service<std_srvs::srv::Trigger>(
+      "/moveit_stop",
+      std::bind(&MoveitServer::handleStop, this,
+                std::placeholders::_1, std::placeholders::_2),
+      rmw_qos_profile_services_default,
+      stop_service_group_);
 
     // Subscribe to vision results (array of markers)
     vision_sub_ = node_->create_subscription<interfaces::msg::Marker2DArray>(
@@ -112,7 +131,7 @@ public:
 
 private:
   // ---------------------------
-  // Service: joint / pose
+  // Service: joint / pose / cartesian / line
   // ---------------------------
   void handleRequest(
       const std::shared_ptr<interfaces::srv::MoveRequest::Request> req,
@@ -139,56 +158,61 @@ private:
     // JOINT CONSTRAINT LOGIC
     // =================================================================
 
-    // 1. Create a constraints object to hold all our constraints
     moveit_msgs::msg::Constraints path_constraints;
-
+{
     // 3. Create the constraint for the shoulder_lift_joint
-    moveit_msgs::msg::JointConstraint shoulder_lift_constraint;
-    shoulder_lift_constraint.joint_name = "shoulder_lift_joint";
+    moveit_msgs::msg::JointConstraint jc;
+    jc.joint_name = "shoulder_lift_joint";
     
     // Example: Limit lift joint to be between -2.57 and -0.57 radians
     // (This is centered at -1.57, or -90 degrees)
-    shoulder_lift_constraint.position = -1.57;
-    shoulder_lift_constraint.tolerance_below = 1.2; // 1.0 rad tolerance
-    shoulder_lift_constraint.tolerance_above = 1.2; // 1.0 rad tolerance
-    shoulder_lift_constraint.weight = 1.0;
-    path_constraints.joint_constraints.push_back(shoulder_lift_constraint);
+    jc.position = -1.57;
+    jc.tolerance_below = 1.2; // 1.0 rad tolerance
+    jc.tolerance_above = 1.2; // 1.0 rad tolerance
+    jc.weight = 1.0;
+    path_constraints.joint_constraints.push_back(jc);
+}
 
+{ 
+    moveit_msgs::msg::JointConstraint jc;
+    jc.joint_name = "shoulder_pan_joint";
+    
+    // Example: Limit lift joint to be between -2.57 and -0.57 radians
+    // (This is centered at -1.57, or -90 degrees)
+    jc.position = 0;
+    jc.tolerance_below = 2; // 1.0 rad tolerance
+    jc.tolerance_above = 2; // 1.0 rad tolerance
+    jc.weight = 1.0;
+    path_constraints.joint_constraints.push_back(jc);
+}
     if (req->command == "joint") {
-      // Apply the constraints before planning
       move_group_->setPathConstraints(path_constraints);
       ok = setJointTargets(req->positions);
-    
+
     } else if (req->command == "pose") {
-      // Apply the constraints before planning
       move_group_->setPathConstraints(path_constraints);
-      
+
       geometry_msgs::msg::Pose pose = createPose(req->positions);
       move_group_->setPoseTarget(pose, kEEFrame);
       publishTargetMarker(pose);
       ok = planAndExecute();
-    
+
     } else if (req->command == "line") {
-      // For "line", we must ADD our joint constraint to the existing Z-line constraint
+      // Add Z-line constraint + joint constraint
       auto current = computeEEFfromJointState();
       geometry_msgs::msg::Pose target = current;
       target.position.z = req->positions[2];
 
-      // Start with the path_constraints we just defined (which has the joint limit)
       moveit_msgs::msg::Constraints c = path_constraints; 
-      
-      // Now, add the Z-line constraint to it as well
       addZLineConstraint(c, current, target);
-      
-      // Set both constraints
       move_group_->setPathConstraints(c);
 
       move_group_->setPoseTarget(target, kEEFrame);
       publishTargetMarker(target);
       ok = planAndExecute();
-    
+
     } else if (req->command == "cartesian") {
-      // Optional Cartesian move using joint-state-based EE pose
+      // Cartesian move using joint-state-based EEF pose as start
       move_group_->clearPoseTargets();
       move_group_->clearPathConstraints();
       move_group_->setStartStateToCurrentState();
@@ -204,7 +228,23 @@ private:
       res->success = false;
       return;
     }
+
     res->success = ok;
+  }
+
+  // ---------------------------
+  // Stop service
+  // ---------------------------
+  void handleStop(
+      const std::shared_ptr<std_srvs::srv::Trigger::Request> /*req*/,
+      std::shared_ptr<std_srvs::srv::Trigger::Response> res)
+  {
+    RCLCPP_WARN(node_->get_logger(), "Stop requested! Stopping current motion.");
+    cancel_requested_.store(true);
+    move_group_->stop();
+
+    res->success = true;
+    res->message = "Motion stop requested.";
   }
 
   // ---------------------------
@@ -213,7 +253,8 @@ private:
   // Build a thin box centered between current.z and target.z to force Z-line motion
   void addZLineConstraint(moveit_msgs::msg::Constraints& out,
                           const geometry_msgs::msg::Pose& current,
-                          const geometry_msgs::msg::Pose& target)  {
+                          const geometry_msgs::msg::Pose& /*target*/)
+  {
     moveit_msgs::msg::PositionConstraint pc;
     pc.header.frame_id = "base_link";
     pc.link_name = move_group_->getEndEffectorLink();
@@ -240,7 +281,11 @@ private:
     out.name = "use_equality_constraints";
   }
 
-  geometry_msgs::msg::Pose computeEEFfromJointState()  {
+  // ---------------------------
+  // Joint-state-based FK for EEF pose
+  // ---------------------------
+  geometry_msgs::msg::Pose computeEEFfromJointState()
+  {
     geometry_msgs::msg::Pose pose;
     // default identity pose if no joint states yet
     if (last_js_.name.empty() || last_js_.position.empty()) {
@@ -264,7 +309,9 @@ private:
     // Get the JointModelGroup for the planning group
     const moveit::core::JointModelGroup* jmg = model->getJointModelGroup(kPlanningGroup);
     if (!jmg) {
-      RCLCPP_ERROR(node_->get_logger(), "computeEEFfromJointState: failed to get JointModelGroup '%s'", kPlanningGroup.c_str());
+      RCLCPP_ERROR(node_->get_logger(),
+                   "computeEEFfromJointState: failed to get JointModelGroup '%s'",
+                   kPlanningGroup.c_str());
       pose.orientation.w = 1.0;
       return pose;
     }
@@ -314,8 +361,6 @@ private:
     // Use joint-state-based FK instead of move_group_->getCurrentPose()
     geometry_msgs::msg::Pose start = computeEEFfromJointState();
 
-    // If we never received joint states, computeEEFfromJointState()
-    // will give you an identity-ish pose. You can bail early if you want:
     if (last_js_.name.empty() || last_js_.position.empty()) {
       RCLCPP_ERROR(node_->get_logger(),
                    "computeCartesianPose: no joint_state received yet, aborting.");
@@ -330,6 +375,8 @@ private:
     const double eef_step       = 0.01;  // path resolution (m)
     const double jump_threshold = 0.0;   // disable jump detection
 
+    cancel_requested_.store(false);
+
     double fraction = move_group_->computeCartesianPath(
       waypoints, eef_step, jump_threshold, trajectory, true);
 
@@ -342,19 +389,24 @@ private:
       return false;
     }
 
+    if (cancel_requested_.load()) {
+      RCLCPP_WARN(node_->get_logger(),
+                  "computeCartesianPose: cancelled before execution.");
+      return false;
+    }
+
     moveit::planning_interface::MoveGroupInterface::Plan plan;
     plan.trajectory_ = trajectory;
 
     auto exec_code = move_group_->execute(plan);
     if (exec_code != moveit::core::MoveItErrorCode::SUCCESS) {
       RCLCPP_ERROR(node_->get_logger(),
-                   "computeCartesianPose: Execution failed.");
+                   "computeCartesianPose: Execution failed or was stopped.");
       return false;
     }
 
     return true;
   }
-
 
   // ---------------------------
   // Vision subscriber + queue
@@ -492,8 +544,13 @@ private:
   {
     moveit::planning_interface::MoveGroupInterface::Plan plan;
     bool success = false;
+    cancel_requested_.store(false);
 
     for (int i = 1; i <= kPlanningAttempts && !success; ++i) {
+      if (cancel_requested_.load()) {
+        RCLCPP_WARN(node_->get_logger(), "Plan cancelled before completion.");
+        return false;
+      }
       RCLCPP_INFO(node_->get_logger(), "Planning attempt: %d", i);
       moveit::core::MoveItErrorCode code = move_group_->plan(plan);
       success = (code == moveit::core::MoveItErrorCode::SUCCESS);
@@ -507,9 +564,14 @@ private:
       return false;
     }
 
+    if (cancel_requested_.load()) {
+      RCLCPP_WARN(node_->get_logger(), "Execution cancelled before start.");
+      return false;
+    }
+
     auto exec_code = move_group_->execute(plan);
     if (exec_code != moveit::core::MoveItErrorCode::SUCCESS) {
-      RCLCPP_ERROR(node_->get_logger(), "Execution failed.");
+      RCLCPP_ERROR(node_->get_logger(), "Execution failed or was stopped.");
       return false;
     }
     return true;
@@ -519,13 +581,17 @@ private:
     last_js_ = *msg;
   }
 
-
   // Members
   rclcpp::Node::SharedPtr node_;
   std::shared_ptr<moveit::planning_interface::MoveGroupInterface> move_group_;
   moveit::planning_interface::PlanningSceneInterface planning_scene_;
   rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr marker_pub_;
   rclcpp::Service<interfaces::srv::MoveRequest>::SharedPtr service_;
+  rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr stop_service_;
+
+  rclcpp::CallbackGroup::SharedPtr move_service_group_;
+  rclcpp::CallbackGroup::SharedPtr stop_service_group_;
+
   rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr joint_state_sub_;
   sensor_msgs::msg::JointState last_js_;
 
@@ -533,6 +599,8 @@ private:
   rclcpp::TimerBase::SharedPtr process_timer_;
   std::queue<Target> pending_;
   bool busy_{false};
+
+  std::atomic<bool> cancel_requested_{false};
 
   // params
   double z_above_work_{0.20};
@@ -547,23 +615,34 @@ int main(int argc, char **argv)
   rclcpp::init(argc, argv);
   auto node   = std::make_shared<rclcpp::Node>("moveit_server");
   auto server = std::make_shared<MoveitServer>(node);
-  rclcpp::spin(node);
+
+  rclcpp::executors::MultiThreadedExecutor exec;
+  exec.add_node(node);
+  exec.spin();
+
   rclcpp::shutdown();
   return 0;
 }
 
-
+// -----------------------------------------------
+// Usage Examples
+// -----------------------------------------------
 
 // HOME - NEED TO RUN THIS FIRST OR MOVEIT WILL FAIL
 // ros2 service call /moveit_path_plan interfaces/srv/MoveRequest "{command: 'joint', positions: [-1.3, 1.57, -1.83, -1.57, 0.0, 0.0]}"
 
+// World: X=0.461m, Y=-0.001m, Z=0.400m
+
 // POSE TEST
-// ros2 service call /moveit_path_plan interfaces/srv/MoveRequest "{command: 'pose', positions: [0.60, 0.35, 0.65, -3.1415, 0.0, 1.57]}"
+// ros2 service call /moveit_path_plan interfaces/srv/MoveRequest "{command: 'pose', positions: [0.461, 0.01, 0.35, -3.1415, 0.0, 1.57]}"
 // ros2 service call /moveit_path_plan interfaces/srv/MoveRequest "{command: 'pose', positions: [0.60, 0.35, 0.35, -3.1415, 0.0, 1.57]}"
 
 // Cartesian TEST
 // ros2 service call /moveit_path_plan interfaces/srv/MoveRequest "{command: 'pose', positions: [0.50, 0.35, 0.65, -3.1415, 0.0, 1.57]}"
-// ros2 service call /moveit_path_plan interfaces/srv/MoveRequest "{command: 'cartesian', positions: [0.50, 0.35, 0.30, -3.1415, 0.0, 1.57]}" (line down in Z)
+// ros2 service call /moveit_path_plan interfaces/srv/MoveRequest "{command: 'cartesian', positions: [0.50, 0.35, 0.30, -3.1415, 0.0, 1.57]}"  # line down in Z
+
+// STOP TEST (while arm is moving)
+// ros2 service call /moveit_stop std_srvs/srv/Trigger "{}"
 
 // Marker Movement Test
 /*
@@ -573,4 +652,15 @@ markers:
  - {id: 2.0, x: 0.55, y: 0.35}
  - {id: 3.0, x: 0.60, y: 0.55}
 "
+*/
+
+// Start Transformer?
+/*
+ros2 run tf2_ros static_transform_publisher \
+
+  1.30317 0.0174152 0.675776 \
+
+  -0.388123 -0.0054127 0.92155 0.0087602 \
+
+  base_link camera_link
 */

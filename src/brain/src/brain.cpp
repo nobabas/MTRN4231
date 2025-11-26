@@ -212,7 +212,7 @@ public:
             }
             
             // Then move to pose
-            if (!callMovementService("cartesian", current_pose)) {
+            if (!callMovementService("pose", current_pose)) {
                 RCLCPP_ERROR(get_logger(), "Movement to marker %d failed. Skipping to next.", marker_id);
                 continue;
             }
@@ -242,7 +242,7 @@ public:
                             "Marker %d → Moisture %.2f > %.2f → lowering probe to z = %.3f",
                             marker_id, latest_moisture_, soil_threshold_, current_pose[2]);
 
-                if (!callMovementService("cartesian", current_pose)) {
+                if (!callMovementService("line", current_pose)) {
                     RCLCPP_WARN(get_logger(), "Move down step failed (marker %d). Retrying...", marker_id);
                 }
 
@@ -257,7 +257,7 @@ public:
             // Step 4: Retract probe back to safe height
             // ----------------------------------------------------
             current_pose[2] = initial_z;
-            if (!callMovementService("cartesian", current_pose)) {
+            if (!callMovementService("line", current_pose)) {
                 RCLCPP_WARN(get_logger(), "Failed to retract probe after sampling marker %d.", marker_id);
             }
 

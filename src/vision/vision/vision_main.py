@@ -6,8 +6,9 @@ from ultralytics import YOLO
 import cv2
 import numpy as np
 
-MODEL_PATH = '/home/samuel/MTRN4231/src/best.pt'
-CONFIDENCE = 0.3
+MODEL_PATH = '/home/mtrn/MTRN4231/src/best.pt'
+
+CONFIDENCE = 0.25
 
 class YoloPublisher(Node):
     def __init__(self):
@@ -41,7 +42,7 @@ class YoloPublisher(Node):
         frame = np.frombuffer(msg.data, dtype=np.uint8).reshape(msg.height, msg.width, 3)
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         # Run YOLO on frame
-        results = self.model(frame, conf=CONFIDENCE)
+        results = self.model(frame, conf=CONFIDENCE, verbose=False)
         r = results[0]
 
         # Draw annotated detections
