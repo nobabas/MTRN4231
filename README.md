@@ -61,6 +61,8 @@ This system utilizes the integration of camera detection, collaborating the UR5e
 Video link:
 https://www.youtube.com/shorts/ufF1myLWomA
 
+Most likely get from a test run
+
 Add image of the robot with full setup
 <div align="center">
   <img src="img/demo_img.png" alt="cad" width="100%">
@@ -98,6 +100,7 @@ Need an folder to store all the images
 - **vision**
   - vision_main (Yolo detection and determines centroid)
 
+>>--------------------------------------------------------------------------------------------->>
 ### Closed-Loop System Behaviour
 
 #### Motion Plan Overview
@@ -106,11 +109,13 @@ Need an folder to store all the images
 
 ## Technical Components
 
+<<--------------------------------------------------------------------------------------------<<>>
 ### Computer Vision
 The computer vision module utilises a trained Yolov11n model with a pre-existing dataset, targetting specifically blue markers. An image feed is constantly fed into the vision in real time, within a reduced frequency, to update and annotate boxes around the blue markers. Using the boxes it then identifies the centroid position of each marker in pixels to then be published as /pixel_coords.
 
 This vision effectiviely detects the starting position of each marker in pixels. This will be used to calculate the real world coordinates with the use of the transformation package.  
 
+>>-------------------------------------------------------------------------------------------->>
 ### Custom End-Effector
 provide photos/renders, assembly details, engineering drawings, 
 control overview and integration details. 
@@ -137,7 +142,9 @@ Hardware Requirement
 Intel Realsense D435 Depth Camera
 - List of stuff relating to it
 
------------------------------------------------
+Calibration
+- No Calibrations
+
 ## Running the System
 Clear instructions for launching and running the complete system
 Example commands (e.g. ros2 launch project_name bringup.launch.py).
@@ -176,6 +183,8 @@ Something about the success of the system
 ### Quantitative Results (Accuracy, Repeatability)
 *(Include data or figures showing performance metrics.)*
 Remember to put in photos
+
+<<-----------------------------------------------------------------------------------------------------------------------------------<<
 
 ### Robustness, Adaptability, and Innovation
 - Robutstness
