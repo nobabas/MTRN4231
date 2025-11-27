@@ -35,13 +35,16 @@
 [Brent]: https://www.linkedin.com/in/daryl-lee-7b022a201/
 [David]: https://www.linkedin.com/in/davidnie0418/
 
+[UR10e Vision Based Fruit Harvesting]: https://github.com/DaviddNie/UR10e_vision_based_fruit_harvesting
+[Screw Driving Bot 1]: https://github.com/DaviddNie/ScrewDrivingBot1 
+
 [ROS Packages and Node Descriptions]: #ros-packages-and-node-descriptions
 
 ## Project Overview
 
-This project utilizes UR5e from Universal Robot for soil detection.
+This project utilizes UR5e from Universal Robot for soil moisture testing detection to assist large farms.
 
-This system utilizes the integration of camera detection, collaborating with the end effector to enable to robot to move and obtain data from the soil.
+This system utilizes the integration of camera detection, collaborating the UR5e, and a custom end effector, designed to detect moisture, to enable to robot to move and obtain the moisture from the soil and to be consistently repeated in multiple areas.
 
 **Project Duration**: 6 weeks
 
@@ -122,7 +125,7 @@ behaviour in real time.
 --------------------------------------------------------------------------------
 
 ## Installation and Setup
-
+Step-by-step installation instructions for dependencies and workspace setup.
 
 ### Prerequisites and Dependencies
 
@@ -131,14 +134,21 @@ behaviour in real time.
 
 
 ### Hardware Setup and Calibration
+Hardware Requirement
+Intel Realsense D435 Depth Camera
+- List of stuff relating to it
 
 -----------------------------------------------
 ## Running the System
+Clear instructions for launching and running the complete system
+Example commands (e.g. ros2 launch project_name bringup.launch.py).
+- Expected behaviour and example outputs.
+- Optional troubleshooting notes.
+- The system should be launched by a single command (e.g. via a launch file, shell script
+or Docker image), without manual sequencing.
 
-### Testing image
+### Testing Yolo Model
 'python3 vision_basic.py'
-
-###
 
 ### Launching System without End Effector
 
@@ -151,24 +161,34 @@ behaviour in real time.
 
 
 
---------------------------------------------------------------------
-
 ## Results and Demonstration
 
 ### Performance Against Design Goals
 *(Discuss the success of the system based on the initial requirements.)*
+- Inital Requirements
+  - Reliability of system: 1 Failure per 500 Samples
+  - Cycle time: Less than 5 minutes per sample
+  - Sampling Accuracy: Within 2mm placement of sensor
+  - Sensor Accuracy: Within 0.5 Analogue units
+  - Repeatibility: Within 0.5mm of sensor position for same sampling point
+
+Something about the success of the system
 
 ### Quantitative Results (Accuracy, Repeatability)
 *(Include data or figures showing performance metrics.)*
+Remember to put in photos
 
 ### Robustness, Adaptability, and Innovation
 - Robutstness
-
+  - Very Robust
 - Adaptability
--
+  - A majority of the computer vision aspect relies on the realsense camera hardware, as it most of the functions calls from the specs.
+  - Can be changed based on training the data the Yolov11 files to aim for either different coloured markers or to adapt to the changes.
+  - For UR5e related movement it is very adaptable.
+  - Using this as it is in a different environement may yield different results.
 - Innovation
-  - This 
---------------------------------------------------------------
+  - Although there are some example similar to this project, there have been no example of pure automation of consistent soil detection.
+
 ## Discussion and Future Work
 Our approach to this project has a simple objective to only detect the soil, which makes it effective and simple to complete the tasks without difficulty. It is creative as although there is a lot of soil detection related technology, not many of them are automated or utilises robot, as most uses are manual or requires manpower to run them in the real world. This idea is not novel to an extent but it provides an different approach to utilising this technology. 
 
@@ -185,19 +205,24 @@ These were addressed by the team by hard focusing on the problems that exist on 
 
 ### Opportunities for Improvement
 Due to the simipicty of the project, there are many improvements that can be made.
-Such improvements can consist of an end effector with different tools on it, where it can switch each tool in and out of use, with the capacity to dig and plant seed. Another improvement is the making the path planning timing more efficient to reduce time delays. A greater dataset could have been made for YOLO11 to ensure it is consistent in detecting all the objects required. Additionally, instead of only using blue markers as it's main detection, it could also detect other items, such as plants or rocks in the soil.
+
+The following below are some things that can be improved on for "Version 2.0":
+- End effector with different tools on it, where it can switch each tool in and out of use, with the capacity to dig and plant seed
+- Another improvement is the making the path planning timing more efficient to reduce time delays.
+- A greater dataset could have been made for YOLO11 to ensure it is consistent in detecting all the objects required.
+- Instead of only using blue markers as it's main detection, it could also detect other items, such as plants or rocks in the soil.
 
 ## Contributors and Roles
 (INCOMPLETE SECTION)
-Minh - Moveit
+- Minh: Moveit
   - 
-Samuel - Endeffector + Brain
+- Samuel: Endeffector + Brain
   - 
-Brent - Computer Vision + Transformations
+- Brent: Computer Vision + Transformations
   - 
 
 ## Repository Structure
-The below is the repository setup that is done in github:
+The below is the repository setup that is done in github -
 - end_effector/arduino
   - Soil_moisture_reading
   - Soil_test_for_ur5e
@@ -213,7 +238,7 @@ The below is the repository setup that is done in github:
   - vision
 - yolo_dataset
 
-Each folder does the following
+Each folder does the following -
 - End_effector:
   - Using Arduino to run the end effector with UR5e
 - src:
