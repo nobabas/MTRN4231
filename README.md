@@ -35,8 +35,8 @@
 [Brent]: https://www.linkedin.com/in/daryl-lee-7b022a201/
 [David]: https://www.linkedin.com/in/davidnie0418/
 
-[UR10e Vision Based Fruit Harvesting]: https://github.com/DaviddNie/UR10e_vision_based_fruit_harvesting
-[Screw Driving Bot 1]: https://github.com/DaviddNie/ScrewDrivingBot1 
+[UR10e]: https://github.com/DaviddNie/UR10e_vision_based_fruit_harvesting
+[Screw]: https://github.com/DaviddNie/ScrewDrivingBot1 
 
 [ROS Packages and Node Descriptions]: #ros-packages-and-node-descriptions
 
@@ -66,8 +66,9 @@ Add image of the robot with full setup
   <img src="img/demo_img.png" alt="cad" width="100%">
 </div>
 
+Need an folder to store all the images
 
--------------------------------------------------------------------------
+
 ## System Architecture
 ### ROS Packages and Node Descriptions
 - **brain**
@@ -103,7 +104,6 @@ Add image of the robot with full setup
 
 #### System Flowchart
 
----------------------------------------------------------------------------
 ## Technical Components
 
 ### Computer Vision
@@ -122,7 +122,6 @@ demonstrates.
 ### Closed-Loop Operation and Feedback
  describe the feedback method and how it adapts system 
 behaviour in real time.
---------------------------------------------------------------------------------
 
 ## Installation and Setup
 Step-by-step installation instructions for dependencies and workspace setup.
@@ -213,13 +212,23 @@ The following below are some things that can be improved on for "Version 2.0":
 - Instead of only using blue markers as it's main detection, it could also detect other items, such as plants or rocks in the soil.
 
 ## Contributors and Roles
-(INCOMPLETE SECTION)
-- Minh: Moveit
-  - 
-- Samuel: Endeffector + Brain
-  - 
-- Brent: Computer Vision + Transformations
-  - 
+- Minh: 
+  - Primary Areas of Responsibility:
+    - Moveit
+    - Integration
+
+- Samuel:
+  - Primary Areas of Responsibility:
+    - Endeffector
+    - Brain
+    - Integration
+
+- Brent: 
+  - Primary Areas of Responsibility:
+    - Computer Vision
+    - Transformations of coordinates
+    - README
+
 
 ## Repository Structure
 The below is the repository setup that is done in github -
@@ -243,11 +252,12 @@ Each folder does the following -
   - Using Arduino to run the end effector with UR5e
 - src:
   - The main folder which contains all the packages
-  - These packages are explained in [ROS Packages and Node Descriptions]
+  - These packages are explained in [ROS Packages][ROS Packages and Node Descriptions]
 - yolo_dataset:
   - Only contains images that were used to train the Yolo model
 
 ## References and Acknowledgements
-(INCOMPLETE SECTION)
-- MTRN4231 Labs
-- David's repo (both his apple and drill)
+- MTRN4231 Labs Week 1-5
+- David Nie's Github Repositories
+  - [UR10e Vision Based Fruit Harvesting][UR10e]
+  - [Screw Driving Bot][Screw]
