@@ -2,13 +2,16 @@ import rclpy
 import tf2_ros
 from geometry_msgs.msg import Point, Pose, TransformStamped, PointStamped
 from rclpy.time import Time
+from rclpy.qos import qos_profile_sensor_data
+from rclpy.callback_groups import ReentrantCallbackGroup
+
 import pyrealsense2 as rs
 from sensor_msgs.msg import CameraInfo
-from rclpy.callback_groups import ReentrantCallbackGroup
 import tf2_geometry_msgs
 import tf2_geometry_msgs.tf2_geometry_msgs as tf2_geometry
 from geometry_msgs.msg import Quaternion
 from tf2_geometry_msgs import do_transform_pose
+
 
 import numpy as np
 from sensor_msgs.msg import Image
@@ -40,11 +43,14 @@ class TFHandler:
             #Based on parameters
             '/camera/camera/aligned_depth_to_color/image_raw',
             self.depth_callback,
-            10,
+            qos_profile=qos_profile_sensor_data,
         )
 
     def depth_callback(self, msg):
-        self.current_depth = self.bridge.imgmsg_to_cv2(msg, desired_encoding='passthrough')
+        try:
+            self.current_depth = self.bridge.imgmsg_to_cv2(msg, desired_encoding='passthrough')
+        except Exception as e:
+            self.node.get_logger().error(f"Depth Error: {e}")
 
     def camera_info_callback(self, msg):
         """Store camera intrinsics when available."""
@@ -83,6 +89,10 @@ class TFHandler:
         self.intrinsics.model = rs.distortion.brown_conrady
         self.intrinsics.coeffs = [0.0, 0.0, 0.0, 0.0, 0.0]
         self.node.get_logger().info("Mock camera intrinsics set for testing")
+    
+    def set_mock_depth(self, distance_mm):
+        self.current_depth = np.full((480,640), distance_mm, dtype=np.uint16)
+        self.node.get_logger().warn(f"[MOCK] Fake depth loaded: {distance_mm}")
 
     def transform_to_base(self, point, from_frame='camera_link'):
         try:
@@ -145,6 +155,9 @@ class TFHandler:
 
         # Get depth at pixel
         d = float(self.current_depth[int(pixel_y), int(pixel_x)]) * 0.001  # mm → meters
+
+        # Just temporarily print the depth
+        self.node.get_logger().info(f"Pixel ({pixel_x}, {pixel_y}) has depth: {d:.3f}")
 
         # Handle invalid/missing depth
         if d <= 0 or np.isnan(d):

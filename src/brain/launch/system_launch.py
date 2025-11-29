@@ -72,7 +72,7 @@ def generate_launch_description():
         robotAndCamera,
         take_image,
         vision,
+        transformations,
         arm,
         teensy_bridge,
-        transformations,
     ])

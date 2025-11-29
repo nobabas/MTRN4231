@@ -37,7 +37,7 @@
 #include "interfaces/srv/brain_cmd.hpp"
 
 // --- CONTROL SWITCH: Set to 1 for Vision, 0 for Hardcoded ---
-#define USE_VISION 0
+#define USE_VISION 1
 
 class BrainNode : public rclcpp::Node
 {
@@ -282,6 +282,11 @@ public:
             target[2] = safe_z;
             rclcpp::sleep_for(std::chrono::milliseconds(500));
             callMovementService("cartesian", target);
+            // Just do this: 
+            // callMovementService("joint", {-1.3, 1.57, -1.83, -1.57, 0.0, 0.0});
+
+            // Should include that it stays down to read for a few seconds 
+
         }
         
         // Final Home (JOINT)

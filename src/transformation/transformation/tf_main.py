@@ -5,45 +5,55 @@ from .tf_subscriber import MarkerSubscriber
 import cv2
 import rclpy
 from rclpy.node import Node
+from rclpy.executors import MultiThreadedExecutor
 import threading
 import time
 
+
 def main():
+    print("Started tf_main")
     rclpy.init()
     subscriber = MarkerSubscriber()
     publisher = BlueMarkerPublisher()
+    node = rclpy.create_node('tf_handler_node')
+    tf_handler = TFHandler(node)
     
+    # ADDED MAKE SURE TO CHANGE 
+    # tf_handler.set_mock_intrinsics()
+
+    executor = MultiThreadedExecutor()
+    executor.add_node(subscriber)
+    executor.add_node(node)
+
+    executor_thread = threading.Thread(target=executor.spin, daemon=True)
+    executor_thread.start()
+
     try: 
-        node = rclpy.create_node('test_tf')
-        tf_handler = TFHandler(node)
-
-        # Enable mock intrinsics 
-        #if tf_handler.intrinsics is None:
+        # Enable mock intrinsics if needed (optional)
+        # if tf_handler.intrinsics is None:
         #        tf_handler.set_mock_intrinsics()
-        # Wait until camera intrinsics are received
+
+        print("Waiting for camera intrinsics...")
+        
+        # 4. Wait for intrinsics (The background executor handles the callbacks)
         while tf_handler.intrinsics is None:
-            rclpy.spin_once(tf_handler.node, timeout_sec=0.1)
-            tf_handler.node.get_logger().warn("Waiting for camera intrinsics...")
+            time.sleep(0.1)
 
-
+        print("Camera intrinsics received!")
         print("Waiting for ROS 2 node discovery...")
         time.sleep(2)
-
-        def spin_node():
-            rclpy.spin(subscriber)
-            
-        spin_thread = threading.Thread(target=spin_node, daemon=True)
-        spin_thread.start()
         
-        print("Subscriber is now actively listening...")
+        print("Subscriber and TF Handler are now active...")
         print("Waiting 5 seconds for all markers to arrive...")
         
-        # Give the subscriber 5s to collect all messages
+        # 5. Wait for markers to be collected
+        # The executor is still spinning in the background, so:
+        # - subscriber is collecting markers
+        # - tf_handler is updating self.current_depth
         time.sleep(5.0) 
                    
         print(f"Successfully received {len(subscriber.blue_area)} markers!")
         
-
         world_result = subscriber.get_world_coordinates(tf_handler)
         # world_result = world_result.transform_camera_to_world1(world_result)
         print("Waiting 5 seconds for brain_node to connect...")
@@ -63,6 +73,7 @@ def main():
     except KeyboardInterrupt:
         print("Shutting down...")
     finally:
+        executor.shutdown()
         publisher.destroy_node()
         subscriber.destroy_node()
         node.destroy_node()
