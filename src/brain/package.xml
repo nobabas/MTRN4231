@@ -3,22 +3,20 @@
 <package format="3">
   <name>brain</name>
   <version>0.0.0</version>
-  <description>Brain package for blue detection</description>
+  <description>Brain package for soil sampling logic (C++)</description>
   <maintainer email="you@example.com">Your Name</maintainer>
   <license>Apache-2.0</license>
 
-  <depend>rclpy</depend>
-  <depend>sensor_msgs</depend>
-  <depend>geometry_msgs</depend>
-  <depend>tf2_ros</depend>
-  <depend>tf2_geometry_msgs</depend>
-  <depend>cv_bridge</depend>
-  <depend>std_msgs</depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>rclcpp</depend>             <depend>std_msgs</depend>
   <depend>std_srvs</depend>
   <depend>interfaces</depend>
-
-  <exec_depend>python3-opencv</exec_depend>
-  <exec_depend>python3-numpy</exec_depend>
+  
+  <depend>geometry_msgs</depend>
+  <depend>tf2</depend>
+  <depend>tf2_ros</depend>
+  <depend>visualization_msgs</depend>
 
   <export>
     <build_type>ament_cmake</build_type>
