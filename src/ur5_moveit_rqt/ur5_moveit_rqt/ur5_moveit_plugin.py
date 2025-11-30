@@ -7,7 +7,7 @@ from rclpy.node import Node
 from rqt_gui_py.plugin import Plugin
 from python_qt_binding import QtWidgets, QtCore
 
-from interfaces.srv import MoveRequest
+from interfaces.srv import MoveRequest, BrainCmd
 from std_srvs.srv import Trigger
 
 _rclpy_initialized = False
@@ -20,10 +20,12 @@ class MoveitClientNode(Node):
 
         self.move_cli = self.create_client(MoveRequest, '/moveit_path_plan')
         self.stop_cli = self.create_client(Trigger, '/moveit_stop')
+        self.brain_cli = self.create_client(BrainCmd, '/brain_srv')
 
         self.get_logger().info('Waiting for services...')
         self.move_cli.wait_for_service()
         self.stop_cli.wait_for_service()
+        self.brain_cli.wait_for_service()
         self.get_logger().info('Services available.')
 
     def call_move(self, command, positions):
@@ -33,6 +35,14 @@ class MoveitClientNode(Node):
 
         self.get_logger().info(f'Calling move: {command} {positions}')
         future = self.move_cli.call_async(req)
+        return future
+    
+    def call_brain(self, command):
+        req = BrainCmd.Request()
+        req.command = command
+
+        self.get_logger().info(f'Calling brain command: {command}')
+        future = self.brain_cli.call_async(req)
         return future
 
     def call_stop(self):
@@ -60,7 +70,7 @@ class UR5MoveItPlugin(Plugin):
 
         # Simple QWidget with buttons
         self._widget = QtWidgets.QWidget()
-        self._widget.setWindowTitle('UR5 MoveIt Control')
+        self._widget.setWindowTitle('Soil Sampler Control')
 
         layout = QtWidgets.QVBoxLayout(self._widget)
 
@@ -68,19 +78,23 @@ class UR5MoveItPlugin(Plugin):
         layout.addWidget(self.status_label)
 
         btn_home = QtWidgets.QPushButton('Home')
-        btn_pose = QtWidgets.QPushButton('Pose Test')
-        btn_cart = QtWidgets.QPushButton('Cartesian Down')
+        btn_sample = QtWidgets.QPushButton('Sample')
+        btn_topography = QtWidgets.QPushButton('Topography')
+        btn_vertical = QtWidgets.QPushButton('Vertical')
+        btn_heatmap = QtWidgets.QPushButton('Heat-map')
         btn_stop = QtWidgets.QPushButton('STOP')
 
         btn_row = QtWidgets.QHBoxLayout()
-        for b in (btn_home, btn_pose, btn_cart, btn_stop):
+        for b in (btn_home, btn_sample, btn_topography, btn_vertical, btn_heatmap, btn_stop):
             btn_row.addWidget(b)
         layout.addLayout(btn_row)
 
         # Connect buttons
         btn_home.clicked.connect(self._on_home)
-        btn_pose.clicked.connect(self._on_pose)
-        btn_cart.clicked.connect(self._on_cart)
+        btn_sample.clicked.connect(self._on_sample)
+        btn_topography.clicked.connect(self._on_topography)
+        btn_vertical.clicked.connect(self._on_vertical)
+        btn_heatmap.clicked.connect(self._on_heatmap)
         btn_stop.clicked.connect(self._on_stop)
 
         if context.serial_number() > 1:
@@ -104,13 +118,17 @@ class UR5MoveItPlugin(Plugin):
         positions = [-1.3, 1.57, -1.83, -1.57, 0.0, 0.0]
         self._call_move('joint', positions)
 
-    def _on_pose(self):
-        positions = [0.60, 0.35, 0.65, -3.1415, 0.0, 1.57]
-        self._call_move('pose', positions)
+    def _on_sample(self):
+        self._call_brain('soil_sampling')
 
-    def _on_cart(self):
-        positions = [0.50, 0.35, 0.30, -3.1415, 0.0, 1.57]
-        self._call_move('cartesian', positions)
+    def _on_topography(self):
+        self._call_brain('topography')
+
+    def _on_vertical(self):
+        self._call_brain('vertical')
+
+    def _on_heatmap(self):
+        self._call_brain('heat_map')
 
     def _on_stop(self):
         future = self.node.call_stop()
@@ -119,6 +137,10 @@ class UR5MoveItPlugin(Plugin):
     def _call_move(self, command, positions):
         self.status_label.setText(f'Sending {command}...')
         future = self.node.call_move(command, positions)
+
+    def _call_brain(self, command):
+        self.status_label.setText(f'Sending {command}...')
+        future = self.node.call_brain(command)
 
     # ---------- rclpy spinning ----------
 
