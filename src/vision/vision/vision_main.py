@@ -7,7 +7,7 @@ import cv2
 import numpy as np
 
 # Make sure to change
-MODEL_PATH = '/home/samuel/MTRN4231/src/best.pt'
+MODEL_PATH = '/home/mtrn/MTRN4231/src/best.pt'
 
 CONFIDENCE = 0.25
 

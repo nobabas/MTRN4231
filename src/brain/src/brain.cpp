@@ -70,13 +70,47 @@ void BrainNode::brainServiceCallback(const std::shared_ptr<interfaces::srv::Brai
 void BrainNode::markerCallback(const interfaces::msg::Marker2DArray::SharedPtr msg)
 {
     std::lock_guard<std::mutex> lock(marker_mutex_);
+    
+    // Threshold to consider a marker "new" (e.g., 5cm)
+    double duplicate_radius = 0.05; 
+
     for (const auto &marker_2d : msg->markers) {
+        float new_x = marker_2d.x;
+        float new_y = marker_2d.y;
+
+        // --- SPATIAL FILTERING ---
+        bool is_duplicate = false;
+        
+        for (const auto &existing_pair : marker_map_) {
+            auto existing_pose = existing_pair.second.pose;
+            float ex_x = existing_pose[0];
+            float ex_y = existing_pose[1];
+
+            // Calculate Euclidean distance (2D)
+            float dist = std::sqrt(std::pow(new_x - ex_x, 2) + std::pow(new_y - ex_y, 2));
+            
+            if (dist < duplicate_radius) {
+                is_duplicate = true;
+                // Optionally log debug info
+                // RCLCPP_DEBUG(get_logger(), "Ignored duplicate marker at (%.2f, %.2f)", new_x, new_y);
+                break; 
+            }
+        }
+
+        if (is_duplicate) {
+            continue; 
+        }
+
         interfaces::msg::MarkerData full_marker;
         full_marker.id = marker_2d.id;
-        full_marker.pose = {marker_2d.x, marker_2d.y, 0.35, -3.1415, 0.0, 1.57};
+        // Z default = 0.35m
+        full_marker.pose = {new_x, new_y, 0.35, -3.1415, 0.0, 0.0};
+        
         marker_map_[static_cast<int>(full_marker.id)] = full_marker;
+        
+        RCLCPP_INFO(get_logger(), "Brain: Added Marker ID %.0f at [%.2f, %.2f]", 
+                    full_marker.id, new_x, new_y);
     }
-    RCLCPP_INFO_ONCE(get_logger(), "Brain: Markers received.");
 }
 
 void BrainNode::moistureCallback(const std_msgs::msg::Float32::SharedPtr msg)

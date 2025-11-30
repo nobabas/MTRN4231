@@ -30,7 +30,7 @@ bool VerticalProfileRoutine::run(const std::map<int, interfaces::msg::MarkerData
     }
 #else
     RCLCPP_WARN(logger, "[Test] Using Hardcoded Point.");
-    targets.push_back({0.45f, 0.0f, 0.40f, -3.14f, 0.0f, 1.57f});
+    targets.push_back({0.45f, 0.0f, 0.40f, -3.14f, 0.0f, 0.0f});
 #endif
 
     std::vector<float> depths = {0.30f, 0.25f, 0.20f};

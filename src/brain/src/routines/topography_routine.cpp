@@ -30,10 +30,10 @@ bool TopographyRoutine::run(const std::map<int, interfaces::msg::MarkerData>& ma
     }
 #else
     RCLCPP_WARN(logger, "[Test] Using Hardcoded Grid.");
-    targets.push_back({0.30f, 0.0f, 0.40f, -3.14f, 0.0f, 1.57f});
+    targets.push_back({0.30f, 0.0f, 0.40f, -3.14f, 0.0f, 0.0f});
 #endif
 
-    double contact_threshold = 200.0; 
+    double contact_threshold = 1000.0; 
 
     for (const auto &hover : targets) {
         if(!moveTo(hover, "cartesian")) continue;
