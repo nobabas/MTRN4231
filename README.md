@@ -117,6 +117,7 @@ This vision effectiviely detects the starting position of each marker in pixels.
 
 >>-------------------------------------------------------------------------------------------->>
 ### Custom End-Effector
+![Endeffector render](endeffector v13.png) 
 provide photos/renders, assembly details, engineering drawings, 
 control overview and integration details. 
 
