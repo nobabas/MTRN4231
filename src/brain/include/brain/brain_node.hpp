@@ -1,6 +1,10 @@
 #pragma once
+
 #include <map>
 #include <mutex>
+#include <memory>
+#include <vector>
+
 #include "rclcpp/rclcpp.hpp"
 #include "std_msgs/msg/float32.hpp"
 #include "interfaces/msg/marker2_d_array.hpp"
@@ -18,6 +22,8 @@
 class BrainNode : public rclcpp::Node {
 public:
     BrainNode();
+    
+    void init(); 
 
 private:
     // --- Callbacks ---

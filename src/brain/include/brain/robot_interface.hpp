@@ -8,7 +8,7 @@
 
 struct RobotInterface {
     // The node is useful for logging
-    rclcpp::Node::SharedPtr node;
+    rclcpp::Node* node;
     
     // The clients needed to move and see
     rclcpp::Client<interfaces::srv::MoveRequest>::SharedPtr move_client;

@@ -1,5 +1,7 @@
 #pragma once
 #include <map>
+#include <vector>
+#include <string>
 #include "brain/robot_interface.hpp"
 #include "interfaces/msg/marker_data.hpp"
 
@@ -9,5 +11,5 @@ public:
     bool run(const std::map<int, interfaces::msg::MarkerData>& markers);
 private:
     RobotInterface tools_;
-    bool moveLine(const std::vector<float>& pose);
+    bool move(const std::vector<float>& pose, const std::string& command);
 };
