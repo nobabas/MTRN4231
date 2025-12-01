@@ -56,6 +56,8 @@ bool TopographyRoutine::run(const std::map<int, interfaces::msg::MarkerData>& ma
             }
         }
         moveTo(hover, "cartesian");
+        // Use getEndEffectorLink from moveitserver.cpp
+        // Joint state publisher
     }
     
     moveTo({-1.3f, 1.57f, -1.83f, -1.57f, 0.0f, 0.0f}, "joint");

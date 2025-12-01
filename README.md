@@ -205,6 +205,12 @@ behaviour in real time.
 ## Installation and Setup
 Step-by-step installation instructions for dependencies and workspace setup.
 
+#### Endeffector installation
+First make sure arduino 2.3.6 is installed: https://docs.arduino.cc/software/ide-v2/tutorials/getting-started/ide-v2-downloading-and-installing/
+Then download the teensy 4.1 board manager: https://www.pjrc.com/teensy/td_download.html
+
+After these changes run /MTRN4231/end_effector/arduino/Soil_moisture_reading/Soil_moisture_reading.ino. Make sure not to run terminal monitor
+
 ### Prerequisites and Dependencies
 
 

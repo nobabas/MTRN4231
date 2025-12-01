@@ -72,7 +72,7 @@ void BrainNode::markerCallback(const interfaces::msg::Marker2DArray::SharedPtr m
     std::lock_guard<std::mutex> lock(marker_mutex_);
     
     // Threshold to consider a marker "new" (e.g., 5cm)
-    double duplicate_radius = 0.05; 
+    double duplicate_radius = 0.01; 
 
     for (const auto &marker_2d : msg->markers) {
         float new_x = marker_2d.x;

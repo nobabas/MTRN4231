@@ -22,7 +22,7 @@ class ImageSaverSubscriber(Node):
 
         # Directory to save incoming images
         # Change to where it's needed
-        self.save_dir = "/home/samuel/MTRN4231/received_images"
+        self.save_dir = "/home/mtrn/MTRN4231/received_images"
         os.makedirs(self.save_dir, exist_ok=True)
 
         # Flag to ensure we only save once

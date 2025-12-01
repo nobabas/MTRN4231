@@ -4,7 +4,7 @@
 
 #define MOISTURE_PIN A0       // Analog pin for soil moisture sensor
 #define READ_INTERVAL 150     // Time between serial outputs (ms)
-#define NUM_SAMPLES 20        // Number of samples for averaging
+#define NUM_SAMPLES 10        // Number of samples for averaging
 
 void setup() {
   Serial.begin(9600);         // Match teensy_bridge_node.py baud rate
