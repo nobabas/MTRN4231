@@ -8,6 +8,8 @@
   - [Closed-Loop System Behaviour](#closed-loop-system-behaviour)
 - [Technical Components](#technical-components)
   - [Computer Vision](#computer-vision)
+    -[Vision Pipeline](#vision-pipeline)
+    -[Contribution to the Overall Task](#contribution-to-the-overall-task)
   - [Custom End-Effector](#custom-end-effector)
   - [System Visualisation](#system-visualisation)
   - [Closed-Loop Operation and Feedback](#closed-loop-operation-and-feedback)
@@ -31,7 +33,7 @@
 - [References and Acknowledgements](#references-and-acknowledgements)
 
 [Minh]: https://www.linkedin.com/in/minh-thang-pham-493832265/
-[Samuel]: https://www.linkedin.com/in/jiawen-zhang-1aa622203/
+[Samuel]: https://www.linkedin.com/in/samuel-gray-mechatronic/?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app
 [Brent]: https://www.linkedin.com/in/brent-poon-016bb6208/
 [David]: https://www.linkedin.com/in/davidnie0418/
 
@@ -56,6 +58,7 @@ This system utilizes the integration of camera detection, collaborating the UR5e
 **Supervisor**:
 * David Nie: [David's LinkedIn profile][David]
 
+<<------------------------------------------------------------------->>
 ### Video Demonstration
 
 Video link:
@@ -68,7 +71,7 @@ Add image of the robot with full setup
   <img src="img/demo_img.png" alt="cad" width="100%">
 </div>
 
-
+<<-------------------------------------------------------------------->>
 ## System Architecture
 ### ROS Packages and Node Descriptions
 - **brain**
@@ -98,12 +101,58 @@ Add image of the robot with full setup
 - **vision**
   - vision_main (Yolo detection and determines centroid)
 
+### Interfaces
+- srv
+  - BrainCmd
+    - 
+  - MoveRequest
+    - 
+  - VisionCmd
+    - 
+
+- msg
+  - MarkerData
+    - float32 id
+    - float32[] pose
+    id:   Numeric ID or sequence index of the marker.
+    pose: Flattened [x, y] vector (6 elements) representing the marker’s 3D position and orientation in the camera or world frame.
+    Explaination -
+    - This is to first put each coordinate for that specific id
+
+  - Marker2D
+    - float32 id
+    - float32 x
+    - float32 y
+    id: Numeric ID or sequence index of the marker.
+    x: x coordinate of world frame position of that id value.
+    y: y coordinate of world frame position of that id value.
+    Explaination -
+    - Similar to MarkerData
+    - Naming is different to avoid confusion of which interface is used
+    - This interface is used before sending it off as an array in Marker2DArray
+
+  - Marker2DArray
+    - Marker2D[] markers
+    markers: Flattened [id, x, y] vector (3 elements) representing the marker's 2D position in the world frame of all markers present.
+    Explaination -
+    - This is used to put each message Marker2D into the array so that it out puts as one.
+    - Example of this array used is [[0, 0.1, 0.2],[1, 0.5, 0.5],[2, 3.2, 1]]
+    - This is published as /blue_marker_coords
+    
+
+
+
 >>--------------------------------------------------------------------------------------------->>
 ### Closed-Loop System Behaviour
 
 #### Motion Plan Overview
 
 #### System Flowchart
+
+
+
+
+
 
 ## Technical Components
 
