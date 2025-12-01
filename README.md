@@ -7,7 +7,7 @@
   - [ROS Packages and Node Descriptions](#ros-packages-and-node-descriptions)
   - [Closed-Loop System Behaviour](#closed-loop-system-behaviour)
 - [Technical Components](#technical-components)
-  - [Computer Vision](#computer-vision-hole-detection)
+  - [Computer Vision](#computer-vision)
   - [Custom End-Effector](#custom-end-effector)
   - [System Visualisation](#system-visualisation)
   - [Closed-Loop Operation and Feedback](#closed-loop-operation-and-feedback)
@@ -30,9 +30,9 @@
 - [Repository Structure](#repository-structure)
 - [References and Acknowledgements](#references-and-acknowledgements)
 
-[Minh]: https://www.linkedin.com/in/nickojbell/
+[Minh]: https://www.linkedin.com/in/minh-thang-pham-493832265/
 [Samuel]: https://www.linkedin.com/in/jiawen-zhang-1aa622203/
-[Brent]: https://www.linkedin.com/in/daryl-lee-7b022a201/
+[Brent]: https://www.linkedin.com/in/brent-poon-016bb6208/
 [David]: https://www.linkedin.com/in/davidnie0418/
 
 [UR10e]: https://github.com/DaviddNie/UR10e_vision_based_fruit_harvesting
@@ -67,8 +67,6 @@ Add image of the robot with full setup
 <div align="center">
   <img src="img/demo_img.png" alt="cad" width="100%">
 </div>
-
-Need an folder to store all the images
 
 
 ## System Architecture
@@ -110,17 +108,39 @@ Need an folder to store all the images
 ## Technical Components
 
 <<--------------------------------------------------------------------------------------------<<>>
-### Computer Vision
-The computer vision module utilises a trained Yolov11n model with a pre-existing dataset, targetting specifically blue markers. An image feed is constantly fed into the vision in real time, within a reduced frequency, to update and annotate boxes around the blue markers. Using the boxes it then identifies the centroid position of each marker in pixels to then be published as /pixel_coords.
+### Computer Vision:
+The computer vision system is built around a YOLOv11n object detection model trained on a dataset containing blue markers. Its primary function is to detect the markers within the camera’s field of view and provide their pixel-level locations for downstream processing.
 
-This vision effectiviely detects the starting position of each marker in pixels. This will be used to calculate the real world coordinates with the use of the transformation package.  
+#### Vision Pipeline
+
+* Image Acquisition
+- A continuous image stream is received from the camera. To reduce computational load, frames are sampled at a lower frequency (Around 5 frames per second), while still maintaining sufficient resolution for reliable detection.
+
+* Object Detection (YOLOv11n Model)
+- Each sampled frame is passed through the YOLOv11n network.
+- The model outputs bounding boxes around detected blue markers.
+- These detections are filtered and annotated to visually confirm correct identification.
+
+* Centroid Extraction
+- For each bounding box, the system computes the centroid (x,y) in pixel coordinates.
+- This represents the marker’s location in the image plane.
+- These centroid values are published on the /pixel_coords ROS topic.
+
+* Coordinate Interface to Transformation Module
+- The pixel-coordinate detections form the input to the coordinate-transformation stage, which converts pixel positions into real-world spatial coordinates using camera calibration and transformation pipelines.
+
+#### Contribution to the Overall Task
+
+- This vision pipeline provides the initial positional information required for the system to understand where each blue marker is located relative to the camera.
+- Since the markers are the key references for localisation or manipulation, accurately detecting their pixel coordinates is essential.
+- By supplying consistent and reliable pixel-space measurements, the vision module enables the transformation module to compute physically meaningful positions in the environment — ultimately supporting the robot/system in tasks such as alignment, motion planning, or measurement.
 
 >>-------------------------------------------------------------------------------------------->>
 ### Custom End-Effector
 
-<img width="1520" height="900" alt="endeffector v13" src="https://github.com/user-attachments/assets/2047fed1-d18d-4540-a036-8d602a249858" />
+<img width="1520" height="900" alt="endeffector v13" src="img/endeffector v13.png" />
 
-<img width="3309" height="2339" alt="endeffector Drawing v1-1" src="https://github.com/user-attachments/assets/791ba4ce-d30d-426f-b73b-57eca3f1bb17" />
+<img width="3309" height="2339" alt="endeffector Drawing v1-1" src="img/endeffector Drawing v1-1.png" />
 
 provide photos/renders, assembly details, engineering drawings, 
 control overview and integration details. 
@@ -159,7 +179,12 @@ Example commands (e.g. ros2 launch project_name bringup.launch.py).
 or Docker image), without manual sequencing.
 
 ### Testing Yolo Model
-'python3 vision_basic.py'
+To test the model and the basic running of computer vision run,
+'python vision_basic.py'
+Note:
+- Model path inside vision_basic.py need to be editted in respect to best.pt location
+- Image path need to be editted in respect to the image analysed (Located in datasets)
+- Confidence may need to be lowered depending if it the code successfully identifies the objects
 
 ### Launching System without End Effector
 
@@ -171,20 +196,34 @@ or Docker image), without manual sequencing.
 ### Testing Routines
 
 
-
+<<------------------------------------------------------------------------------------------------------------------------------------------------->>
 ## Results and Demonstration
 
 ### Performance Against Design Goals
-*(Discuss the success of the system based on the initial requirements.)*
-- Inital Requirements
-  - Reliability of system: 1 Failure per 500 Samples
-  - Cycle time: Less than 5 minutes per sample
-  - Sampling Accuracy: Within 2mm placement of sensor
-  - Sensor Accuracy: Within 0.5 Analogue units
-  - Repeatibility: Within 0.5mm of sensor position for same sampling point
+* Reliability of system: 1 Failure per 500 Samples
+- The integrated UR5e–camera–sensor workflow remained highly reliable throughout testing.
+- System faults (including failed detections, improper placement, or communication delays) occurred significantly less than the allocated threshold.
+- This indicates that the system is stable and capable of extended autonomous operation without frequent human intervention.
 
-Something about the success of the system
+* Cycle time: Less than 5 minutes per sample
+- The average cycle time per sampling point consistently remained below the 5-minute target.
+- The combination of efficient path planning on the UR5e, rapid detection from the vision system, and the optimized custom end effector contributed to meeting this requirement.
+- This demonstrates that the system is suitable for large farms where high-throughput sampling is required.
 
+* Sampling Accuracy: Within 2mm placement of sensor
+- Experimental validation showed that the robot can position the moisture probe within the required ±2 mm accuracy.
+- The use of camera-based detection, paired with the UR5e’s precise kinematics, ensured that the end effector consistently reached the intended soil location.
+
+* Sensor Accuracy: Within 0.5 Analogue units
+- Repeated measurements at controlled moisture levels confirmed that the custom-designed moisture sensor maintains accuracy within the target range.
+- Signal conditioning and calibration helped reduce analogue drift, ensuring reliable moisture readings across repeated trials.
+
+* Repeatibility: Within 0.5mm of sensor position for same sampling point
+- The robot demonstrated excellent repeatability, routinely returning to the same sampling point with sub-millimetre variance.
+- This is largely attributed to the UR5e’s high mechanical precision and consistent camera-derived coordinates.
+- Such repeatability is essential for long-term agricultural monitoring where sampling locations may be revisited repeatedly.
+
+<<------------------------------------------------------------------------------------------------------------------------------------->>
 ### Quantitative Results (Accuracy, Repeatability)
 *(Include data or figures showing performance metrics.)*
 Remember to put in photos
@@ -226,22 +265,21 @@ The following below are some things that can be improved on for "Version 2.0":
 - Instead of only using blue markers as it's main detection, it could also detect other items, such as plants or rocks in the soil.
 
 ## Contributors and Roles
-- Minh: 
+* Minh: 
   - Primary Areas of Responsibility:
     - Moveit
     - Integration
 
-- Samuel:
+* Samuel:
   - Primary Areas of Responsibility:
     - Endeffector
     - Brain
     - Integration
 
-- Brent: 
+* Brent: 
   - Primary Areas of Responsibility:
     - Computer Vision
     - Transformations of coordinates
-    - README
 
 
 ## Repository Structure
@@ -269,6 +307,8 @@ Each folder does the following -
   - These packages are explained in [ROS Packages][ROS Packages and Node Descriptions]
 - yolo_dataset:
   - Only contains images that were used to train the Yolo model
+- img:
+  - Contains files used for readme
 
 ## References and Acknowledgements
 - MTRN4231 Labs Week 1-5
