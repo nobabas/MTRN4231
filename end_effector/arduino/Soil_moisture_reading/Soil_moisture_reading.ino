@@ -3,8 +3,7 @@
 #define drySoil 380   // Define min value we consider soil 'dry'
 
 // Define pins
-#define sensorPin A0   // Analog input pin
-#define outputPin 9    // PWM output pin (must support PWM)
+#define outputPin A0   // Analog input pin
 
 void setup() {
   Serial.begin(9600);
