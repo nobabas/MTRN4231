@@ -36,6 +36,7 @@ private:
     // --- Data ---
     double soil_threshold_;
     double latest_moisture_ = 0.0;
+    double latest_temperature_ = 26.0;
     
     std::map<int, interfaces::msg::MarkerData> marker_map_;
     std::mutex marker_mutex_;
@@ -50,6 +51,7 @@ private:
     rclcpp::Service<interfaces::srv::BrainCmd>::SharedPtr brain_srv_;
     rclcpp::Subscription<interfaces::msg::Marker2DArray>::SharedPtr marker_sub_;
     rclcpp::Subscription<std_msgs::msg::Float32>::SharedPtr moist_sub_;
+    rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr temp_pub_;
 
     // --- Routines & Tools ---
     RobotInterface tools_;
