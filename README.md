@@ -62,13 +62,10 @@ This system utilizes the integration of camera detection, collaborating the UR5e
 ### Video Demonstration
 
 Video link:
-https://www.youtube.com/shorts/ufF1myLWomA
+[![Watch the video](img/demo_image.jpg)](https://youtube.com/shorts/Lg8x_b_xSfI?feature=share)
 
-Most likely get from a test run
-
-Add image of the robot with full setup
 <div align="center">
-  <img src="img/demo_img.png" alt="cad" width="100%">
+  <img src="img/demo_image.jpg" alt="cad" width="100%">
 </div>
 
 <<-------------------------------------------------------------------->>
@@ -170,38 +167,108 @@ Add image of the robot with full setup
 
 >>--------------------------------------------------------------------------------------------->>
 ### Closed-Loop System Behaviour
+The system operates using a fully closed-loop control architecture, where sensor measurements continuously influence and correct robot behaviour during operation. This ensures that the robot responds dynamically to environmental variation—such as marker position changes, depth shifts, or sensor noise—rather than relying on static commands.
 
-#### Motion Plan Overview
+#### Feedback Sources
 
-#### System Flowchart
+The system uses three primary real-time feedback streams:
+
+1. Computer Vision Feedback (YOLO + Camera)
+
+- The vision node continuously detects blue markers and publishes updated centroid pixel coordinates.
+- These coordinates are converted into world-frame positions through the transformation module.
+- This ensures that every robot movement is based on the current marker position, not a previously captured value.
+
+2. Robot Motion Feedback (UR5e + MoveIt)
+
+- MoveIt provides real-time feedback about joint states and end-effector pose.
+- Planned trajectories are continuously checked for validity and re-evaluated if obstacles or inconsistencies are detected.
+
+3. End-Effector Sensor Feedback (Teensy Moisture Probe)
+- During soil measurement, the moisture probe sends continuous analogue readings.
+- The robot waits until a stable reading is detected before lifting and moving to the next point.
+
+#### How the Feedback Loop Works
+Step-by-step closed-loop process:
+
+1. Detect Marker
+
+- Vision publishes pixel centroids → transformation node outputs world coordinates.
+
+2. Update Robot Target
+
+- Brain node receives coordinates and sends a MoveRequest with the latest (x, y, z).
+
+3. Move and Re-evaluate
+
+- The robot begins to move toward the target.
+- If a new marker position is detected during movement, the updated coordinate is sent to the brain.
+- Brain can interrupt the current command and re-issue a corrected MoveRequest to remove accumulating error.
+
+4. Perform Soil Measurement
+
+- Once the robot reaches the sampling point, the end-effector lowers into the soil.
+- The Teensy continuously sends moisture readings.
+- The robot remains in position until readings stabilise, then lifts and returns to safe height.
+
+5. Advance to Next Target
+
+- Brain increments the marker ID and repeats the cycle until no markers remain.
+
+####
+
+
+
+### Motion Plan Overview
+Some hand drawn image of the movement
+
+### System Flowchart
+Process (For now)
+Arm Moved to Home Position
+Identified -> No Markers Detected -> Terminate -> End
+|
+Creating List of coordinates in real world
+|
+Sent to brain to process
+|
+Move (id,x,y,z) <----------------------|
+|                                      |
+Move down by z                         |
+|                                      |
+Something end effector here            |
+|                                      |
+Lift Up end effector by z              |
+|                                      |
+increase id value by 1                 |
+|                                      |
+---------------------------------------|
 
 
 
 
-
-
-## Technical Components
 
 <<--------------------------------------------------------------------------------------------<<>>
+## Technical Components
+
 ### Computer Vision:
 The computer vision system is built around a YOLOv11n object detection model trained on a dataset containing blue markers. Its primary function is to detect the markers within the camera’s field of view and provide their pixel-level locations for downstream processing.
 
 #### Vision Pipeline
 
-* Image Acquisition
+##### Image Acquisition
 - A continuous image stream is received from the camera. To reduce computational load, frames are sampled at a lower frequency (Around 5 frames per second), while still maintaining sufficient resolution for reliable detection.
 
-* Object Detection (YOLOv11n Model)
+##### Object Detection (YOLOv11n Model)
 - Each sampled frame is passed through the YOLOv11n network.
 - The model outputs bounding boxes around detected blue markers.
 - These detections are filtered and annotated to visually confirm correct identification.
 
-* Centroid Extraction
+##### Centroid Extraction
 - For each bounding box, the system computes the centroid (x,y) in pixel coordinates.
 - This represents the marker’s location in the image plane.
 - These centroid values are published on the /pixel_coords ROS topic.
 
-* Coordinate Interface to Transformation Module
+###### Coordinate Interface to Transformation Module
 - The pixel-coordinate detections form the input to the coordinate-transformation stage, which converts pixel positions into real-world spatial coordinates using camera calibration and transformation pipelines.
 
 #### Contribution to the Overall Task
@@ -221,21 +288,45 @@ provide photos/renders, assembly details, engineering drawings,
 control overview and integration details. 
 
 ### System Visualisation
- explain how your system is visualised (e.g. RViz) and what it 
-demonstrates.
+The system is visualised via 3 main components, being RViz, YOLO and a RQT custom user interface.  
+
+#### RViz
+RViz is responsible for the main visualisation of the program. There are 4 main elements that will be displayed within the RViz window being:
+- UR5e Arm attached with simplified end effector
+- Bounding/Safety Planes
+- Visualisation Markers
+- Point-Cloud Visualisation
+
+
+
+#### YOLOv11n
+A live-feed pop-up of YOLOv11n's output will be displayed. This output as stated above, will be the camera's view with bounding boxes around desired detected objects.
+
+#### RQT GUI
+The GUI is a simple user interface, consisting of 6 buttons being: 
+- **Home:** Sends the UR5e arm to the default set home position.
+- **Sample:** Starts default soil sampling process, where target markers locations are probed.
+- **Topography:** Maps surface unevenness by recording the exact Z-height of soil contact across a grid.
+- **Vertical:** Measures moisture levels at multiple depths at a single location to analyze vertical distribution.
+- **Heat-map:** Samples the four corners of the workspace at a fixed depth to provide a broad moisture overview.
+- **STOP:** Emergency STOP broadcast.
+
+
+#### Contribution to Overall Task
+
+
 
 ### Closed-Loop Operation and Feedback
  describe the feedback method and how it adapts system 
 behaviour in real time.
 
+#### Closed Loop Pipeline
+
+#### Contribution to Overall Task
+
+
 ## Installation and Setup
 Step-by-step installation instructions for dependencies and workspace setup.
-
-#### Endeffector installation
-First make sure arduino 2.3.6 is installed: https://docs.arduino.cc/software/ide-v2/tutorials/getting-started/ide-v2-downloading-and-installing/
-Then download the teensy 4.1 board manager: https://www.pjrc.com/teensy/td_download.html
-
-After these changes run /MTRN4231/end_effector/arduino/Soil_moisture_reading/Soil_moisture_reading.ino. Make sure not to run terminal monitor
 
 ### Prerequisites and Dependencies
 
