@@ -12,7 +12,7 @@ bool HeatMapRoutine::run() {
     RCLCPP_INFO(logger, "--- Starting Corner Heat Map ---");
 
     // --- 1. START AT HOME (JOINT) ---
-    std::vector<float> home_joints = {-1.3f, 1.57f, -1.83f, -1.57f, 0.0f, 0.0f};
+    std::vector<float> home_joints = {-1.57f, 1.57f, -1.83f, -1.57f, 0.0f, 0.0f};
     if (!moveTo(home_joints, "joint")) {
         RCLCPP_ERROR(logger, "Failed to move Home. Aborting.");
         return false;

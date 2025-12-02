@@ -15,7 +15,7 @@ bool VerticalProfileRoutine::run(const std::map<int, interfaces::msg::MarkerData
     RCLCPP_INFO(logger, "--- Starting Vertical Profile ---");
 
     // Go Home First
-    if (!move({-1.3f, 1.57f, -1.83f, -1.57f, 0.0f, 0.0f}, "joint")) return false;
+    if (!move({-1.57f, 1.57f, -1.83f, -1.57f, 0.0f, 0.0f}, "joint")) return false;
 
     std::vector<std::vector<float>> targets;
 

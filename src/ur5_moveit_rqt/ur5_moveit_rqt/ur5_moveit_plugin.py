@@ -115,7 +115,7 @@ class UR5MoveItPlugin(Plugin):
     # ---------- Button handlers ----------
 
     def _on_home(self):
-        positions = [-1.3, 1.57, -1.83, -1.57, 0.0, 0.0]
+        positions = [-1.57, 1.57, -1.83, -1.57, 0.0, 0.0]
         self._call_move('joint', positions)
 
     def _on_sample(self):
