@@ -198,9 +198,21 @@ control overview and integration details.
  explain how your system is visualised (e.g. RViz) and what it 
 demonstrates.
 
+#### Visualisation Pipeline
+
+
+#### Contribution to Overall Task
+
+
+
 ### Closed-Loop Operation and Feedback
  describe the feedback method and how it adapts system 
 behaviour in real time.
+
+#### Closed Loop Pipeline
+
+#### Contribution to Overall Task
+
 
 ## Installation and Setup
 Step-by-step installation instructions for dependencies and workspace setup.
