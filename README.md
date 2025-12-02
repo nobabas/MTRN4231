@@ -183,7 +183,7 @@ https://www.youtube.com/shorts/ufF1myLWomA
     Marker2D[] markers
     ```
 
-    **Explaination:** Puts individual Marker2D markers into a singular array to be published. An example output could be: **[id: 0, x: 0.1, y: 0.2]**, **[id: 1, x: 0.5, y: 0.5]**, **[id: 2, x: 3.2, y: 1]** ]
+    **Explaination:** Puts individual Marker2D markers into a singular array to be published. An example output could be: **[[id: 0, x: 0.1, y: 0.2]**, **[id: 1, x: 0.5, y: 0.5]**, **[id: 2, x: 3.2, y: 1]]**
     
 
 ### Closed-Loop System Behaviour
@@ -228,6 +228,19 @@ The following is a step-by-step run through of the closed-loop process:
 **5. Advance to Next Target**
 - Brain increments the marker ID and repeats.
 
+#### How the System Adapts in Real Time
+**Correction for detection drift:**
+If lighting changes or the camera shifts slightly, the vision module will still locate the marker and update its position. The robot always follows the current transformed coordinates instead of precomputed ones.
+
+**Avoiding accumulated pose error:**
+Rather than assuming the robot reached its target perfectly, every new motion command is generated from fresh vision data.
+
+**Safe end-effector operation:**
+The robot lowers only until the depth sensor confirms a stable soil contact point, preventing over-penetration.
+
+**Dynamic task execution:**
+If markers are lost or newly detected, the brain node adapts by updating the processing list in real time.
+
 
 ### Operation Plan Overview
 The following diagram is a high-level overview of the operational loop of the basic soil sampling routine.
@@ -253,8 +266,6 @@ Lift Up end effector by z              |
 increase id value by 1                 |
 |                                      |
 ---------------------------------------|
-
-
 
 
 ## Technical Components
@@ -287,7 +298,6 @@ The computer vision system is built around a YOLOv11n object detection model tra
 - Since the markers are the key references for localisation or manipulation, accurately detecting their pixel coordinates is essential.
 - By supplying consistent and reliable pixel-space measurements, the vision module enables the transformation module to compute physically meaningful positions in the environment — ultimately supporting the robot/system in tasks such as alignment, motion planning, or measurement.
 
->>-------------------------------------------------------------------------------------------->>
 ### Custom End-Effector
 
 <center><img width="1520" height="900" alt="endeffector v13" src="img/endeffector v13.png" />
@@ -322,7 +332,7 @@ The GUI is a simple user interface, consisting of 6 buttons being:
 - **Heat-map:** Samples the four corners of the workspace at a fixed depth to provide a broad moisture overview.
 - **STOP:** Emergency STOP broadcast.
 
-
+<<--------------------------------------------------------------------->>
 #### Contribution to Overall Task
 
 
