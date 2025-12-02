@@ -17,4 +17,7 @@ struct RobotInterface {
     
     // Pointer to shared moisture data
     const double* latest_moisture; 
+
+    // Pointer to shared temperature data
+    const double* latest_temperature;
 };

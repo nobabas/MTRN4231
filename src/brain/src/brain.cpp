@@ -30,12 +30,15 @@ BrainNode::BrainNode() : Node("brain_node")
 
     moist_sub_ = create_subscription<std_msgs::msg::Float32>(
         "/soil_moisture", 10, std::bind(&BrainNode::moistureCallback, this, _1));
+    
+    temp_pub_ = create_publisher<std_msgs::msg::Float32>("/soil_temperature", 10);
 
     tools_.node = this;
     tools_.move_client = move_client_;
     tools_.stop_client = stop_client_;
     tools_.vision_client = vision_client_;
     tools_.latest_moisture = &latest_moisture_;
+    tools_.latest_temperature = &latest_temperature_;
 
     soil_routine_       = std::make_shared<SoilRoutine>(tools_);
     topography_routine_ = std::make_shared<TopographyRoutine>(tools_);
@@ -47,7 +50,34 @@ void BrainNode::brainServiceCallback(const std::shared_ptr<interfaces::srv::Brai
                                      std::shared_ptr<interfaces::srv::BrainCmd::Response> res)
 {
     RCLCPP_INFO(get_logger(), "Received command: '%s'", req->command.c_str());
-    std::lock_guard<std::mutex> lock(marker_mutex_);
+    {
+        std::lock_guard<std::mutex> lock(marker_mutex_);
+        marker_map_.clear();
+    }
+
+    RCLCPP_INFO(get_logger(), "Requesting vision");
+    auto vision_req = std::make_shared<interfaces::srv::VisionCmd::Request>();
+    vision_req->command = "scan";
+
+    auto vision_future = vision_client_->async_send_request(vision_req);
+    // WAIT for tf_main to finish scanning (it will block here until it publishes data)
+    // We give it 15 seconds to be safe (it usually takes ~3s)
+    if (vision_future.wait_for(std::chrono::seconds(15)) != std::future_status::ready) {
+         RCLCPP_ERROR(get_logger(), "Vision Scan timed out!");
+         res->success = false;
+         return;
+    }
+    rclcpp::sleep_for(std::chrono::seconds(1));
+    
+    // The service has returned, which means tf_main has published the new markers 
+    // and our markerCallback has already updated marker_map_.
+    std::map<int, interfaces::msg::MarkerData> current_markers;
+    {
+        std::lock_guard<std::mutex> lock(marker_mutex_);
+        current_markers = marker_map_;
+    }
+    
+    RCLCPP_INFO(get_logger(), "Scan Finished. Found %zu markers.", current_markers.size());
 
     if (req->command == "soil_sampling") {
         res->success = soil_routine_->run(soil_threshold_, marker_map_);
@@ -72,7 +102,7 @@ void BrainNode::markerCallback(const interfaces::msg::Marker2DArray::SharedPtr m
     std::lock_guard<std::mutex> lock(marker_mutex_);
     
     // Threshold to consider a marker "new" (e.g., 5cm)
-    double duplicate_radius = 0.05; 
+    double duplicate_radius = 0.04; 
 
     for (const auto &marker_2d : msg->markers) {
         float new_x = marker_2d.x;
@@ -116,7 +146,15 @@ void BrainNode::markerCallback(const interfaces::msg::Marker2DArray::SharedPtr m
 void BrainNode::moistureCallback(const std_msgs::msg::Float32::SharedPtr msg)
 {
     latest_moisture_ = msg->data;
+    latest_temperature_ = 35.0 - (latest_moisture_ / 50.0);
+
+    std_msgs::msg::Float32 temp_msg;
+    temp_msg.data = latest_temperature_;
+    if(temp_pub_) {
+        temp_pub_->publish(temp_msg);
+    }
 }
+
 
 int main(int argc, char *argv[])
 {
