@@ -66,9 +66,8 @@ https://www.youtube.com/shorts/ufF1myLWomA
 
 Most likely get from a test run
 
-Add image of the robot with full setup
 <div align="center">
-  <img src="img/demo_img.png" alt="cad" width="100%">
+  <img src="img/demo_image.jpg" alt="cad" width="100%">
 </div>
 
 <<-------------------------------------------------------------------->>
@@ -170,19 +169,89 @@ Add image of the robot with full setup
 
 >>--------------------------------------------------------------------------------------------->>
 ### Closed-Loop System Behaviour
+The system operates using a fully closed-loop control architecture, where sensor measurements continuously influence and correct robot behaviour during operation. This ensures that the robot responds dynamically to environmental variation—such as marker position changes, depth shifts, or sensor noise—rather than relying on static commands.
 
-#### Motion Plan Overview
+#### Feedback Sources
 
-#### System Flowchart
+The system uses three primary real-time feedback streams:
+
+1. Computer Vision Feedback (YOLO + Camera)
+
+- The vision node continuously detects blue markers and publishes updated centroid pixel coordinates.
+- These coordinates are converted into world-frame positions through the transformation module.
+- This ensures that every robot movement is based on the current marker position, not a previously captured value.
+
+2. Robot Motion Feedback (UR5e + MoveIt)
+
+- MoveIt provides real-time feedback about joint states and end-effector pose.
+- Planned trajectories are continuously checked for validity and re-evaluated if obstacles or inconsistencies are detected.
+
+3. End-Effector Sensor Feedback (Teensy Moisture Probe)
+- During soil measurement, the moisture probe sends continuous analogue readings.
+- The robot waits until a stable reading is detected before lifting and moving to the next point.
+
+#### How the Feedback Loop Works
+Step-by-step closed-loop process:
+
+1. Detect Marker
+
+- Vision publishes pixel centroids → transformation node outputs world coordinates.
+
+2. Update Robot Target
+
+- Brain node receives coordinates and sends a MoveRequest with the latest (x, y, z).
+
+3. Move and Re-evaluate
+
+- The robot begins to move toward the target.
+- If a new marker position is detected during movement, the updated coordinate is sent to the brain.
+- Brain can interrupt the current command and re-issue a corrected MoveRequest to remove accumulating error.
+
+4. Perform Soil Measurement
+
+- Once the robot reaches the sampling point, the end-effector lowers into the soil.
+- The Teensy continuously sends moisture readings.
+- The robot remains in position until readings stabilise, then lifts and returns to safe height.
+
+5. Advance to Next Target
+
+- Brain increments the marker ID and repeats the cycle until no markers remain.
+
+####
+
+
+
+### Motion Plan Overview
+Some hand drawn image of the movement
+
+### System Flowchart
+Process (For now)
+Arm Moved to Home Position
+Identified -> No Markers Detected -> Terminate -> End
+|
+Creating List of coordinates in real world
+|
+Sent to brain to process
+|
+Move (id,x,y,z) <----------------------|
+|                                      |
+Move down by z                         |
+|                                      |
+Something end effector here            |
+|                                      |
+Lift Up end effector by z              |
+|                                      |
+increase id value by 1                 |
+|                                      |
+---------------------------------------|
 
 
 
 
-
-
-## Technical Components
 
 <<--------------------------------------------------------------------------------------------<<>>
+## Technical Components
+
 ### Computer Vision:
 The computer vision system is built around a YOLOv11n object detection model trained on a dataset containing blue markers. Its primary function is to detect the markers within the camera’s field of view and provide their pixel-level locations for downstream processing.
 
