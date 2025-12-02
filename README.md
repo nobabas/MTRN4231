@@ -71,7 +71,7 @@ This system utilizes the integration of camera detection, collaborating the UR5e
   - Responsible for custom URDF package for UR5e and end effector.
   - Two URDF exists, being a detailed EE visualisation and simplified EE for operation.
   - Interfaces with UR5e control drivers.
-- **interfaces (custom messages and services)**
+- **interfaces**
   - Custom messages and service calls.
 - **moveit_planning_server**
     - Cartesian motion control, converts desired cartesian pose into corresponding joint trajectories.
@@ -86,7 +86,7 @@ This system utilizes the integration of camera detection, collaborating the UR5e
   - tf_subscriber: Subscribes from vision_main.
   - tf_utils: Additional transformation calculations and adjustments.
 - **ur_moveit_config**
-  - 
+  - Determines path planners and movement configurations
 - **vision**
   - Detect desired markers and provides position via YOLOv11n.
   - Publishes coordinates in image frame.
@@ -113,6 +113,7 @@ This system utilizes the integration of camera detection, collaborating the UR5e
     ```
     command: "joint", "line", "cartesian"  
     positions: target positions [x, y, z, r, p, y] or [joint1, joint2, joint3, joint4, joint5, joint6]
+    ---
     success: boolean
     ```
 
@@ -167,65 +168,55 @@ This system utilizes the integration of camera detection, collaborating the UR5e
     Marker2D[] markers
     ```
 
-    **Explaination:** Puts individual Marker2D markers into a singular array to be published. An example output could be:  
-     **[id: 0, x: 0.1, y: 0.2]**, **[id: 1, x: 0.5, y: 0.5]**, **[id: 2, x: 3.2, y: 1]** ]
+    **Explaination:** Puts individual Marker2D markers into a singular array to be published. An example output could be: **[id: 0, x: 0.1, y: 0.2]**, **[id: 1, x: 0.5, y: 0.5]**, **[id: 2, x: 3.2, y: 1]** ]
     
 
 ### Closed-Loop System Behaviour
-The system operates using a fully closed-loop control architecture, where sensor measurements continuously influence and correct robot behaviour during operation. This ensures that the robot responds dynamically to environmental variation—such as marker position changes, depth shifts, or sensor noise—rather than relying on static commands.
+The system operates using a fully closed-loop control architecture, where the soil sensor measurements continuously influence and correct robot behaviour during operation. This ensures that the robot responds dynamically to environmental variation such as marker position changes, depth shifts, or sensor noise rather than relying on static commands calls.
 
 #### Feedback Sources
 
 The system uses three primary real-time feedback streams:
 
-1. Computer Vision Feedback (YOLO + Camera)
-
+**Computer Vision Feedback (YOLO + Camera)**
 - The vision node continuously detects blue markers and publishes updated centroid pixel coordinates.
 - These coordinates are converted into world-frame positions through the transformation module.
 - This ensures that every robot movement is based on the current marker position, not a previously captured value.
 
-2. Robot Motion Feedback (UR5e + MoveIt)
-
+**Robot Motion Feedback (UR5e + MoveIt)**
 - MoveIt provides real-time feedback about joint states and end-effector pose.
 - Planned trajectories are continuously checked for validity and re-evaluated if obstacles or inconsistencies are detected.
 
-3. End-Effector Sensor Feedback (Teensy Moisture Probe)
+**End-Effector Sensor Feedback (Teensy Moisture Probe)**
 - During soil measurement, the moisture probe sends continuous analogue readings.
 - The robot waits until a stable reading is detected before lifting and moving to the next point.
 
 #### How the Feedback Loop Works
-Step-by-step closed-loop process:
+The following is a step-by-step run through of the closed-loop process:
 
-1. Detect Marker
+**1. Detect Marker**
+- Vision publishes pixel centroids then transformation node outputs world coordinates.
 
-- Vision publishes pixel centroids → transformation node outputs world coordinates.
+**2. Update Robot Target**
+- Brain node receives coordinates and sends a movement request with the latest world pose (x, y, z, r, p, y).
 
-2. Update Robot Target
-
-- Brain node receives coordinates and sends a MoveRequest with the latest (x, y, z).
-
-3. Move and Re-evaluate
-
+**3. Move and Re-evaluate**
 - The robot begins to move toward the target.
 - If a new marker position is detected during movement, the updated coordinate is sent to the brain.
 - Brain can interrupt the current command and re-issue a corrected MoveRequest to remove accumulating error.
 
-4. Perform Soil Measurement
-
+**4. Perform Soil Measurement**
 - Once the robot reaches the sampling point, the end-effector lowers into the soil.
 - The Teensy continuously sends moisture readings.
 - The robot remains in position until readings stabilise, then lifts and returns to safe height.
 
-5. Advance to Next Target
-
-- Brain increments the marker ID and repeats the cycle until no markers remain.
-
-####
+**5. Advance to Next Target**
+- Brain increments the marker ID and repeats.
 
 
-
-### Motion Plan Overview
-Some hand drawn image of the movement
+### Operation Plan Overview
+The following diagram is a high-level overview of the operational loop of the basic soil sampling routine.
+<center><img width="1520" height="900" alt="Behaviour Visualisation" src="img/BehaviourVisualisation.PNG" /></center>
 
 ### System Flowchart
 Process (For now)
@@ -251,8 +242,6 @@ increase id value by 1                 |
 
 
 
-
-<<--------------------------------------------------------------------------------------------<<>>
 ## Technical Components
 
 ### Computer Vision:
@@ -285,9 +274,9 @@ The computer vision system is built around a YOLOv11n object detection model tra
 >>-------------------------------------------------------------------------------------------->>
 ### Custom End-Effector
 
-<img width="1520" height="900" alt="endeffector v13" src="img/endeffector v13.png" />
+<center><img width="1520" height="900" alt="endeffector v13" src="img/endeffector v13.png" />
 
-<img width="3309" height="2339" alt="endeffector Drawing v1-1" src="img/endeffector Drawing v1-1.png" />
+<img width="3309" height="2339" alt="endeffector Drawing v1-1" src="img/endeffector Drawing v1-1.png" /></center>
 
 provide photos/renders, assembly details, engineering drawings, 
 control overview and integration details. 
@@ -302,10 +291,11 @@ RViz is responsible for the main visualisation of the program. There are 4 main 
 - Visualisation Markers
 - Point-Cloud Visualisation
 
-
+<center><img width="1000" height="500" alt="endeffector Drawing v1-1" src="img/RViz.png"/></center>
 
 #### YOLOv11n
-A live-feed pop-up of YOLOv11n's output will be displayed. This output as stated above, will be the camera's view with bounding boxes around desired detected objects.
+A live-feed pop-up of YOLOv11n's output will be displayed. This output as stated above, will be the camera's view with bounding boxes around desired detected objects. An example can be seen below
+<center><img width="500" height="500" alt="endeffector Drawing v1-1" src="img/YOLOv11Output.png"/></center>
 
 #### RQT GUI
 The GUI is a simple user interface, consisting of 6 buttons being: 
