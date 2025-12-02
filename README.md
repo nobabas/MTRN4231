@@ -62,13 +62,10 @@ This system utilizes the integration of camera detection, collaborating the UR5e
 ### Video Demonstration
 
 Video link:
-https://youtube.com/shorts/Lg8x_b_xSfI?feature=share
+[![Watch the video](img/demo_image.jpg)](https://youtube.com/shorts/Lg8x_b_xSfI?feature=share)
 
-Most likely get from a test run
-
-Add image of the robot with full setup
 <div align="center">
-  <img src="img/demo_img.png" alt="cad" width="100%">
+  <img src="img/demo_image.jpg" alt="cad" width="100%">
 </div>
 
 <<-------------------------------------------------------------------->>
@@ -104,11 +101,34 @@ Add image of the robot with full setup
 ### Interfaces
 - srv
   - BrainCmd
-    - 
+    - string command
+    - bool response
+
+    Explaination:
+    A simple string command to tell which routine to run. Returns if response is successful or not.
+
   - MoveRequest
-    - 
+    - string command
+    - float64[] positions
+    - bool success
+    command: Either string of 'joint' / 'command'
+    positions: target positions [x, y, z, r, p, y] or [joint1, joint2, joint3, joint4, joint5, joint6]
+    success: Either True or False
+
+    Explaination:
+    The command line to move the the robot with a given command and target position
+
   - VisionCmd
-    - 
+    - string command
+    - interfaces/MarkerData marker_data
+
+    Explaination:
+    A command string that tells the vision node what to do.
+    Example: "detect_marker" to trigger blue marker detection.
+
+    The vision node returns one detected marker with its ID and pose.
+    If no marker is found, marker_data.pose can be empty.
+
 
 - msg
   - MarkerData
@@ -116,6 +136,7 @@ Add image of the robot with full setup
     - float32[] pose
     id:   Numeric ID or sequence index of the marker.
     pose: Flattened [x, y] vector (6 elements) representing the marker’s 3D position and orientation in the camera or world frame.
+    
     Explaination -
     - This is to first put each coordinate for that specific id
 
@@ -126,6 +147,7 @@ Add image of the robot with full setup
     id: Numeric ID or sequence index of the marker.
     x: x coordinate of world frame position of that id value.
     y: y coordinate of world frame position of that id value.
+
     Explaination -
     - Similar to MarkerData
     - Naming is different to avoid confusion of which interface is used
@@ -134,6 +156,7 @@ Add image of the robot with full setup
   - Marker2DArray
     - Marker2D[] markers
     markers: Flattened [id, x, y] vector (3 elements) representing the marker's 2D position in the world frame of all markers present.
+
     Explaination -
     - This is used to put each message Marker2D into the array so that it out puts as one.
     - Example of this array used is [[0, 0.1, 0.2],[1, 0.5, 0.5],[2, 3.2, 1]]
@@ -144,19 +167,89 @@ Add image of the robot with full setup
 
 >>--------------------------------------------------------------------------------------------->>
 ### Closed-Loop System Behaviour
+The system operates using a fully closed-loop control architecture, where sensor measurements continuously influence and correct robot behaviour during operation. This ensures that the robot responds dynamically to environmental variation—such as marker position changes, depth shifts, or sensor noise—rather than relying on static commands.
 
-#### Motion Plan Overview
+#### Feedback Sources
 
-#### System Flowchart
+The system uses three primary real-time feedback streams:
+
+1. Computer Vision Feedback (YOLO + Camera)
+
+- The vision node continuously detects blue markers and publishes updated centroid pixel coordinates.
+- These coordinates are converted into world-frame positions through the transformation module.
+- This ensures that every robot movement is based on the current marker position, not a previously captured value.
+
+2. Robot Motion Feedback (UR5e + MoveIt)
+
+- MoveIt provides real-time feedback about joint states and end-effector pose.
+- Planned trajectories are continuously checked for validity and re-evaluated if obstacles or inconsistencies are detected.
+
+3. End-Effector Sensor Feedback (Teensy Moisture Probe)
+- During soil measurement, the moisture probe sends continuous analogue readings.
+- The robot waits until a stable reading is detected before lifting and moving to the next point.
+
+#### How the Feedback Loop Works
+Step-by-step closed-loop process:
+
+1. Detect Marker
+
+- Vision publishes pixel centroids → transformation node outputs world coordinates.
+
+2. Update Robot Target
+
+- Brain node receives coordinates and sends a MoveRequest with the latest (x, y, z).
+
+3. Move and Re-evaluate
+
+- The robot begins to move toward the target.
+- If a new marker position is detected during movement, the updated coordinate is sent to the brain.
+- Brain can interrupt the current command and re-issue a corrected MoveRequest to remove accumulating error.
+
+4. Perform Soil Measurement
+
+- Once the robot reaches the sampling point, the end-effector lowers into the soil.
+- The Teensy continuously sends moisture readings.
+- The robot remains in position until readings stabilise, then lifts and returns to safe height.
+
+5. Advance to Next Target
+
+- Brain increments the marker ID and repeats the cycle until no markers remain.
+
+####
+
+
+
+### Motion Plan Overview
+Some hand drawn image of the movement
+
+### System Flowchart
+Process (For now)
+Arm Moved to Home Position
+Identified -> No Markers Detected -> Terminate -> End
+|
+Creating List of coordinates in real world
+|
+Sent to brain to process
+|
+Move (id,x,y,z) <----------------------|
+|                                      |
+Move down by z                         |
+|                                      |
+Something end effector here            |
+|                                      |
+Lift Up end effector by z              |
+|                                      |
+increase id value by 1                 |
+|                                      |
+---------------------------------------|
 
 
 
 
-
-
-## Technical Components
 
 <<--------------------------------------------------------------------------------------------<<>>
+## Technical Components
+
 ### Computer Vision:
 The computer vision system is built around a YOLOv11n object detection model trained on a dataset containing blue markers. Its primary function is to detect the markers within the camera’s field of view and provide their pixel-level locations for downstream processing.
 
@@ -260,7 +353,8 @@ or Docker image), without manual sequencing.
 ### Testing Yolo Model
 To test the model and the basic running of computer vision run,
 'python vision_basic.py'
-Note:
+
+* Note:
 - Model path inside vision_basic.py need to be editted in respect to best.pt location
 - Image path need to be editted in respect to the image analysed (Located in datasets)
 - Confidence may need to be lowered depending if it the code successfully identifies the objects
