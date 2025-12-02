@@ -51,7 +51,7 @@ This system utilizes the integration of camera detection, collaborating the UR5e
 **Project Duration**: 6 weeks
 
 **Authors**:
-* Minh Thang Phan: [Minh's LinkedIn Profile][Minh]
+* Minh Thang Pham: [Minh's LinkedIn Profile][Minh]
 * Samuel Gray: [Samuel's LinkedIn profile][Samuel]
 * Brent Poon: [Brent's LinkedIn profile][Brent]
 
