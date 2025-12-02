@@ -58,114 +58,119 @@ This system utilizes the integration of camera detection, collaborating the UR5e
 **Supervisor**:
 * David Nie: [David's LinkedIn profile][David]
 
-<<------------------------------------------------------------------->>
 ### Video Demonstration
-
-Video link:
 [![Watch the video](img/demo_image.jpg)](https://youtube.com/shorts/Lg8x_b_xSfI?feature=share)
 
-<div align="center">
-  <img src="img/demo_image.jpg" alt="cad" width="100%">
-</div>
 
-<<-------------------------------------------------------------------->>
 ## System Architecture
 ### ROS Packages and Node Descriptions
 - **brain**
-  - brain
+  - Responsible for communication between nodes. 
+  - Contains soil sampling logics and routine.
 - **endeffector_description**
+  - Responsible for custom URDF package for UR5e and end effector.
+  - Two URDF exists, being a detailed EE visualisation and simplified EE for operation.
+  - Interfaces with UR5e control drivers.
 - **interfaces (custom messages and services)**
-  - **srv**
-    - BrainCmd (For testing individual Packages)
-    - MoveRequest (Running Movement Request)
-    - VisionCmd (Interface with Vision Module)
-  - **msg**
-    - Marker2D (For putting world coordinates in temporary)
-    - Marker2DArray (For putting all the world coordinates in to be published)
-    - MarkerData (For putting world coordinates of that specific id value)
+  - Custom messages and service calls.
 - **moveit_planning_server**
-    - moveit_server
+    - Cartesian motion control, converts desired cartesian pose into corresponding joint trajectories.
+    - Monitors safety planes, collisions and joint speed limits.
 - **take_image**
-  - camera_run (Enables camera)
+  - Enables the camera
 - **teensy_bridge**
-  - teensy_bridge_node
+  - Publishes soil sensor readings at -- Hz
 - **transformation**
-  - tf_main (Main transformation calculations)
-  - tf_publisher (Publishes transformation coordinates)
-  - tf_subscriber (Subscribes from vision_main)
-  - tf_utils (Addition transformation calculations)
+  - tf_main: Main transformation calculations.
+  - tf_publisher: Publishes world-frame transformation coordinates.
+  - tf_subscriber: Subscribes from vision_main.
+  - tf_utils: Additional transformation calculations and adjustments.
 - **ur_moveit_config**
+  - 
 - **vision**
-  - vision_main (Yolo detection and determines centroid)
+  - Detect desired markers and provides position via YOLOv11n.
+  - Publishes coordinates in image frame.
 
 ### Interfaces
-- srv
-  - BrainCmd
-    - string command
-    - bool response
-
-    Explaination:
+- **srv**
+  - **BrainCmd**
+    ```
+    string command
+    ---
+    bool response
+    ```
+    **Explaination:**
     A simple string command to tell which routine to run. Returns if response is successful or not.
 
-  - MoveRequest
-    - string command
-    - float64[] positions
-    - bool success
-    command: Either string of 'joint' / 'command'
+  - **MoveRequest**
+    ```
+    string command
+    float64[] positions
+    ----
+    bool success 
+    ```
+    **Service Call:**  
+    ```
+    command: "joint", "line", "cartesian"  
     positions: target positions [x, y, z, r, p, y] or [joint1, joint2, joint3, joint4, joint5, joint6]
-    success: Either True or False
+    success: boolean
+    ```
 
-    Explaination:
+    **Explaination:**
     The command line to move the the robot with a given command and target position
 
-  - VisionCmd
-    - string command
-    - interfaces/MarkerData marker_data
+  - **VisionCmd**
+    ```
+    string command
+    ---
+    interfaces/MarkerData marker_data
+    ```
 
-    Explaination:
-    A command string that tells the vision node what to do.
-    Example: "detect_marker" to trigger blue marker detection.
+    **Explaination:** A service call that triggers the object/marker detection event.
 
-    The vision node returns one detected marker with its ID and pose.
-    If no marker is found, marker_data.pose can be empty.
+- **msg**
+  - **MarkerData**
+    ```
+    #-------------------------------------------------------------------#
+    #   id:   Numeric ID of marker.                                     #
+    #   pose: Flattened [x, y] vector (6 elements) representing         #
+    #         marker’s 3D position orientation in camera or world frame.#
+    #-------------------------------------------------------------------#
 
+    float32 id
+    float32[] pose
+    ```
 
-- msg
-  - MarkerData
-    - float32 id
-    - float32[] pose
-    id:   Numeric ID or sequence index of the marker.
-    pose: Flattened [x, y] vector (6 elements) representing the marker’s 3D position and orientation in the camera or world frame.
+    **Explaination:** Used to sort and determine unique and duplicate markers.
+
+  - **Marker2D**
+    ```
+    #-------------------------------------------------------------------#
+    #   id: Numeric ID or sequence index of the marker.                 #
+    #   x: x coordinate of world frame position of that id value.       #
+    #   y: y coordinate of world frame position of that id value.       #
+    #-------------------------------------------------------------------#
     
-    Explaination -
-    - This is to first put each coordinate for that specific id
+    float32 id
+    float32 x
+    float32 y
+    ```
 
-  - Marker2D
-    - float32 id
-    - float32 x
-    - float32 y
-    id: Numeric ID or sequence index of the marker.
-    x: x coordinate of world frame position of that id value.
-    y: y coordinate of world frame position of that id value.
+    **Explaination:** This is similar to MarkerData and is used to store world x and y coordinates with corresponding marker's ID.
 
-    Explaination -
-    - Similar to MarkerData
-    - Naming is different to avoid confusion of which interface is used
-    - This interface is used before sending it off as an array in Marker2DArray
+  - **Marker2DArray**
+    ```
+    #-------------------------------------------#
+    #   markers: Array of Marker2D messages     #
+    #-------------------------------------------#
+        
+    Marker2D[] markers
+    ```
 
-  - Marker2DArray
-    - Marker2D[] markers
-    markers: Flattened [id, x, y] vector (3 elements) representing the marker's 2D position in the world frame of all markers present.
-
-    Explaination -
-    - This is used to put each message Marker2D into the array so that it out puts as one.
-    - Example of this array used is [[0, 0.1, 0.2],[1, 0.5, 0.5],[2, 3.2, 1]]
-    - This is published as /blue_marker_coords
+    **Explaination:** Puts individual Marker2D markers into a singular array to be published. An example output could be:  
+     **[id: 0, x: 0.1, y: 0.2]**, **[id: 1, x: 0.5, y: 0.5]**, **[id: 2, x: 3.2, y: 1]** ]
     
 
-
-
->>--------------------------------------------------------------------------------------------->>
 ### Closed-Loop System Behaviour
 The system operates using a fully closed-loop control architecture, where sensor measurements continuously influence and correct robot behaviour during operation. This ensures that the robot responds dynamically to environmental variation—such as marker position changes, depth shifts, or sensor noise—rather than relying on static commands.
 
