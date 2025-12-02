@@ -63,6 +63,7 @@ This system utilizes the integration of camera detection, collaborating the UR5e
 
 Video link:
 https://www.youtube.com/shorts/ufF1myLWomA
+[![Watch the video](img/demo_image.jpg)](img/demo_video.mov)
 
 Most likely get from a test run
 
