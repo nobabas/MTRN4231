@@ -62,7 +62,7 @@ This system utilizes the integration of camera detection, collaborating the UR5e
 ### Video Demonstration
 
 Video link:
-[![Watch the video](img/demo_image.jpg)](https://youtube.com/shorts/Lg8x_b_xSfI?feature=share)
+https://www.youtube.com/shorts/ufF1myLWomA
 
 <div align="center">
   <img src="img/demo_image.jpg" alt="cad" width="100%">
@@ -269,6 +269,7 @@ The computer vision system is built around a YOLOv11n object detection model tra
 - These centroid values are published on the /pixel_coords ROS topic.
 
 ###### Coordinate Interface to Transformation Module
+* Coordinate Interface to Transformation Module
 - The pixel-coordinate detections form the input to the coordinate-transformation stage, which converts pixel positions into real-world spatial coordinates using camera calibration and transformation pipelines.
 
 #### Contribution to the Overall Task
@@ -315,18 +316,21 @@ The GUI is a simple user interface, consisting of 6 buttons being:
 #### Contribution to Overall Task
 
 
+ explain how your system is visualised (e.g. RViz) and what it 
+demonstrates.
 
 ### Closed-Loop Operation and Feedback
  describe the feedback method and how it adapts system 
 behaviour in real time.
 
-#### Closed Loop Pipeline
-
-#### Contribution to Overall Task
-
-
 ## Installation and Setup
 Step-by-step installation instructions for dependencies and workspace setup.
+
+#### Endeffector installation
+First make sure arduino 2.3.6 is installed: https://docs.arduino.cc/software/ide-v2/tutorials/getting-started/ide-v2-downloading-and-installing/
+Then download the teensy 4.1 board manager: https://www.pjrc.com/teensy/td_download.html
+
+After these changes run /MTRN4231/end_effector/arduino/Soil_moisture_reading/Soil_moisture_reading.ino. Make sure not to run terminal monitor
 
 ### Prerequisites and Dependencies
 
@@ -378,7 +382,7 @@ To test the model and the basic running of computer vision run,
 - System faults (including failed detections, improper placement, or communication delays) occurred significantly less than the allocated threshold.
 - This indicates that the system is stable and capable of extended autonomous operation without frequent human intervention.
 
-* Cycle time: Less than 5 minutes per sample
+* Cycle time: Less than 1 minute per sample
 - The average cycle time per sampling point consistently remained below the 5-minute target.
 - The combination of efficient path planning on the UR5e, rapid detection from the vision system, and the optimized custom end effector contributed to meeting this requirement.
 - This demonstrates that the system is suitable for large farms where high-throughput sampling is required.
@@ -387,11 +391,11 @@ To test the model and the basic running of computer vision run,
 - Experimental validation showed that the robot can position the moisture probe within the required ±2 mm accuracy.
 - The use of camera-based detection, paired with the UR5e’s precise kinematics, ensured that the end effector consistently reached the intended soil location.
 
-* Sensor Accuracy: Within 0.5 Analogue units
+* Sensor Accuracy: Within 100 Analogue units ***
 - Repeated measurements at controlled moisture levels confirmed that the custom-designed moisture sensor maintains accuracy within the target range.
 - Signal conditioning and calibration helped reduce analogue drift, ensuring reliable moisture readings across repeated trials.
 
-* Repeatibility: Within 0.5mm of sensor position for same sampling point
+* Accuracy: Within 10 mm of sensor position for same sampling point
 - The robot demonstrated excellent repeatability, routinely returning to the same sampling point with sub-millimetre variance.
 - This is largely attributed to the UR5e’s high mechanical precision and consistent camera-derived coordinates.
 - Such repeatability is essential for long-term agricultural monitoring where sampling locations may be revisited repeatedly.
@@ -400,6 +404,16 @@ To test the model and the basic running of computer vision run,
 ### Quantitative Results (Accuracy, Repeatability)
 *(Include data or figures showing performance metrics.)*
 Remember to put in photos
+(This will be an image)
+
+Test | Detection Accuracy | Sampling Time/ Execution Time | Sampling accuracy | Sensor accuracy
+1
+2
+3
+4
+5
+
+Averages
 
 <<-----------------------------------------------------------------------------------------------------------------------------------<<
 
