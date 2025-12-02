@@ -57,7 +57,7 @@ void BrainNode::brainServiceCallback(const std::shared_ptr<interfaces::srv::Brai
 
     RCLCPP_INFO(get_logger(), "Requesting vision");
     auto vision_req = std::make_shared<interfaces::srv::VisionCmd::Request>();
-    vision_req->command = "scan";
+    vision_req->command = "scan";   
 
     auto vision_future = vision_client_->async_send_request(vision_req);
     // WAIT for tf_main to finish scanning (it will block here until it publishes data)

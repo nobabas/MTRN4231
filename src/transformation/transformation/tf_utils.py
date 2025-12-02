@@ -140,7 +140,7 @@ class TFHandler:
         """Custom transformation from camera to world coordinates."""
         return [
             
-            point[0] + 0.81,   # this is -(robot x)
+            point[0] + 0.78,   # this is -(robot x)
             point[1] - 0.09, # this is -(robot y)
             point[2],   # Camera Z -> World X (forward)
         ]

@@ -5,7 +5,7 @@
 #include <string>
 
 // --- CONTROL SWITCH ---
-#define USE_VISION 0
+#define USE_VISION 1
 
 using namespace std::chrono_literals;
 
@@ -80,7 +80,7 @@ bool SoilRoutine::run(double soil_threshold, const std::map<int, interfaces::msg
         callMovementService("cartesian", target);
     }
     
-    callMovementService("joint", {-1.3f, 1.57f, -1.83f, -1.57f, 0.0f, 0.0f});
+    callMovementService("joint", {-1.57f, 1.57f, -1.83f, -1.57f, 0.0f, 0.0f});
     return true;
 }
 
