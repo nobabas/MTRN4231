@@ -664,3 +664,7 @@ ros2 run tf2_ros static_transform_publisher \
 
   base_link camera_link
 */
+
+// If speed is getting out of hand
+// move_group_->setMaxVelocityScalingFactor(0.1);  // 10% of max speed
+// move_group_->setMaxAccelerationScalingFactor(0.1);  // 10% of max accel

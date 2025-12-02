@@ -51,28 +51,28 @@ This system utilizes the integration of camera detection, collaborating the UR5e
 **Project Duration**: 6 weeks
 
 **Authors**:
-* Minh Thang Phan: [Minh's LinkedIn Profile][Minh]
+* Minh Thang Pham: [Minh's LinkedIn Profile][Minh]
 * Samuel Gray: [Samuel's LinkedIn profile][Samuel]
 * Brent Poon: [Brent's LinkedIn profile][Brent]
 
 **Supervisor**:
 * David Nie: [David's LinkedIn profile][David]
 
-<<------------------------------------------------------------------->>
 ### Video Demonstration
+<<<<<<< HEAD
 
 Video link:
 https://www.youtube.com/shorts/ufF1myLWomA
+=======
+[![Watch the video](img/demo_image.jpg)](https://youtube.com/shorts/Lg8x_b_xSfI?feature=share)
+>>>>>>> d9abff64152ffc45b7575e972252e5b6272faf76
 
-<div align="center">
-  <img src="img/demo_image.jpg" alt="cad" width="100%">
-</div>
 
-<<-------------------------------------------------------------------->>
 ## System Architecture
 ### ROS Packages and Node Descriptions
 - **brain**
-  - brain
+  - Responsible for communication between nodes. 
+  - Contains soil sampling logics and routine.
 - **endeffector_description**
 - **interfaces (custom messages and services)**
   - **srv**
@@ -83,144 +83,155 @@ https://www.youtube.com/shorts/ufF1myLWomA
     - Marker2D (For putting world coordinates in temporary)
     - Marker2DArray (For putting all the world coordinates in to be published)
     - MarkerData (For putting world coordinates of that specific id value)
+  - Responsible for custom URDF package for UR5e and end effector.
+  - Two URDF exists, being a detailed EE visualisation and simplified EE for operation.
+  - Interfaces with UR5e control drivers.
+- **interfaces**
+  - Custom messages and service calls.
 - **moveit_planning_server**
-    - moveit_server
+    - Cartesian motion control, converts desired cartesian pose into corresponding joint trajectories.
+    - Monitors safety planes, collisions and joint speed limits.
 - **take_image**
-  - camera_run (Enables camera)
+  - Enables the camera
 - **teensy_bridge**
-  - teensy_bridge_node
+  - Publishes soil sensor readings at -- Hz
 - **transformation**
-  - tf_main (Main transformation calculations)
-  - tf_publisher (Publishes transformation coordinates)
-  - tf_subscriber (Subscribes from vision_main)
-  - tf_utils (Addition transformation calculations)
+  - tf_main: Main transformation calculations.
+  - tf_publisher: Publishes world-frame transformation coordinates.
+  - tf_subscriber: Subscribes from vision_main.
+  - tf_utils: Additional transformation calculations and adjustments.
 - **ur_moveit_config**
+  - Determines path planners and movement configurations
 - **vision**
-  - vision_main (Yolo detection and determines centroid)
+  - Detect desired markers and provides position via YOLOv11n.
+  - Publishes coordinates in image frame.
 
 ### Interfaces
-- srv
-  - BrainCmd
-    - string command
-    - bool response
-
-    Explaination:
+- **srv**
+  - **BrainCmd**
+    ```
+    string command
+    ---
+    bool response
+    ```
+    **Explaination:**
     A simple string command to tell which routine to run. Returns if response is successful or not.
 
-  - MoveRequest
-    - string command
-    - float64[] positions
-    - bool success
-    command: Either string of 'joint' / 'command'
+  - **MoveRequest**
+    ```
+    string command
+    float64[] positions
+    ----
+    bool success 
+    ```
+    **Service Call:**  
+    ```
+    command: "joint", "line", "cartesian"  
     positions: target positions [x, y, z, r, p, y] or [joint1, joint2, joint3, joint4, joint5, joint6]
-    success: Either True or False
+    ---
+    success: boolean
+    ```
 
-    Explaination:
+    **Explaination:**
     The command line to move the the robot with a given command and target position
 
-  - VisionCmd
-    - string command
-    - interfaces/MarkerData marker_data
+  - **VisionCmd**
+    ```
+    string command
+    ---
+    interfaces/MarkerData marker_data
+    ```
 
-    Explaination:
-    A command string that tells the vision node what to do.
-    Example: "detect_marker" to trigger blue marker detection.
+    **Explaination:** A service call that triggers the object/marker detection event.
 
-    The vision node returns one detected marker with its ID and pose.
-    If no marker is found, marker_data.pose can be empty.
+- **msg**
+  - **MarkerData**
+    ```
+    #-------------------------------------------------------------------#
+    #   id:   Numeric ID of marker.                                     #
+    #   pose: Flattened [x, y] vector (6 elements) representing         #
+    #         marker’s 3D position orientation in camera or world frame.#
+    #-------------------------------------------------------------------#
 
+    float32 id
+    float32[] pose
+    ```
 
-- msg
-  - MarkerData
-    - float32 id
-    - float32[] pose
-    id:   Numeric ID or sequence index of the marker.
-    pose: Flattened [x, y] vector (6 elements) representing the marker’s 3D position and orientation in the camera or world frame.
+    **Explaination:** Used to sort and determine unique and duplicate markers.
+
+  - **Marker2D**
+    ```
+    #-------------------------------------------------------------------#
+    #   id: Numeric ID or sequence index of the marker.                 #
+    #   x: x coordinate of world frame position of that id value.       #
+    #   y: y coordinate of world frame position of that id value.       #
+    #-------------------------------------------------------------------#
     
-    Explaination -
-    - This is to first put each coordinate for that specific id
+    float32 id
+    float32 x
+    float32 y
+    ```
 
-  - Marker2D
-    - float32 id
-    - float32 x
-    - float32 y
-    id: Numeric ID or sequence index of the marker.
-    x: x coordinate of world frame position of that id value.
-    y: y coordinate of world frame position of that id value.
+    **Explaination:** This is similar to MarkerData and is used to store world x and y coordinates with corresponding marker's ID.
 
-    Explaination -
-    - Similar to MarkerData
-    - Naming is different to avoid confusion of which interface is used
-    - This interface is used before sending it off as an array in Marker2DArray
+  - **Marker2DArray**
+    ```
+    #-------------------------------------------#
+    #   markers: Array of Marker2D messages     #
+    #-------------------------------------------#
+        
+    Marker2D[] markers
+    ```
 
-  - Marker2DArray
-    - Marker2D[] markers
-    markers: Flattened [id, x, y] vector (3 elements) representing the marker's 2D position in the world frame of all markers present.
-
-    Explaination -
-    - This is used to put each message Marker2D into the array so that it out puts as one.
-    - Example of this array used is [[0, 0.1, 0.2],[1, 0.5, 0.5],[2, 3.2, 1]]
-    - This is published as /blue_marker_coords
+    **Explaination:** Puts individual Marker2D markers into a singular array to be published. An example output could be: **[id: 0, x: 0.1, y: 0.2]**, **[id: 1, x: 0.5, y: 0.5]**, **[id: 2, x: 3.2, y: 1]** ]
     
 
-
-
->>--------------------------------------------------------------------------------------------->>
 ### Closed-Loop System Behaviour
-The system operates using a fully closed-loop control architecture, where sensor measurements continuously influence and correct robot behaviour during operation. This ensures that the robot responds dynamically to environmental variation—such as marker position changes, depth shifts, or sensor noise—rather than relying on static commands.
+The system operates using a fully closed-loop control architecture, where the soil sensor measurements continuously influence and correct robot behaviour during operation. This ensures that the robot responds dynamically to environmental variation such as marker position changes, depth shifts, or sensor noise rather than relying on static commands calls.
 
 #### Feedback Sources
 
 The system uses three primary real-time feedback streams:
 
-1. Computer Vision Feedback (YOLO + Camera)
-
+**Computer Vision Feedback (YOLO + Camera)**
 - The vision node continuously detects blue markers and publishes updated centroid pixel coordinates.
 - These coordinates are converted into world-frame positions through the transformation module.
 - This ensures that every robot movement is based on the current marker position, not a previously captured value.
 
-2. Robot Motion Feedback (UR5e + MoveIt)
-
+**Robot Motion Feedback (UR5e + MoveIt)**
 - MoveIt provides real-time feedback about joint states and end-effector pose.
 - Planned trajectories are continuously checked for validity and re-evaluated if obstacles or inconsistencies are detected.
 
-3. End-Effector Sensor Feedback (Teensy Moisture Probe)
+**End-Effector Sensor Feedback (Teensy Moisture Probe)**
 - During soil measurement, the moisture probe sends continuous analogue readings.
 - The robot waits until a stable reading is detected before lifting and moving to the next point.
 
 #### How the Feedback Loop Works
-Step-by-step closed-loop process:
+The following is a step-by-step run through of the closed-loop process:
 
-1. Detect Marker
+**1. Detect Marker**
+- Vision publishes pixel centroids then transformation node outputs world coordinates.
 
-- Vision publishes pixel centroids → transformation node outputs world coordinates.
+**2. Update Robot Target**
+- Brain node receives coordinates and sends a movement request with the latest world pose (x, y, z, r, p, y).
 
-2. Update Robot Target
-
-- Brain node receives coordinates and sends a MoveRequest with the latest (x, y, z).
-
-3. Move and Re-evaluate
-
+**3. Move and Re-evaluate**
 - The robot begins to move toward the target.
 - If a new marker position is detected during movement, the updated coordinate is sent to the brain.
 - Brain can interrupt the current command and re-issue a corrected MoveRequest to remove accumulating error.
 
-4. Perform Soil Measurement
-
+**4. Perform Soil Measurement**
 - Once the robot reaches the sampling point, the end-effector lowers into the soil.
 - The Teensy continuously sends moisture readings.
 - The robot remains in position until readings stabilise, then lifts and returns to safe height.
 
-5. Advance to Next Target
-
-- Brain increments the marker ID and repeats the cycle until no markers remain.
-
-####
+**5. Advance to Next Target**
+- Brain increments the marker ID and repeats.
 
 
-
-### Motion Plan Overview
-Some hand drawn image of the movement
+### Operation Plan Overview
+The following diagram is a high-level overview of the operational loop of the basic soil sampling routine.
+<center><img width="1520" height="900" alt="Behaviour Visualisation" src="img/BehaviourVisualisation.PNG" /></center>
 
 ### System Flowchart
 Process (For now)
@@ -246,8 +257,6 @@ increase id value by 1                 |
 
 
 
-
-<<--------------------------------------------------------------------------------------------<<>>
 ## Technical Components
 
 ### Computer Vision:
@@ -281,9 +290,9 @@ The computer vision system is built around a YOLOv11n object detection model tra
 >>-------------------------------------------------------------------------------------------->>
 ### Custom End-Effector
 
-<img width="1520" height="900" alt="endeffector v13" src="img/endeffector v13.png" />
+<center><img width="1520" height="900" alt="endeffector v13" src="img/endeffector v13.png" />
 
-<img width="3309" height="2339" alt="endeffector Drawing v1-1" src="img/endeffector Drawing v1-1.png" />
+<img width="3309" height="2339" alt="endeffector Drawing v1-1" src="img/endeffector Drawing v1-1.png" /></center>
 
 provide photos/renders, assembly details, engineering drawings, 
 control overview and integration details. 
@@ -298,10 +307,11 @@ RViz is responsible for the main visualisation of the program. There are 4 main 
 - Visualisation Markers
 - Point-Cloud Visualisation
 
-
+<center><img width="1000" height="500" alt="endeffector Drawing v1-1" src="img/RViz.png"/></center>
 
 #### YOLOv11n
-A live-feed pop-up of YOLOv11n's output will be displayed. This output as stated above, will be the camera's view with bounding boxes around desired detected objects.
+A live-feed pop-up of YOLOv11n's output will be displayed. This output as stated above, will be the camera's view with bounding boxes around desired detected objects. An example can be seen below
+<center><img width="500" height="500" alt="endeffector Drawing v1-1" src="img/YOLOv11Output.png"/></center>
 
 #### RQT GUI
 The GUI is a simple user interface, consisting of 6 buttons being: 
