@@ -59,13 +59,7 @@ This system utilizes the integration of camera detection, collaborating the UR5e
 * David Nie: [David's LinkedIn profile][David]
 
 ### Video Demonstration
-<<<<<<< HEAD
-
-Video link:
-https://www.youtube.com/shorts/ufF1myLWomA
-=======
 [![Watch the video](img/demo_image.jpg)](https://youtube.com/shorts/Lg8x_b_xSfI?feature=share)
->>>>>>> d9abff64152ffc45b7575e972252e5b6272faf76
 
 
 ## System Architecture
@@ -74,20 +68,19 @@ https://www.youtube.com/shorts/ufF1myLWomA
   - Responsible for communication between nodes. 
   - Contains soil sampling logics and routine.
 - **endeffector_description**
-- **interfaces (custom messages and services)**
-  - **srv**
-    - BrainCmd (For testing individual Packages)
-    - MoveRequest (Running Movement Request)
-    - VisionCmd (Interface with Vision Module)
-  - **msg**
-    - Marker2D (For putting world coordinates in temporary)
-    - Marker2DArray (For putting all the world coordinates in to be published)
-    - MarkerData (For putting world coordinates of that specific id value)
   - Responsible for custom URDF package for UR5e and end effector.
   - Two URDF exists, being a detailed EE visualisation and simplified EE for operation.
   - Interfaces with UR5e control drivers.
 - **interfaces**
-  - Custom messages and service calls.
+  - Custom services and messages
+  - **srv**
+    - BrainCmd
+    - MoveRequest
+    - VisionCmd
+  - **msg**
+    - Marker2D
+    - Marker2DArray
+    - MarkerData
 - **moveit_planning_server**
     - Cartesian motion control, converts desired cartesian pose into corresponding joint trajectories.
     - Monitors safety planes, collisions and joint speed limits.
