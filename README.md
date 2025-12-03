@@ -174,23 +174,6 @@ This system utilizes the integration of camera detection, collaborating the UR5e
 ### Closed-Loop System Behaviour
 The system operates using a fully closed-loop control architecture, where the soil sensor measurements continuously influence and correct robot behaviour during operation. This ensures that the robot responds dynamically to environmental variation such as marker position changes, depth shifts, or sensor noise rather than relying on static commands calls.
 
-#### Feedback Sources
-
-The system uses three primary real-time feedback streams:
-
-**Computer Vision Feedback (YOLO + Camera)**
-- The vision node continuously detects blue markers and publishes updated centroid pixel coordinates.
-- These coordinates are converted into world-frame positions through the transformation module.
-- This ensures that every robot movement is based on the current marker position, not a previously captured value.
-
-**Robot Motion Feedback (UR5e + MoveIt)**
-- MoveIt provides real-time feedback about joint states and end-effector pose.
-- Planned trajectories are continuously checked for validity and re-evaluated if obstacles or inconsistencies are detected.
-
-**End-Effector Sensor Feedback (Teensy Moisture Probe)**
-- During soil measurement, the moisture probe sends continuous analogue readings.
-- The robot waits until a stable reading is detected before lifting and moving to the next point.
-
 #### How the Feedback Loop Works
 The following is a step-by-step run through of the closed-loop process:
 
@@ -271,9 +254,7 @@ The computer vision system is built around a YOLOv11n object detection model tra
 - Since the markers are the key references for localisation or manipulation, accurately detecting their pixel coordinates is essential.
 - By supplying consistent and reliable pixel-space measurements, the vision module enables the transformation module to compute physically meaningful positions in the environment — ultimately supporting the robot/system in tasks such as alignment, motion planning, or measurement.
 
->>-------------------------------------------------------------------------------------------->>
 ### Custom End-Effector
-
 <center><img width="1520" height="900" alt="endeffector v13" src="img/endeffector v13.png" />
 
 <img width="3309" height="2339" alt="endeffector Drawing v1-1" src="img/endeffector Drawing v1-1.png" /></center>
@@ -298,7 +279,7 @@ A live-feed pop-up of YOLOv11n's output will be displayed. This output as stated
 <center><img width="500" height="500" alt="endeffector Drawing v1-1" src="img/YOLOv11Output.png"/></center>
 
 #### RQT GUI
-The GUI is a simple user interface, consisting of 6 buttons being: 
+The GUI is a simple user interface, consisting of 6 buttons and a soil sample step graph for data monitoring 
 - **Home:** Sends the UR5e arm to the default set home position.
 - **Sample:** Starts default soil sampling process, where target markers locations are probed.
 - **Topography:** Maps surface unevenness by recording the exact Z-height of soil contact across a grid.
@@ -316,6 +297,20 @@ The GUI is a simple user interface, consisting of 6 buttons being:
 behaviour in real time.
 
 #### Closed Loop Pipeline
+The system uses three primary real-time feedback streams:
+
+**Computer Vision Feedback (YOLO + Camera)**
+- The vision node continuously detects blue markers and publishes updated centroid pixel coordinates.
+- These coordinates are converted into world-frame positions through the transformation module.
+- This ensures that every robot movement is based on the current marker position, not a previously captured value.
+
+**Robot Motion Feedback (UR5e + MoveIt)**
+- MoveIt provides real-time feedback about joint states and end-effector pose.
+- Planned trajectories are continuously checked for validity and re-evaluated if obstacles or inconsistencies are detected.
+
+**End-Effector Sensor Feedback (Teensy Moisture Probe)**
+- During soil measurement, the moisture probe sends continuous analogue readings.
+- The robot waits until a stable reading is detected before lifting and moving to the next point.
 
 #### Contribution to Overall Task
 
