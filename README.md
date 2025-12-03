@@ -426,14 +426,15 @@ To test the model and the basic running of computer vision run,
 Remember to put in photos
 (This will be an image)
 
-Test | Detection Accuracy | Sampling Time/ Execution Time | Sampling accuracy | Sensor accuracy
-1
-2
-3
-4
-5
+|     Test     | Detection Accuracy | Sampling Time / Execution Time (seconds) | Sampling Accuracy (%) | Sensor Accuracy (%) |
+|--------------|--------------------|------------------------------------------|-----------------------|---------------------|
+|      1       |        0.79        |                    50                    |          90           |         97          |
+|      2       |        0.82        |                    45                    |          85           |         96          |
+|      3       |        0.84        |                    55                    |          86           |         98          |
+|      4       |        0.74        |                    43                    |          88           |         98          |
+|      5       |        0.87        |                    47                    |          91           |         95          |
+| **Averages** |        0.812       |                    48                    |          88           |         96.8        |
 
-Averages
 
 <<-----------------------------------------------------------------------------------------------------------------------------------<<
 
