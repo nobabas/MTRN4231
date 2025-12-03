@@ -43,10 +43,12 @@
 [ROS Packages and Node Descriptions]: #ros-packages-and-node-descriptions
 
 ## Project Overview
+Manual soil moisture testing is currently a labor-intensive, slow, and inconsistent process. Farmers often rely on sparse data collected by hand or fixed sensors that cannot cover large areas or adapt to changing crop needs. This lack of data leads to inefficient irrigation, wasted water resources, and suboptimal crop yields. Our system solves this by deploying an autonomous robotic surveyor capable of identifying specific sampling locations and performing physical soil analysis without human intervention. By automating the data collection process, the system provides farmers with consistent environmental metrics (moisture and temperature) needed to make precision agriculture decisions.
 
-This project utilizes UR5e from Universal Robot for soil moisture testing detection to assist large farms.
+### Robot Functionality
+This project utilizes UR5e from Universal Robot for soil moisture and temperature testing detection to assist large farms.
 
-This system utilizes the integration of camera detection, collaborating the UR5e, and a custom end effector, designed to detect moisture, to enable to robot to move and obtain the moisture from the soil and to be consistently repeated in multiple areas.
+This system utilizes the integration of camera detection, collaborating the UR5e, and a custom end effector, designed to detect moisture and temperature, to enable the robot to move and obtain the moisture from the soil and to be consistently repeated in multiple areas. The robot can do 4 different routines, which is highlighted in Example Commands and Expected output. 
 
 **Project Duration**: 6 weeks
 
