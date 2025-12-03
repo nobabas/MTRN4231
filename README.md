@@ -59,7 +59,13 @@ This system utilizes the integration of camera detection, collaborating the UR5e
 * David Nie: [David's LinkedIn profile][David]
 
 ### Video Demonstration
+<<<<<<< HEAD
+
+Video link:
+https://www.youtube.com/shorts/ufF1myLWomA
+=======
 [![Watch the video](img/demo_image.jpg)](https://youtube.com/shorts/Lg8x_b_xSfI?feature=share)
+>>>>>>> d9abff64152ffc45b7575e972252e5b6272faf76
 
 
 ## System Architecture
@@ -68,6 +74,15 @@ This system utilizes the integration of camera detection, collaborating the UR5e
   - Responsible for communication between nodes. 
   - Contains soil sampling logics and routine.
 - **endeffector_description**
+- **interfaces (custom messages and services)**
+  - **srv**
+    - BrainCmd (For testing individual Packages)
+    - MoveRequest (Running Movement Request)
+    - VisionCmd (Interface with Vision Module)
+  - **msg**
+    - Marker2D (For putting world coordinates in temporary)
+    - Marker2DArray (For putting all the world coordinates in to be published)
+    - MarkerData (For putting world coordinates of that specific id value)
   - Responsible for custom URDF package for UR5e and end effector.
   - Two URDF exists, being a detailed EE visualisation and simplified EE for operation.
   - Interfaces with UR5e control drivers.
@@ -168,7 +183,7 @@ This system utilizes the integration of camera detection, collaborating the UR5e
     Marker2D[] markers
     ```
 
-    **Explaination:** Puts individual Marker2D markers into a singular array to be published. An example output could be: **[id: 0, x: 0.1, y: 0.2]**, **[id: 1, x: 0.5, y: 0.5]**, **[id: 2, x: 3.2, y: 1]** ]
+    **Explaination:** Puts individual Marker2D markers into a singular array to be published. An example output could be: **[[id: 0, x: 0.1, y: 0.2]**, **[id: 1, x: 0.5, y: 0.5]**, **[id: 2, x: 3.2, y: 1]]**
     
 
 ### Closed-Loop System Behaviour
@@ -195,6 +210,19 @@ The following is a step-by-step run through of the closed-loop process:
 
 **5. Advance to Next Target**
 - Brain increments the marker ID and repeats.
+
+#### How the System Adapts in Real Time
+**Correction for detection drift:**
+If lighting changes or the camera shifts slightly, the vision module will still locate the marker and update its position. The robot always follows the current transformed coordinates instead of precomputed ones.
+
+**Avoiding accumulated pose error:**
+Rather than assuming the robot reached its target perfectly, every new motion command is generated from fresh vision data.
+
+**Safe end-effector operation:**
+The robot lowers only until the depth sensor confirms a stable soil contact point, preventing over-penetration.
+
+**Dynamic task execution:**
+If markers are lost or newly detected, the brain node adapts by updating the processing list in real time.
 
 
 ### Operation Plan Overview
@@ -223,8 +251,6 @@ increase id value by 1                 |
 ---------------------------------------|
 
 
-
-
 ## Technical Components
 
 ### Computer Vision:
@@ -246,6 +272,7 @@ The computer vision system is built around a YOLOv11n object detection model tra
 - These centroid values are published on the /pixel_coords ROS topic.
 
 ###### Coordinate Interface to Transformation Module
+* Coordinate Interface to Transformation Module
 - The pixel-coordinate detections form the input to the coordinate-transformation stage, which converts pixel positions into real-world spatial coordinates using camera calibration and transformation pipelines.
 
 #### Contribution to the Overall Task
@@ -287,15 +314,18 @@ The GUI is a simple user interface, consisting of 6 buttons and a soil sample st
 - **Heat-map:** Samples the four corners of the workspace at a fixed depth to provide a broad moisture overview.
 - **STOP:** Emergency STOP broadcast.
 
-
+<<--------------------------------------------------------------------->>
 #### Contribution to Overall Task
 
 
+ explain how your system is visualised (e.g. RViz) and what it 
+demonstrates.
 
 ### Closed-Loop Operation and Feedback
  describe the feedback method and how it adapts system 
 behaviour in real time.
 
+<<<<<<< HEAD
 #### Closed Loop Pipeline
 The system uses three primary real-time feedback streams:
 
@@ -315,8 +345,16 @@ The system uses three primary real-time feedback streams:
 #### Contribution to Overall Task
 
 
+=======
+>>>>>>> 3eb5ef44eb67a45ecf9c587dc82d457c0152ffa5
 ## Installation and Setup
 Step-by-step installation instructions for dependencies and workspace setup.
+
+#### Endeffector installation
+First make sure arduino 2.3.6 is installed: https://docs.arduino.cc/software/ide-v2/tutorials/getting-started/ide-v2-downloading-and-installing/
+Then download the teensy 4.1 board manager: https://www.pjrc.com/teensy/td_download.html
+
+After these changes run /MTRN4231/end_effector/arduino/Soil_moisture_reading/Soil_moisture_reading.ino. Make sure not to run terminal monitor
 
 ### Prerequisites and Dependencies
 
@@ -368,7 +406,7 @@ To test the model and the basic running of computer vision run,
 - System faults (including failed detections, improper placement, or communication delays) occurred significantly less than the allocated threshold.
 - This indicates that the system is stable and capable of extended autonomous operation without frequent human intervention.
 
-* Cycle time: Less than 5 minutes per sample
+* Cycle time: Less than 1 minute per sample
 - The average cycle time per sampling point consistently remained below the 5-minute target.
 - The combination of efficient path planning on the UR5e, rapid detection from the vision system, and the optimized custom end effector contributed to meeting this requirement.
 - This demonstrates that the system is suitable for large farms where high-throughput sampling is required.
@@ -377,21 +415,40 @@ To test the model and the basic running of computer vision run,
 - Experimental validation showed that the robot can position the moisture probe within the required ±2 mm accuracy.
 - The use of camera-based detection, paired with the UR5e’s precise kinematics, ensured that the end effector consistently reached the intended soil location.
 
-* Sensor Accuracy: Within 0.5 Analogue units
+* Sensor Accuracy: Within 100 Analogue units ***
 - Repeated measurements at controlled moisture levels confirmed that the custom-designed moisture sensor maintains accuracy within the target range.
 - Signal conditioning and calibration helped reduce analogue drift, ensuring reliable moisture readings across repeated trials.
 
-* Repeatibility: Within 0.5mm of sensor position for same sampling point
+* Accuracy: Within 10 mm of sensor position for same sampling point
 - The robot demonstrated excellent repeatability, routinely returning to the same sampling point with sub-millimetre variance.
 - This is largely attributed to the UR5e’s high mechanical precision and consistent camera-derived coordinates.
 - Such repeatability is essential for long-term agricultural monitoring where sampling locations may be revisited repeatedly.
 
-<<------------------------------------------------------------------------------------------------------------------------------------->>
 ### Quantitative Results (Accuracy, Repeatability)
-*(Include data or figures showing performance metrics.)*
-Remember to put in photos
+* Performance Testing Metrics:
+Detection Accuracy:
+- Rating out of 1
+- The confidence that there is an object present in the image
+Sampling Time / Execution Time:
+- In seconds
+- The time it takes for the sample and the execution of the robot to run once
+Sampling Accuracy:
+- In percentage
+- The accuracy of the sample 
 
-<<-----------------------------------------------------------------------------------------------------------------------------------<<
+Sensor Accuracy:
+- In percentage
+- The accuracy of the sensor
+
+|     Test     | Detection Accuracy | Sampling Time / Execution Time (seconds) | Sampling Accuracy (%) | Sensor Accuracy (%) |
+|--------------|--------------------|------------------------------------------|-----------------------|---------------------|
+|      1       |        0.79        |                    50                    |          90           |         97          |
+|      2       |        0.82        |                    45                    |          85           |         96          |
+|      3       |        0.84        |                    55                    |          86           |         98          |
+|      4       |        0.74        |                    43                    |          88           |         98          |
+|      5       |        0.87        |                    47                    |          91           |         95          |
+| **Averages** |        0.812       |                    48                    |          88           |         96.8        |
+
 
 ### Robustness, Adaptability, and Innovation
 - Robutstness
