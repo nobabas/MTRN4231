@@ -420,11 +420,21 @@ To test the model and the basic running of computer vision run,
 - This is largely attributed to the UR5e’s high mechanical precision and consistent camera-derived coordinates.
 - Such repeatability is essential for long-term agricultural monitoring where sampling locations may be revisited repeatedly.
 
-<<------------------------------------------------------------------------------------------------------------------------------------->>
 ### Quantitative Results (Accuracy, Repeatability)
-*(Include data or figures showing performance metrics.)*
-Remember to put in photos
-(This will be an image)
+* Performance Testing Metrics:
+Detection Accuracy:
+- Rating out of 1
+- The confidence that there is an object present in the image
+Sampling Time / Execution Time:
+- In seconds
+- The time it takes for the sample and the execution of the robot to run once
+Sampling Accuracy:
+- In percentage
+- The accuracy of the sample 
+
+Sensor Accuracy:
+- In percentage
+- The accuracy of the sensor
 
 |     Test     | Detection Accuracy | Sampling Time / Execution Time (seconds) | Sampling Accuracy (%) | Sensor Accuracy (%) |
 |--------------|--------------------|------------------------------------------|-----------------------|---------------------|
@@ -435,8 +445,6 @@ Remember to put in photos
 |      5       |        0.87        |                    47                    |          91           |         95          |
 | **Averages** |        0.812       |                    48                    |          88           |         96.8        |
 
-
-<<-----------------------------------------------------------------------------------------------------------------------------------<<
 
 ### Robustness, Adaptability, and Innovation
 - Robutstness
