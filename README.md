@@ -9,7 +9,6 @@
 - [Technical Components](#technical-components)
   - [Computer Vision](#computer-vision)
     -[Vision Pipeline](#vision-pipeline)
-    -[Contribution to the Overall Task](#contribution-to-the-overall-task)
   - [Custom End-Effector](#custom-end-effector)
   - [System Visualisation](#system-visualisation)
   - [Closed-Loop Operation and Feedback](#closed-loop-operation-and-feedback)
@@ -69,7 +68,6 @@ The system executes four distinct autonomous routines:
 ### Video Demonstration
 * Click the Image for Demo Footage
 [![Watch the video](img/demo_image.jpg)](https://youtube.com/shorts/Lg8x_b_xSfI?feature=share)
-d9abff64152ffc45b7575e972252e5b6272faf76
 
 
 ## System Architecture
@@ -252,26 +250,8 @@ The following diagram is a high-level overview of the operational loop of the ba
 <center><img width="1520" height="900" alt="Behaviour Visualisation" src="img/BehaviourVisualisation.PNG" /></center>
 
 ### System Flowchart
-Process (For now)
-Arm Moved to Home Position
-Identified -> No Markers Detected -> Terminate -> End
-|
-Creating List of coordinates in real world
-|
-Sent to brain to process
-|
-Move (id,x,y,z) <----------------------|
-|                                      |
-Move down by z                         |
-|                                      |
-Something end effector here            |
-|                                      |
-Lift Up end effector by z              |
-|                                      |
-increase id value by 1                 |
-|                                      |
----------------------------------------|
 
+<center><img width="571" height="1109" alt="Behaviour Visualisation" src="img/Flowchart diagram.PNG" /></center>
 
 ## Technical Components
 
@@ -302,8 +282,6 @@ The computer vision system is built around a YOLOv11n object detection model tra
 - This vision pipeline provides the initial positional information required for the system to understand where each blue marker is located relative to the camera.
 - Since the markers are the key references for localisation or manipulation, accurately detecting their pixel coordinates is essential.
 - By supplying consistent and reliable pixel-space measurements, the vision module enables the transformation module to compute physically meaningful positions in the environment — ultimately supporting the robot/system in tasks such as alignment, motion planning, or measurement.
-
-
 
 ### Custom End-Effector
 
@@ -339,13 +317,6 @@ The GUI is a simple user interface, consisting of 6 buttons being:
 - **Vertical:** Measures moisture levels at multiple depths at a single location to analyze vertical distribution.
 - **Heat-map:** Samples the four corners of the workspace at a fixed depth to provide a broad moisture overview.
 - **STOP:** Emergency STOP broadcast.
-
-
-#### Contribution to Overall Task
-
-
- explain how your system is visualised (e.g. RViz) and what it 
-demonstrates.
 
 ### Closed-Loop Operation and Feedback
  describe the feedback method and how it adapts system 
