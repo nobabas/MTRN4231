@@ -20,4 +20,7 @@ struct RobotInterface {
 
     // Pointer to shared temperature data
     const double* latest_temperature;
+
+    // Pointer to shared contact height data
+    const double* latest_contact_height;
 };

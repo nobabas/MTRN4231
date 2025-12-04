@@ -10,6 +10,10 @@
 #include "interfaces/msg/marker2_d_array.hpp"
 #include "interfaces/srv/brain_cmd.hpp"
 
+#include "tf2_ros/transform_listener.h"
+#include "tf2_ros/buffer.h"
+#include "tf2_geometry_msgs/tf2_geometry_msgs.hpp"
+
 // Include shared tools
 #include "brain/robot_interface.hpp"
 
@@ -37,9 +41,13 @@ private:
     double soil_threshold_;
     double latest_moisture_ = 0.0;
     double latest_temperature_ = 26.0;
+    double latest_contact_height_ = 0.0;
     
     std::map<int, interfaces::msg::MarkerData> marker_map_;
     std::mutex marker_mutex_;
+
+    std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
+    std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
 
     // --- ROS Interfaces ---
     rclcpp::CallbackGroup::SharedPtr reentrant_group_;
