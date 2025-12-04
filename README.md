@@ -287,10 +287,11 @@ The computer vision system is built around a YOLOv11n object detection model tra
 
 <center><img width="1520" height="900" alt="endeffector v13" src="img/endeffector v13.png" />
 
-<img width="3309" height="2339" alt="endeffector Drawing v1-1" src="img/endeffector Drawing v1-1.png" /></center>
+<img width="3309" height="2339" alt="endeffector Drawing v1-1" src="img/endeffector Drawing v1-1.png"/>
 
-provide photos/renders, assembly details, engineering drawings, 
-control overview and integration details. 
+<img width="1520" height="900" alt="endeffector v13" src="img/WiringDiagream.PNG" />
+</center>
+  
 
 ### System Visualisation
 The system is visualised via 3 main components, being RViz, YOLO and a RQT custom user interface.  
