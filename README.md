@@ -359,11 +359,7 @@ First make sure arduino 2.3.6 is installed: https://docs.arduino.cc/software/ide
 Then download the teensy 4.1 board manager: https://www.pjrc.com/teensy/td_download.html
 
 After these changes run /MTRN4231/end_effector/arduino/Soil_moisture_reading/Soil_moisture_reading.ino.  
-Ensure not to run Arduino's Serial Terminal or there are more than one program accessing the teensy port. 
-This can be checked via
-```
-lsof /dev/ttyAMC0
-```
+
 
 ### Prerequisites and Dependencies
 
@@ -380,6 +376,25 @@ Calibration
 - No Calibrations
 
 ## Running the System
+To run the entire system, only one launch file is required which is located within src/brain/launch directory. There exists two options to launching the program, one for conenction with a physical robot and the other is a virtual simulation.  
+
+To toggle between real and simulation, check with the launch file ur_with_endeffector within src/endeffector_description.
+```
+use_fake = True     # Using simulated robot
+use_fake = False    # Using real robot
+```
+
+To launch the system, run 
+```
+ros2 launch brain system_launch.py
+```
+
+In a new terminal within the root directory, open run **rqt** and click **Plugins -> Robot Tools -> UR5e Moveit Control**. Next **Plugins -> Visualisation -> Plot** and add **/soil_moisture/data** to visualise soil sensor readings.  
+This is the main GUI for the program and consists of sampling routine options, HOME and STOP buttons. 
+
+Note that for sake of debugging and testing, each module can be ran seperately, instructions will be covered below.
+
+
 Clear instructions for launching and running the complete system
 Example commands (e.g. ros2 launch project_name bringup.launch.py).
 - Expected behaviour and example outputs.
@@ -391,20 +406,56 @@ or Docker image), without manual sequencing.
 To test the model and the basic running of computer vision run,
 'python vision_basic.py'
 
-* Note:
+Note:
 - Model path inside vision_basic.py need to be editted in respect to best.pt location
 - Image path need to be editted in respect to the image analysed (Located in datasets)
 - Confidence may need to be lowered depending if it the code successfully identifies the objects
 
-### Launching System without End Effector
+### Testing Moveit Movement Server
+To run the movement server seperately, there are two launch files that needs to be ran being **ur_with_endeffector.launch.py** and **moveit_planning.launch.py**. NOTE: this needs to be 2 seperate terminals.
+```
+ros2 launch endeffector_description ur_with_endeffector.launch.py
+ros2 launch moveit_planning_server moveit_planning.launch.py
+```
+Same as stated above, toggle **use_fake** to connect with the virtual or physical UR5e arm. 
 
-### Launching System with End Effector
+As with all nodes and packages in the system, this server is able to receive custom CLI service calls via the MoveRequest format which an example can be seen as follows
+```
+# Cartesian Path Call
+ros2 service call /moveit_path_plan interfaces/srv/MoveRequest "{command: 'cartesian', positions: [0.50, 0.35, 0.30, -3.1415, 0.0, 1.57]}"
+
+# Joint Call
+ros2 service call /moveit_path_plan interfaces/srv/MoveRequest "{command: 'joint', positions: [-1.57, 1.57, -1.83, -1.57, 0.0, 0.0]}"
+
+# Stop
+ros2 service call /moveit_stop std_srvs/srv/Trigger "{}"
+```
+As seen above, the two main movement services are **cartesian** and **joint**. There does exists two other options being **line** and **pose** which are OMPL-based planners as compared to **cartesian** using a cartesian planner. Whilst OMPL-based approach does work, it possess inferior path-planning speed and accuracy as comapred to a cartesian-based apporach and as such was not utilised.
+
+The server is a multithreaded operation, as such, it is possible to call multiple services at once, which is precisely why STOP works.
+
+
+### Testing End Effector
+
+
+### Testing System with End Effector
+
 
 
 ### Example Commands and Expected Output
 
 ### Testing Routines
 
+### Common Errors and Troubleshooting
+- If the movement services aren't being applied to the real UR5e, double check that the connection program on the UR5e pendant is actively running and is able to communicate. Everytime the system is launched or relaunch, it is required to re-run the communication program on the teaching pendant.
+- Ensure not to run Arduino's Serial Terminal or there are more than one program accessing the teensy port. If there are more than one program utilising the teensy port simultanuously (possibly from a previous group), this will prevent the ROS-Teensy bridge from being able to read incoming data from the sensor. While running the system, the port usage can be checked via the command below. If there is a second application use the kill command.
+  ```
+  lsof /dev/ttyAMC0
+
+  # If there's a second program
+  kill {insert PID}
+  ```
+- 
 
 <<------------------------------------------------------------------------------------------------------------------------------------------------->>
 ## Results and Demonstration
