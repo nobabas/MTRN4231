@@ -339,7 +339,7 @@ The GUI is a simple user interface, consisting of 6 buttons being:
 - **Heat-map:** Samples the four corners of the workspace at a fixed depth to provide a broad moisture overview.
 - **STOP:** Emergency STOP broadcast.
 
-<<--------------------------------------------------------------------->>
+
 #### Contribution to Overall Task
 
 
@@ -357,7 +357,12 @@ Step-by-step installation instructions for dependencies and workspace setup.
 First make sure arduino 2.3.6 is installed: https://docs.arduino.cc/software/ide-v2/tutorials/getting-started/ide-v2-downloading-and-installing/
 Then download the teensy 4.1 board manager: https://www.pjrc.com/teensy/td_download.html
 
-After these changes run /MTRN4231/end_effector/arduino/Soil_moisture_reading/Soil_moisture_reading.ino. Make sure not to run terminal monitor
+After these changes run /MTRN4231/end_effector/arduino/Soil_moisture_reading/Soil_moisture_reading.ino.  
+Ensure not to run Arduino's Serial Terminal or there are more than one program accessing the teensy port. 
+This can be checked via
+```
+lsof /dev/ttyAMC0
+```
 
 ### Prerequisites and Dependencies
 
