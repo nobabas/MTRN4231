@@ -251,7 +251,7 @@ The following diagram is a high-level overview of the operational loop of the ba
 
 ### System Flowchart
 
-<center><img width="571" height="1109" alt="Behaviour Visualisation" src="img/Flowchart diagram.PNG" /></center>
+<center><img width="571" height="1109" alt="Behaviour Visualisation" src="img/Flowchart diagram.png" /></center>
 
 ## Technical Components
 
