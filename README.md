@@ -318,27 +318,48 @@ The GUI is a simple user interface, consisting of 6 buttons being:
 - **Heat-map:** Samples the four corners of the workspace at a fixed depth to provide a broad moisture overview.
 - **STOP:** Emergency STOP broadcast.
 
+#### Contribution to the Overall Task
+- Provides real-time feedback for each individual nodes.
+
 ### Closed-Loop Operation and Feedback
  describe the feedback method and how it adapts system 
 behaviour in real time.
 
 ## Installation and Setup
-Step-by-step installation instructions for dependencies and workspace setup.
+### Operating System
+The program needs to ran on a native Ubuntu 22.04.5 LTS boot.
 
-#### Endeffector installation
-First make sure arduino 2.3.6 is installed: https://docs.arduino.cc/software/ide-v2/tutorials/getting-started/ide-v2-downloading-and-installing/
-Then download the teensy 4.1 board manager: https://www.pjrc.com/teensy/td_download.html
+### ROS2
+This system needs to be ran on ROS2 Humble distro. For instructions for installing ROS2 Humble, refer to ROS2's [official installation documation](https://docs.ros.org/en/humble/Installation.html).  
+Once ROS2 is installed, install the following ROS2 libraries
 
-After these changes run /MTRN4231/end_effector/arduino/Soil_moisture_reading/Soil_moisture_reading.ino.  
+```
+sudo apt-get install ros-humble-ur
+sudo apt install ros-humble-moveit
+```
+
+### Vision
 
 
-### Prerequisites and Dependencies
+### End Effector
+Ensure that an Arduino IDE version >= 2.0 is installed, if not, follow Arduino's [official installation guide](https://docs.arduino.cc/software/ide-v2/tutorials/getting-started/ide-v2-downloading-and-installing/)  
+Download the Teensy 4.1 board manager for Arduino following the [installation guide for Linux](https://www.pjrc.com/teensy/td_download.html)
 
-
-### Workspace Setup
-
+### System and Workspace Setup
+Move into the root directory of this repository, build and source the system before starting any testing or operations. NOTE: source the ros distro by choosing the correct setup file suffix that corresponds to the operating system and shell (for UNIX-based systems, this will be .bash)
+```
+colcon build
+source install/setup.bash
+```
 
 ### Hardware Setup and Calibration
+
+#### Camera
+
+
+#### End Effector
+
+
 Hardware Requirement
 Intel Realsense D435 Depth Camera
 - List of stuff relating to it
@@ -407,13 +428,19 @@ The server is a multithreaded operation, as such, it is possible to call multipl
 
 
 ### Testing End Effector
+Open the installed Arduino IDE and upload /MTRN4231/end_effector/arduino/Soil_moisture_reading/Soil_moisture_reading.ino after wiring according to wiring diagram. To start reading from the sensor, run
+```
+ros2 launch teensy_bridge teensy_bridge_launch.py
+```
+Soil sensor data should start being visualised on the RQT GUI.
 
+If no access to the end effector is availble or using a virtual simulation, dummy inputs from the sensor can be emulated directly from the brain.
+```
+ros2 run brain dummy_inputs.py
+```
 
 ### Testing System with End Effector
 
-
-
-### Example Commands and Expected Output
 
 ### Testing Routines
 
@@ -428,7 +455,6 @@ The server is a multithreaded operation, as such, it is possible to call multipl
   ```
 - 
 
-<<------------------------------------------------------------------------------------------------------------------------------------------------->>
 ## Results and Demonstration
 
 ### Performance Against Design Goals
@@ -523,6 +549,7 @@ The following below are some things that can be improved on for "Version 2.0":
   - Primary Areas of Responsibility:
     - Moveit
     - Integration
+    - Testing/Quality Control
 
 * Samuel:
   - Primary Areas of Responsibility:
