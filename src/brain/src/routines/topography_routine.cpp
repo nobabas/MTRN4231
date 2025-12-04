@@ -26,6 +26,7 @@ bool TopographyRoutine::run(const std::map<int, interfaces::msg::MarkerData>& ma
     }
     for (const auto &pair : markers) {
         auto arr = pair.second.pose;
+        // Target Z is safe hover height (0.40m)
         targets.push_back({(float)arr[0], (float)arr[1], 0.40f, -3.14f, 0.0f, 1.57f});
     }
 #else
@@ -36,8 +37,10 @@ bool TopographyRoutine::run(const std::map<int, interfaces::msg::MarkerData>& ma
     double contact_threshold = 1000.0; 
 
     for (const auto &hover : targets) {
+        // 1. Move to Hover
         if(!moveTo(hover, "cartesian")) continue;
 
+        // 2. Define Dive Target (deep enough to ensure contact)
         std::vector<float> dive = hover;
         dive[2] = 0.15f; 
         
@@ -45,19 +48,28 @@ bool TopographyRoutine::run(const std::map<int, interfaces::msg::MarkerData>& ma
         req->command = "cartesian";
         for(float p : dive) req->positions.push_back(p);
         
+        // 3. Start Moving Down
         auto future = tools_.move_client->async_send_request(req);
+        
+        // 4. Monitor for Contact
         while(rclcpp::ok()) {
             if(future.wait_for(10ms) == std::future_status::ready) break;
+            
+            // Check Moisture
             if(*(tools_.latest_moisture) > contact_threshold) {
+                // A. Stop Robot
                 auto stop_req = std::make_shared<std_srvs::srv::Trigger::Request>();
                 tools_.stop_client->async_send_request(stop_req).wait();
-                RCLCPP_INFO(logger, "Contact Detected!");
+                double height = *(tools_.latest_contact_height);
+                
+                RCLCPP_INFO(logger, "Contact Detected! Surface Height: %.4f m", height);
+
                 break;
             }
         }
+        
+        // 5. Retract
         moveTo(hover, "cartesian");
-        // Use getEndEffectorLink from moveitserver.cpp
-        // Joint state publisher
     }
     
     moveTo({-1.3f, 1.57f, -1.83f, -1.57f, 0.0f, 0.0f}, "joint");
