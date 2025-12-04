@@ -67,7 +67,9 @@ The system executes four distinct autonomous routines:
 * David Nie: [David's LinkedIn profile][David]
 
 ### Video Demonstration
+* Click the Image for Demo Footage
 [![Watch the video](img/demo_image.jpg)](https://youtube.com/shorts/Lg8x_b_xSfI?feature=share)
+d9abff64152ffc45b7575e972252e5b6272faf76
 
 
 ## System Architecture
@@ -78,19 +80,20 @@ The system executes four distinct autonomous routines:
 - **routines**
   - Contains routine logic to communicate with Brain
 - **endeffector_description**
+- **interfaces (custom messages and services)**
+  - **srv**
+    - BrainCmd (For testing individual Packages)
+    - MoveRequest (Running Movement Request)
+    - VisionCmd (Interface with Vision Module)
+  - **msg**
+    - Marker2D (For putting world coordinates in temporary)
+    - Marker2DArray (For putting all the world coordinates in to be published)
+    - MarkerData (For putting world coordinates of that specific id value)
   - Responsible for custom URDF package for UR5e and end effector.
   - Two URDF exists, being a detailed EE visualisation and simplified EE for operation.
   - Interfaces with UR5e control drivers.
 - **interfaces**
-  - Custom services and messages
-  - **srv**
-    - BrainCmd
-    - MoveRequest
-    - VisionCmd
-  - **msg**
-    - Marker2D
-    - Marker2DArray
-    - MarkerData
+  - Custom messages and service calls.
 - **moveit_planning_server**
     - Cartesian motion control, converts desired cartesian pose into corresponding joint trajectories.
     - Monitors safety planes, collisions and joint speed limits.
@@ -117,7 +120,7 @@ The system executes four distinct autonomous routines:
     ---
     bool response
     ```
-    **Explanation:**
+    **Explaination:**
     A simple string command to tell which routine to run. Returns if response is successful or not.
 
   - **MoveRequest**
@@ -129,14 +132,13 @@ The system executes four distinct autonomous routines:
     ```
     **Service Call:**  
     ```
-    command: "joint", "line", "cartesian"  "stop"
     positions: target positions [x, y, z, r, p, y] or [joint1, joint2, joint3, joint4, joint5, joint6]
     ---
     success: boolean
     ```
 
-    **Explanation:**
-    The command line to move the the robot with a given command and target position. Similarly, a command can be given as stop without target positions for the robot to stop.
+    **Explaination:**
+    The command line to move the the robot with a given command and target position
 
   - **VisionCmd**
     ```
@@ -145,7 +147,7 @@ The system executes four distinct autonomous routines:
     interfaces/MarkerData marker_data
     ```
 
-    **Explanation:** A service call that triggers the object/marker detection event.
+    **Explaination:** A service call that triggers the object/marker detection event.
 
 - **msg**
   - **MarkerData**
@@ -160,7 +162,7 @@ The system executes four distinct autonomous routines:
     float32[] pose
     ```
 
-    **Explanation:** Used to sort and determine unique and duplicate markers.
+    **Explaination:** Used to sort and determine unique and duplicate markers.
 
   - **Marker2D**
     ```
@@ -175,7 +177,7 @@ The system executes four distinct autonomous routines:
     float32 y
     ```
 
-    **Explanation:** This is similar to MarkerData and is used to store world x and y coordinates with corresponding marker's ID.
+    **Explaination:** This is similar to MarkerData and is used to store world x and y coordinates with corresponding marker's ID.
 
   - **Marker2DArray**
     ```
@@ -186,11 +188,28 @@ The system executes four distinct autonomous routines:
     Marker2D[] markers
     ```
 
-    **Explanation:** Puts individual Marker2D markers into a singular array to be published. An example output could be: **[[id: 0, x: 0.1, y: 0.2]**, **[id: 1, x: 0.5, y: 0.5]**, **[id: 2, x: 3.2, y: 1]]**
+    **Explaination:** Puts individual Marker2D markers into a singular array to be published. An example output could be: **[[id: 0, x: 0.1, y: 0.2]**, **[id: 1, x: 0.5, y: 0.5]**, **[id: 2, x: 3.2, y: 1]]**
     
 
 ### Closed-Loop System Behaviour
 The system operates using a fully closed-loop control architecture, where the soil sensor measurements continuously influence and correct robot behaviour during operation. This ensures that the robot responds dynamically to environmental variation such as marker position changes, depth shifts, or sensor noise rather than relying on static commands calls.
+
+#### Feedback Sources
+
+The system uses three primary real-time feedback streams:
+
+**Computer Vision Feedback (YOLO + Camera)**
+- The vision node continuously detects blue markers and publishes updated centroid pixel coordinates.
+- These coordinates are converted into world-frame positions through the transformation module.
+- This ensures that every robot movement is based on the current marker position, not a previously captured value.
+
+**Robot Motion Feedback (UR5e + MoveIt)**
+- MoveIt provides real-time feedback about joint states and end-effector pose.
+- Planned trajectories are continuously checked for validity and re-evaluated if obstacles or inconsistencies are detected.
+
+**End-Effector Sensor Feedback (Teensy Moisture Probe)**
+- During soil measurement, the moisture probe sends continuous analogue readings.
+- The robot waits until a stable reading is detected before lifting and moving to the next point.
 
 #### How the Feedback Loop Works
 The following is a step-by-step run through of the closed-loop process:
@@ -274,7 +293,7 @@ The computer vision system is built around a YOLOv11n object detection model tra
 - This represents the marker’s location in the image plane.
 - These centroid values are published on the /pixel_coords ROS topic.
 
-###### Coordinate Interface to Transformation Module
+##### Coordinate Interface to Transformation Module
 * Coordinate Interface to Transformation Module
 - The pixel-coordinate detections form the input to the coordinate-transformation stage, which converts pixel positions into real-world spatial coordinates using camera calibration and transformation pipelines.
 
@@ -284,11 +303,16 @@ The computer vision system is built around a YOLOv11n object detection model tra
 - Since the markers are the key references for localisation or manipulation, accurately detecting their pixel coordinates is essential.
 - By supplying consistent and reliable pixel-space measurements, the vision module enables the transformation module to compute physically meaningful positions in the environment — ultimately supporting the robot/system in tasks such as alignment, motion planning, or measurement.
 
+
+
 ### Custom End-Effector
+
 <center><img width="1520" height="900" alt="endeffector v13" src="img/endeffector v13.png" />
 
 <img width="3309" height="2339" alt="endeffector Drawing v1-1" src="img/endeffector Drawing v1-1.png" /></center>
- 
+
+provide photos/renders, assembly details, engineering drawings, 
+control overview and integration details. 
 
 ### System Visualisation
 The system is visualised via 3 main components, being RViz, YOLO and a RQT custom user interface.  
@@ -307,7 +331,7 @@ A live-feed pop-up of YOLOv11n's output will be displayed. This output as stated
 <center><img width="500" height="500" alt="endeffector Drawing v1-1" src="img/YOLOv11Output.png"/></center>
 
 #### RQT GUI
-The GUI is a simple user interface, consisting of 6 buttons and a soil sample step graph for data monitoring 
+The GUI is a simple user interface, consisting of 6 buttons being: 
 - **Home:** Sends the UR5e arm to the default set home position.
 - **Sample:** Starts default soil sampling process, where target markers locations are probed.
 - **Topography:** Maps surface unevenness by recording the exact Z-height of soil contact across a grid.
@@ -325,25 +349,6 @@ demonstrates.
 ### Closed-Loop Operation and Feedback
  describe the feedback method and how it adapts system 
 behaviour in real time.
-
-#### Closed Loop Pipeline
-The system uses three primary real-time feedback streams:
-
-**Computer Vision Feedback (YOLO + Camera)**
-- The vision node continuously detects blue markers and publishes updated centroid pixel coordinates.
-- These coordinates are converted into world-frame positions through the transformation module.
-- This ensures that every robot movement is based on the current marker position, not a previously captured value.
-
-**Robot Motion Feedback (UR5e + MoveIt)**
-- MoveIt provides real-time feedback about joint states and end-effector pose.
-- Planned trajectories are continuously checked for validity and re-evaluated if obstacles or inconsistencies are detected.
-
-**End-Effector Sensor Feedback (Teensy Moisture Probe)**
-- During soil measurement, the moisture probe sends continuous analogue readings.
-- The robot waits until a stable reading is detected before lifting and moving to the next point.
-
-#### Contribution to Overall Task
-
 
 ## Installation and Setup
 Step-by-step installation instructions for dependencies and workspace setup.
@@ -388,7 +393,7 @@ To test the model and the basic running of computer vision run,
 ### Launching System without End Effector
 
 ### Launching System with End Effector
-To launch the system, run 'ros2 launch brain system_launch.py'
+
 
 ### Example Commands and Expected Output
 
@@ -427,14 +432,17 @@ To launch the system, run 'ros2 launch brain system_launch.py'
 Detection Accuracy:
 - Rating out of 1
 - The confidence that there is an object present in the image
-Sampling Time / Execution Time:
+- This also an average of all 4 markers present in the camera feed
+
+* Sampling Time / Execution Time:
 - In seconds
 - The time it takes for the sample and the execution of the robot to run once
-Sampling Accuracy:
+
+* Sampling Accuracy:
 - In percentage
 - The accuracy of the sample 
 
-Sensor Accuracy:
+* Sensor Accuracy:
 - In percentage
 - The accuracy of the sensor
 
@@ -491,7 +499,7 @@ The following below are some things that can be improved on for "Version 2.0":
 * Samuel:
   - Primary Areas of Responsibility:
     - Endeffector
-    - Brain and Routine
+    - Brain
     - Integration
 
 * Brent: 
@@ -507,7 +515,6 @@ The below is the repository setup that is done in github -
   - Soil_test_for_ur5e
 - src
   - brain
-  - routine
   - endeffector_description
   - interfaces
   - moveit_planning server
