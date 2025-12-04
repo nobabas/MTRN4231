@@ -43,10 +43,18 @@
 [ROS Packages and Node Descriptions]: #ros-packages-and-node-descriptions
 
 ## Project Overview
+Manual soil moisture testing is currently a labor intensive, slow, and inconsistent process. Farmers often rely on sparse data collected by hand or fixed sensors that cannot cover large areas or adapt to changing crop needs. This lack of data leads to inefficient irrigation, wasted water resources, and suboptimal crop yields. Our system solves this by deploying an autonomous robotic surveyor capable of identifying specific sampling locations and performing physical soil analysis without human intervention. By automating the data collection process, the system provides farmers with consistent environmental metrics (moisture and temperature) needed to make precision agriculture decisions.
 
-This project utilizes UR5e from Universal Robot for soil moisture testing detection to assist large farms.
+### Robot Functionality
+This system uses camera detection, collaborating the UR5e, and a custom end effector, designed to detect moisture and temperature, to enable the robot to move and obtain the moisture from the soil and to be consistently repeated in multiple areas. The system employs YOLO for precise marker identification. 
 
-This system utilizes the integration of camera detection, collaborating the UR5e, and a custom end effector, designed to detect moisture, to enable to robot to move and obtain the moisture from the soil and to be consistently repeated in multiple areas.
+### Core Routines
+The system executes four distinct autonomous routines:
+
+* **Precision Soil Sampling:** Automatically navigates to detected markers to insert the sensor and capture moisture readings at specific points of interest.
+* **Topography Mapping:** Surveys the physical height of the terrain across multiple points to generate a contour map of the surface.
+* **Vertical Profiling:** Performs deep-dive analysis by inserting the sensor in incremental steps to measure moisture gradients at varying depths within the root zone.
+* **Heat Map Generation:** Scans a defined grid sector to create a comprehensive moisture and temperature map of the entire workspace.
 
 **Project Duration**: 6 weeks
 
@@ -67,6 +75,8 @@ This system utilizes the integration of camera detection, collaborating the UR5e
 - **brain**
   - Responsible for communication between nodes. 
   - Contains soil sampling logics and routine.
+- **routines**
+  - Contains routine logic to communicate with Brain
 - **endeffector_description**
   - Responsible for custom URDF package for UR5e and end effector.
   - Two URDF exists, being a detailed EE visualisation and simplified EE for operation.
@@ -107,7 +117,7 @@ This system utilizes the integration of camera detection, collaborating the UR5e
     ---
     bool response
     ```
-    **Explaination:**
+    **Explanation:**
     A simple string command to tell which routine to run. Returns if response is successful or not.
 
   - **MoveRequest**
@@ -119,14 +129,14 @@ This system utilizes the integration of camera detection, collaborating the UR5e
     ```
     **Service Call:**  
     ```
-    command: "joint", "line", "cartesian"  
+    command: "joint", "line", "cartesian"  "stop"
     positions: target positions [x, y, z, r, p, y] or [joint1, joint2, joint3, joint4, joint5, joint6]
     ---
     success: boolean
     ```
 
-    **Explaination:**
-    The command line to move the the robot with a given command and target position
+    **Explanation:**
+    The command line to move the the robot with a given command and target position. Similarly, a command can be given as stop without target positions for the robot to stop.
 
   - **VisionCmd**
     ```
@@ -135,7 +145,7 @@ This system utilizes the integration of camera detection, collaborating the UR5e
     interfaces/MarkerData marker_data
     ```
 
-    **Explaination:** A service call that triggers the object/marker detection event.
+    **Explanation:** A service call that triggers the object/marker detection event.
 
 - **msg**
   - **MarkerData**
@@ -150,7 +160,7 @@ This system utilizes the integration of camera detection, collaborating the UR5e
     float32[] pose
     ```
 
-    **Explaination:** Used to sort and determine unique and duplicate markers.
+    **Explanation:** Used to sort and determine unique and duplicate markers.
 
   - **Marker2D**
     ```
@@ -165,7 +175,7 @@ This system utilizes the integration of camera detection, collaborating the UR5e
     float32 y
     ```
 
-    **Explaination:** This is similar to MarkerData and is used to store world x and y coordinates with corresponding marker's ID.
+    **Explanation:** This is similar to MarkerData and is used to store world x and y coordinates with corresponding marker's ID.
 
   - **Marker2DArray**
     ```
@@ -176,7 +186,7 @@ This system utilizes the integration of camera detection, collaborating the UR5e
     Marker2D[] markers
     ```
 
-    **Explaination:** Puts individual Marker2D markers into a singular array to be published. An example output could be: **[[id: 0, x: 0.1, y: 0.2]**, **[id: 1, x: 0.5, y: 0.5]**, **[id: 2, x: 3.2, y: 1]]**
+    **Explanation:** Puts individual Marker2D markers into a singular array to be published. An example output could be: **[[id: 0, x: 0.1, y: 0.2]**, **[id: 1, x: 0.5, y: 0.5]**, **[id: 2, x: 3.2, y: 1]]**
     
 
 ### Closed-Loop System Behaviour
@@ -278,9 +288,7 @@ The computer vision system is built around a YOLOv11n object detection model tra
 <center><img width="1520" height="900" alt="endeffector v13" src="img/endeffector v13.png" />
 
 <img width="3309" height="2339" alt="endeffector Drawing v1-1" src="img/endeffector Drawing v1-1.png" /></center>
-
-provide photos/renders, assembly details, engineering drawings, 
-control overview and integration details. 
+ 
 
 ### System Visualisation
 The system is visualised via 3 main components, being RViz, YOLO and a RQT custom user interface.  
@@ -385,7 +393,7 @@ To test the model and the basic running of computer vision run,
 ### Launching System without End Effector
 
 ### Launching System with End Effector
-
+To launch the system, run 'ros2 launch brain system_launch.py'
 
 ### Example Commands and Expected Output
 
@@ -488,7 +496,7 @@ The following below are some things that can be improved on for "Version 2.0":
 * Samuel:
   - Primary Areas of Responsibility:
     - Endeffector
-    - Brain
+    - Brain and Routine
     - Integration
 
 * Brent: 
@@ -504,6 +512,7 @@ The below is the repository setup that is done in github -
   - Soil_test_for_ur5e
 - src
   - brain
+  - routine
   - endeffector_description
   - interfaces
   - moveit_planning server
