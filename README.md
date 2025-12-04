@@ -78,18 +78,18 @@ The system executes four distinct autonomous routines:
 - **routines**
   - Contains routine logic to communicate with Brain
 - **endeffector_description**
-- **interfaces (custom messages and services)**
-  - **srv**
-    - BrainCmd (For testing individual Packages)
-    - MoveRequest (Running Movement Request)
-    - VisionCmd (Interface with Vision Module)
-  - **msg**
-    - Marker2D (For putting world coordinates in temporary)
-    - Marker2DArray (For putting all the world coordinates in to be published)
-    - MarkerData (For putting world coordinates of that specific id value)
   - Responsible for custom URDF package for UR5e and end effector.
   - Two URDF exists, being a detailed EE visualisation and simplified EE for operation.
   - Interfaces with UR5e control drivers.
+- **interfaces (custom messages and services)**
+  - **srv**
+    - BrainCmd
+    - MoveRequest
+    - VisionCmd
+  - **msg**
+    - Marker2D
+    - Marker2DArray
+    - MarkerData 
 - **interfaces**
   - Custom messages and service calls.
 - **moveit_planning_server**
