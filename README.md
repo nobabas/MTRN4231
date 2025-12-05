@@ -190,6 +190,10 @@ The system executes four distinct autonomous routines:
 
 #### RQT Graph
 <center><img width="1500" height="600" alt="RQT_node_graph" src="img/SOILNODEGRAPH.png"/></center>
+
+A simplified figure without camera can be shown below: 
+
+<center><img width="1500" height="600" alt="RQT_node_graph_simple" src="img/rosgraph.png"/></center>
     
 
 ### Closed-Loop System Behaviour
