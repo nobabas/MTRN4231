@@ -594,10 +594,15 @@ The performance testing metrics that the system is scored to are explained as fo
 
 
 ### Robustness, Adaptability, and Innovation
+<<<<<<< HEAD
 - Robustness
   - The YOLO trained computer vision model works well in different orienation and lighting. It is able to detect blue markers at a fast refresh rate and exibits high confidence levels.
   - The end effector, given it's simplistic design and sturdy structure is extremely resistant to breaking or malfunctions.
   - The ability for the Moveit implementation to repeatedly move the UR5e to accurate coordinates and pose without unexpected behaviours has been achieved through cartestian path planning, meaning any innacuracies or failures have been completely mitigated.
+=======
+- Robutstness
+  - A major robustness improvement was the implementation of 'Cartesian Path Planning' for all sensor interactions. Unlike standard joint space planning, which can produce unpredictable arcs, Cartesian planning forces the robot to move in strict linear lines. This acts as the primary safety layer, ensuring the arm stays within the safe workspace, while the defined safety planes serve as a redundant backup rather than the only constraint.
+>>>>>>> 2174a4e8f67a2cb829987278883db80f64dd049b
 - Adaptability
   - A majority of the computer vision aspect relies on the realsense camera hardware, as it most of the functions calls from the specs.
   - Vision is quite adaptable and can be improved upon via the training data in Yolov11 files to aim for either different coloured markers or to different environments.
@@ -619,8 +624,10 @@ There were several engineering challenges that were faced during the development
   - On rare occasions, the joint velocity required from moveit's cartesian path planning would excedd the safety limit of the physical UR5e itself. This would always result in a failure and sudden stop during sampling routines and proved catastrophic for operations. This was solved through limiting the joint velocity and acceleration of the planner when conducting certain tasks to ensure that the joint velocity limit does not get exceeded.
 - System Intergration
   - Multiple errors through node and topic name mismatches were encountered when trying to integration each package into a cohesive solution. This was remedied through the creation of a high-level interaction diagram with dedicated topic names and communication methods, to which the team is able to refer to and take references from.
-- Sensor Inaccuracies
-  - The Capacitive Soil sensor v1.2 whilst cheap, is well known to be inaccurate and faulty, as such proper calibration and maintainance was taken to ensure that the readings were as accurate as possible. Further, the outputs were passed through an average filter to ensure that no outliers would trigger and cause unpredictable results.
+- End Effector
+  - One of the significant mechanical hurdles was securing the capacitive moisture sensor within the custom end effector. Initial designs allowed for slight movement of the probe during soil insertion, which caused inconsistent contact angles and potential damage to the sensor PCB. We went through multiple design iterations due to this issue. Further, half way through the design process after Gateway 2, the team switched the end effector design to be vertical rather than perpendicular to the angle of the wrist. This design choice initially hinderer our progress but we successfully ended with a secure end effector. 
+  - The Capacitive Soil sensor v1.2 whilst cheap, is well known to be inaccurate and faulty, as such proper calibration and maintainance was taken to ensure that the readings were as accurate as possible.
+  - While the capacitive sensor provides immediate feedback, the team encountered challenges with data consistency and noise. Factors such as varying soil density and slight changes in insertion depth affected the raw analog readings. To mitigate this, we implemented software-side filtering in the Brain Node, using a moving average or threshold-based logic to reject outliers and ensure that only stable, valid readings were recorded during the sampling process.
 
 For problems that was outside of the scope of the team's expertise, the solution was to obtain assistance from other teams, the supervisor, and generative AI whenever possible.
 
