@@ -199,23 +199,6 @@ A simplified figure without camera can be shown below:
 ### Closed-Loop System Behaviour
 The system operates using a fully closed-loop control architecture, where the soil sensor measurements continuously influence and correct robot behaviour during operation. This ensures that the robot responds dynamically to environmental variation such as marker position changes, depth shifts, or sensor noise rather than relying on static commands calls.
 
-#### Feedback Sources
-
-The system uses three primary real-time feedback streams:
-
-**Computer Vision Feedback (YOLO + Camera)**
-- The vision node continuously detects blue markers and publishes updated centroid pixel coordinates.
-- These coordinates are converted into world-frame positions through the transformation module.
-- This ensures that every robot movement is based on the current marker position, not a previously captured value.
-
-**Robot Motion Feedback (UR5e + MoveIt)**
-- MoveIt provides real-time feedback about joint states and end-effector pose.
-- Planned trajectories are continuously checked for validity and re-evaluated if obstacles or inconsistencies are detected.
-
-**End-Effector Sensor Feedback (Teensy Moisture Probe)**
-- During soil measurement, the moisture probe sends continuous analogue readings.
-- The robot waits until a stable reading is detected before lifting and moving to the next point.
-
 #### How the Feedback Loop Works
 The following is a step-by-step run through of the closed-loop process:
 
@@ -311,11 +294,11 @@ RViz is responsible for the main visualisation of the program. There are 4 main 
 - Visualisation Markers
 - Point-Cloud Visualisation
 
-<center><img width="1000" height="500" alt="endeffector Drawing v1-1" src="img/RViz.png"/></center>
+<center><img width="1000" height="500" alt="RViz" src="img/RViz.png"/></center>
 
 #### YOLOv11n
 A live-feed pop-up of YOLOv11n's output will be displayed. This output as stated above, will be the camera's view with bounding boxes around desired detected objects. An example can be seen below
-<center><img width="500" height="500" alt="endeffector Drawing v1-1" src="img/YOLOv11Output.png"/></center>
+<center><img width="500" height="500" alt="YOLO Output" src="img/YOLOv11Output.png"/></center>
 
 #### RQT GUI
 The GUI is a simple user interface, consisting of 6 buttons being: 
@@ -326,12 +309,33 @@ The GUI is a simple user interface, consisting of 6 buttons being:
 - **Heat-map:** Samples the four corners of the workspace at a fixed depth to provide a broad moisture overview.
 - **STOP:** Emergency STOP broadcast.
 
+Additionally, a RQT Plot can be opened to display the current readings from the soil sensor.
+<center><img width="1000" height="500" alt="GUI" src="img/GUI.PNG"/></center>
+
+
 #### Contribution to the Overall Task
 - Provides real-time feedback for each individual nodes.
 
 ### Closed-Loop Operation and Feedback
  describe the feedback method and how it adapts system 
 behaviour in real time.
+
+#### Closed Loop Pipeline
+The system uses three primary real-time feedback streams being:
+
+**Computer Vision Feedback (YOLO + Camera)**
+- The vision node continuously detects blue markers and publishes updated centroid pixel coordinates.
+- These coordinates are converted into world-frame positions through the transformation module.
+- This ensures that every robot movement is based on the current marker position, not a previously captured value.
+
+**Robot Motion Feedback (UR5e + MoveIt)**
+- MoveIt provides real-time feedback about joint states and end-effector pose.
+- Planned trajectories are continuously checked for validity and re-evaluated if obstacles or inconsistencies are detected.
+
+**End-Effector Sensor Feedback (Teensy Moisture Probe)**
+- During soil measurement, the moisture probe sends continuous analogue readings.
+- The robot waits until a stable reading is detected before lifting and moving to the next point.
+
 
 ## Installation and Setup
 ### Operating System
@@ -377,8 +381,7 @@ source install/setup.bash
 
 #### Camera
 The camera used for this project is the 'Intel Realsense D435 Depth Camera
-More information about the camera can be found below:
-https://www.manualshelf.com/manual/intel/82635awgdvkprq/product-data-sheet-brochure-english.html
+More information about the camera can be found [here](https://www.manualshelf.com/manual/intel/82635awgdvkprq/product-data-sheet-brochure-english.html).
 
 #### End Effector
 The moisture sensor needs to be calibrated by measuring the ambient moisture in the air compared to within the soil. Make a note of this value and change the variable to match this threshold, as shown below. 
@@ -387,7 +390,7 @@ declare_parameter<double>("soil_threshold", 1000.0);
 ```
 
 ## Running the System
-To run the entire system, only one launch file is required which is located within src/brain/launch directory. There exists two options to launching the program, one for conenction with a physical robot and the other is a virtual simulation.  
+To run the entire system, only one launch file is required which is located within src/brain/launch directory. There exists two options to launching the program, one for connection with a physical robot and the other is a virtual simulation.  
 
 To toggle between real and simulation, check with the launch file ur_with_endeffector within src/endeffector_description.
 ```
@@ -463,7 +466,7 @@ To launch the system, run
 ```
 ros2 launch brain system_launch.py
 ```
-This will start all the appropriate files. To test without end effector, change in system_launch.py '/ur_with_endeffector.launch.py' to display.launch.py. Alternatively, run
+This will start all the appropriate files. To test without end effector, change in system_launch.py **ur_with_endeffector.launch.py** to **display.launch.py**. Alternatively, run
 ```
 ros2 launch brain system_launch.py  use_fake_hardware:=false
 ```
