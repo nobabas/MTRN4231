@@ -594,15 +594,11 @@ The performance testing metrics that the system is scored to are explained as fo
 
 
 ### Robustness, Adaptability, and Innovation
-<<<<<<< HEAD
 - Robustness
   - The YOLO trained computer vision model works well in different orienation and lighting. It is able to detect blue markers at a fast refresh rate and exibits high confidence levels.
   - The end effector, given it's simplistic design and sturdy structure is extremely resistant to breaking or malfunctions.
   - The ability for the Moveit implementation to repeatedly move the UR5e to accurate coordinates and pose without unexpected behaviours has been achieved through cartestian path planning, meaning any innacuracies or failures have been completely mitigated.
-=======
-- Robutstness
   - A major robustness improvement was the implementation of 'Cartesian Path Planning' for all sensor interactions. Unlike standard joint space planning, which can produce unpredictable arcs, Cartesian planning forces the robot to move in strict linear lines. This acts as the primary safety layer, ensuring the arm stays within the safe workspace, while the defined safety planes serve as a redundant backup rather than the only constraint.
->>>>>>> 2174a4e8f67a2cb829987278883db80f64dd049b
 - Adaptability
   - A majority of the computer vision aspect relies on the realsense camera hardware, as it most of the functions calls from the specs.
   - Vision is quite adaptable and can be improved upon via the training data in Yolov11 files to aim for either different coloured markers or to different environments.
