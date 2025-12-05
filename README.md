@@ -98,7 +98,7 @@ The system executes four distinct autonomous routines:
 - **take_image**
   - Enables the camera
 - **teensy_bridge**
-  - Publishes soil sensor readings at -- Hz
+  - Publishes soil sensor readings at 9.6 kHz
 - **transformation**
   - tf_main: Main transformation calculations.
   - tf_publisher: Publishes world-frame transformation coordinates.
@@ -194,7 +194,10 @@ The system executes four distinct autonomous routines:
 A simplified figure without camera can be shown below: 
 
 <center><img width="1500" height="600" alt="RQT_node_graph_simple" src="img/rosgraph.png"/></center>
-    
+
+#### Package Level Interaction
+<center><img width="1500" height="600" alt="RQT_node_graph_simple" src="img/PackageInteraction.PNG"/></center>
+
 
 ### Closed-Loop System Behaviour
 The system operates using a fully closed-loop control architecture, where the soil sensor measurements continuously influence and correct robot behaviour during operation. This ensures that the robot responds dynamically to environmental variation such as marker position changes, depth shifts, or sensor noise rather than relying on static commands calls.
@@ -251,7 +254,7 @@ The computer vision system is built around a YOLOv11n object detection model tra
 #### Vision Pipeline
 
 ##### Image Acquisition
-- A continuous image stream is received from the camera. To reduce computational load, frames are sampled at a lower frequency (Around 5 frames per second), while still maintaining sufficient resolution for reliable detection.
+- A continuous image stream is received from the camera. To reduce computational load, frames are sampled at a lower frequency of 5 Hz, while still maintaining sufficient resolution for reliable detection.
 
 ##### Object Detection (YOLOv11n Model)
 - Each sampled frame is passed through the YOLOv11n network.
@@ -563,23 +566,23 @@ colcon build --packages-select brain
 - Such repeatability is essential for long-term agricultural monitoring where sampling locations may be revisited repeatedly.
 
 ### Quantitative Results (Accuracy, Repeatability)
-* Performance Testing Metrics:
-Detection Accuracy:
-- Rating out of 1
-- The confidence that there is an object present in the image
-- This also an average of all 4 markers present in the camera feed
+The performance testing metrics that the system is scored to are explained as follows:
+- **Detection Accuracy**
+  - Rating out of 1
+  - The confidence that there is an object present in the image
+  - This also an average of all 4 markers present in the camera feed
 
-* Sampling Time / Execution Time:
-- In seconds
-- The time it takes for the sample and the execution of the robot to run once
+- **Sampling Time / Execution Time**
+  - In seconds
+  - The time it takes for the sample and the execution of the robot to run once
 
-* Sampling Accuracy:
-- In percentage
-- The accuracy of the sample 
+- **Sampling Accuracy**
+  - In percentage
+  - The accuracy of the sample 
 
-* Sensor Accuracy:
-- In percentage
-- The accuracy of the sensor
+- **Sensor Accuracy**
+  - In percentage
+  - The accuracy of the sensor
 
 |     Test     | Detection Accuracy | Sampling Time / Execution Time (seconds) | Sampling Accuracy (%) | Sensor Accuracy (%) |
 |--------------|--------------------|------------------------------------------|-----------------------|---------------------|
