@@ -187,6 +187,9 @@ The system executes four distinct autonomous routines:
     ```
 
     **Explaination:** Puts individual Marker2D markers into a singular array to be published. An example output could be: **[[id: 0, x: 0.1, y: 0.2]**, **[id: 1, x: 0.5, y: 0.5]**, **[id: 2, x: 3.2, y: 1]]**
+
+#### RQT Graph
+<center><img width="1000" height="500" alt="RQT_node_graph" src="img/SOILNODEGRAPH.png"/></center>
     
 
 ### Closed-Loop System Behaviour
@@ -292,6 +295,7 @@ The computer vision system is built around a YOLOv11n object detection model tra
 <img width="1520" height="900" alt="endeffector v13" src="img/WiringDiagream.PNG" />
 </center>
   
+The end effector uses 4xM3 bolts from the bottom of the end effector, with hex screws to secure above the lid. Inside the end effector there are two tabs (see drawing) that match the tabs on the moisture sensor. Place the moisture sensor as to have these line up. 
 
 ### System Visualisation
 The system is visualised via 3 main components, being RViz, YOLO and a RQT custom user interface.  
@@ -373,12 +377,10 @@ More information about the camera can be found below:
 https://www.manualshelf.com/manual/intel/82635awgdvkprq/product-data-sheet-brochure-english.html
 
 #### End Effector
-
-
-
-
-Calibration
-- No Calibrations
+The moisture sensor needs to be calibrated by measuring the ambient moisture in the air compared to within the soil. Make a note of this value and change the variable to match this threshold, as shown below. 
+```
+declare_parameter<double>("soil_threshold", 1000.0);
+```
 
 ## Running the System
 To run the entire system, only one launch file is required which is located within src/brain/launch directory. There exists two options to launching the program, one for conenction with a physical robot and the other is a virtual simulation.  
@@ -453,10 +455,52 @@ ros2 run brain dummy_inputs.py
 ```
 
 ### Testing System with End Effector
-
-
+To launch the system, run 
+```
+ros2 launch brain system_launch.py
+```
 ### Testing Routines
+You can trigger the robot's autonomous routines either via the **rqt GUI** (if configured) or directly via the terminal using `ros2 service call`.
 
+### 1. Triggering Routines
+To manually run a routine, open a new terminal and run the following command:
+
+```
+ros2 service call /brain_srv interfaces/srv/BrainCmd "{command: 'COMMAND_NAME'}"
+Available Routine Commands:
+
+soil_sampling - Precision Soil Sampling (Visits detected markers)
+
+topography - Topography Mapping (Surveys terrain height)
+
+vertical - Vertical Profiling (Deep-dive moisture analysis)
+
+heat_map - Heat Map Generation (Scans the entire sector)
+
+```
+
+As an example: 
+
+```
+ros2 service call /brain_srv interfaces/srv/BrainCmd "{command: 'soil_sampling'}"
+```
+### 2. Vision vs. Test Mode
+The system can operate in two modes: Live Vision (using the camera) or Test Mode (using hardcoded coordinates for debugging).
+
+To enable Live Vision:
+
+Open the desired routine file (e.g., src/brain/src/routines/soil_routine.cpp).
+
+Change the vision flag at the top of the file:
+
+```
+#define USE_VISION 1
+```
+Rebuild the package to apply changes:
+
+```
+colcon build --packages-select brain
+```
 ### Common Errors and Troubleshooting
 - If the movement services aren't being applied to the real UR5e, double check that the connection program on the UR5e pendant is actively running and is able to communicate. Everytime the system is launched or relaunch, it is required to re-run the communication program on the teaching pendant.
 - Ensure not to run Arduino's Serial Terminal or there are more than one program accessing the teensy port. If there are more than one program utilising the teensy port simultanuously (possibly from a previous group), this will prevent the ROS-Teensy bridge from being able to read incoming data from the sensor. While running the system, the port usage can be checked via the command below. If there is a second application use the kill command.
@@ -466,7 +510,7 @@ ros2 run brain dummy_inputs.py
   # If there's a second program
   kill {insert PID}
   ```
-- 
+
 
 ## Results and Demonstration
 
