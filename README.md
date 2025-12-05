@@ -661,22 +661,71 @@ The following below are some things that can be improved on for "Version 2.0":
 
 
 ## Repository Structure
-The below is the repository setup that is done in github -
-- end_effector/arduino
-  - Soil_moisture_reading
-  - Soil_test_for_ur5e
-- src
-  - brain
-  - endeffector_description
-  - interfaces
-  - moveit_planning server
-  - take_image
-  - teensy_bridge
-  - transformation
-  - ur5_moveit_config
-  - vision
-- yolo_dataset
-
+```
+MTRN4231/
+├───img
+├───yolo_dataset
+│   ├───train
+│   │   ├───images
+│   │   └───labels
+│   └───val
+│       ├───images
+│       └───labels
+├───received_images
+├───src
+│   ├───vision
+│   │   ├───launch
+│   │   ├───vision
+│   │   └───resource
+│   ├───teensy_bridge
+│   │   ├───launch
+│   │   ├───teensy_bridge
+│   │   │   └───__pycache__
+│   │   ├───resource
+│   │   └───test
+│   ├───transformation
+│   │   ├───launch
+│   │   ├───resource
+│   │   └───transformation
+│   ├───endeffector_description
+│   │   ├───launch
+│   │   ├───meshes
+│   │   ├───urdf
+│   │   │   └───old
+│   │   └───rviz
+│   ├───interfaces
+│   │   ├───msg
+│   │   └───srv
+│   ├───ur_moveit_config
+│   │   ├───launch
+│   │   ├───srdf
+│   │   ├───config
+│   │   ├───ur_moveit_config
+│   │   └───rviz
+│   ├───brain
+│   │   ├───launch
+│   │   ├───test_nodes
+│   │   ├───include
+│   │   │   └───brain
+│   │   │       └───routines
+│   │   └───src
+│   │       └───routines
+│   ├───take_image
+│   │   ├───launch
+│   │   ├───resource
+│   │   └───take_image
+│   ├───ur5_moveit_rqt
+│   │   ├───resource
+│   │   ├───ur5_moveit_rqt
+│   │   └───test
+│   └───moveit_planning_server
+│       ├───launch
+│       └───src
+└───end_effector
+    └───arduino
+        ├───Soil_moisture_reading
+        └───Soil_test_for_ur5e
+```
 Each folder does the following -
 - End_effector:
   - Using Arduino to run the end effector with UR5e
@@ -686,7 +735,7 @@ Each folder does the following -
 - yolo_dataset:
   - Only contains images that were used to train the Yolo model
 - img:
-  - Contains files used for readme
+  - Contains files used for README.md
 
 ## References and Acknowledgements
 - MTRN4231 Labs Week 1-5
