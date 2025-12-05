@@ -588,6 +588,7 @@ Detection Accuracy:
   - Using this as it is in a different environement may yield different results.
 - Innovation
   - Although there are some example similar to this project, there have been no example of pure automation of consistent soil detection.
+  - A critical technical challenge was enabling the robot to stop immediately upon detecting soil contact. In standard ROS 2 architectures, a long-running motion command can block the execution thread, preventing the system from processing new sensor data until the movement is complete. To solve this, we implemented a Multi-Threaded Architecture using ReentrantCallbackGroups. This allows the "Brain Node" to run the motion routine on one thread while simultaneously processing high-frequency sensor data on another. This design ensures that the instant the moisture threshold is breached, the system can interrupt the active move command and trigger an emergency stop, preventing damage to the sensor or the environment.
 
 ## Discussion and Future Work
 Our approach to this project has a simple objective to only detect the soil, which makes it effective and simple to complete the tasks without difficulty. It is creative as although there is a lot of soil detection related technology, not many of them are automated or utilises robot, as most uses are manual or requires manpower to run them in the real world. This idea is not novel to an extent but it provides an different approach to utilising this technology. 
@@ -607,10 +608,10 @@ These were addressed by the team by hard focusing on the problems that exist on 
 Due to the simipicty of the project, there are many improvements that can be made.
 
 The following below are some things that can be improved on for "Version 2.0":
-- End effector with different tools on it, where it can switch each tool in and out of use, with the capacity to dig and plant seed
+- End effector with different tools on it, where it can switch each tool in and out of use, with the capacity to dig and plant seed. A suggested design would be adding an auger bit as well as a tube to output water.
 - Another improvement is the making the path planning timing more efficient to reduce time delays.
 - A greater dataset could have been made for YOLO11 to ensure it is consistent in detecting all the objects required.
-- Instead of only using blue markers as it's main detection, it could also detect other items, such as plants or rocks in the soil.
+- Instead of only using blue markers as it's main detection, it could also detect other items, such as plants or rocks in the soil. This would also enable crash avoidance and allow farmers to guide the robot through harsh terrains.
 
 ## Contributors and Roles
 * Minh: 
