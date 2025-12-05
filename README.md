@@ -339,7 +339,20 @@ sudo apt install ros-humble-moveit
 ```
 
 ### Vision
+Ensure that ROS2 is installed with the following packages
 
+```
+pip install ultralytics
+pip install cv2
+pip install numpy
+```
+
+### Transformations
+Ensure that the following package is installed
+
+```
+pip install pyrealsense
+```
 
 ### End Effector
 Ensure that an Arduino IDE version >= 2.0 is installed, if not, follow Arduino's [official installation guide](https://docs.arduino.cc/software/ide-v2/tutorials/getting-started/ide-v2-downloading-and-installing/)  
@@ -355,14 +368,14 @@ source install/setup.bash
 ### Hardware Setup and Calibration
 
 #### Camera
-
+The camera used for this project is the 'Intel Realsense D435 Depth Camera
+More information about the camera can be found below:
+https://www.manualshelf.com/manual/intel/82635awgdvkprq/product-data-sheet-brochure-english.html
 
 #### End Effector
 
 
-Hardware Requirement
-Intel Realsense D435 Depth Camera
-- List of stuff relating to it
+
 
 Calibration
 - No Calibrations
