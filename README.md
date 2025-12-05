@@ -386,6 +386,19 @@ source install/setup.bash
 The camera used for this project is the 'Intel Realsense D435 Depth Camera
 More information about the camera can be found [here](https://www.manualshelf.com/manual/intel/82635awgdvkprq/product-data-sheet-brochure-english.html).
 
+* Install Realsense:
+```
+sudo apt install ros-humble-realsense2-camera
+```
+
+* USB Connection:
+- Connect Camera to USB 3.0 Port
+- Verify Detection: rs-enumerate-devices
+
+* Camera Calibration:
+- Assume hand-eye calibration is present
+
+
 #### End Effector
 The moisture sensor needs to be calibrated by measuring the ambient moisture in the air compared to within the soil. Make a note of this value and change the variable to match this threshold, as shown below. 
 ```
