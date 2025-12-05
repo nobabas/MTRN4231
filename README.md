@@ -189,7 +189,7 @@ The system executes four distinct autonomous routines:
     **Explaination:** Puts individual Marker2D markers into a singular array to be published. An example output could be: **[[id: 0, x: 0.1, y: 0.2]**, **[id: 1, x: 0.5, y: 0.5]**, **[id: 2, x: 3.2, y: 1]]**
 
 #### RQT Graph
-<center><img width="1000" height="500" alt="RQT_node_graph" src="img/SOILNODEGRAPH.png"/></center>
+<center><img width="1500" height="600" alt="RQT_node_graph" src="img/SOILNODEGRAPH.png"/></center>
     
 
 ### Closed-Loop System Behaviour
