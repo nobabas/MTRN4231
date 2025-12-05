@@ -593,7 +593,7 @@ Detection Accuracy:
 
 ### Robustness, Adaptability, and Innovation
 - Robutstness
-  - Very Robust
+  - A major robustness improvement was the implementation of 'Cartesian Path Planning' for all sensor interactions. Unlike standard joint space planning, which can produce unpredictable arcs, Cartesian planning forces the robot to move in strict linear lines. This acts as the primary safety layer, ensuring the arm stays within the safe workspace, while the defined safety planes serve as a redundant backup rather than the only constraint.
 - Adaptability
   - A majority of the computer vision aspect relies on the realsense camera hardware, as it most of the functions calls from the specs.
   - Can be changed based on training the data the Yolov11 files to aim for either different coloured markers or to adapt to the changes.
@@ -610,10 +610,13 @@ Our approach to this project has a simple objective to only detect the soil, whi
 There were several engineering challenges that were faced during the development of this project. Such challenges faced were:
 - Time
   - A tight time constraint,
-- System Intergration
+- System Integration
   - Multiple errors and fixes had to be made through the process of intergrating the entire system.
 - Utilising Certain programs like Ros2 package, RVIS and Moveit
   - There were some difficultly in using those programs in terms of difficultly to understand and slow processing speed.
+- End Effector
+  - One of the significant mechanical hurdles was securing the capacitive moisture sensor within the custom end effector. Initial designs allowed for slight movement of the probe during soil insertion, which caused inconsistent contact angles and potential damage to the sensor PCB. We went through multiple design iterations due to this issue. Further, half way through the design process after Gateway 2, the team switched the end effector design to be vertical rather than perpendicular to the angle of the wrist. This design choice initially hinderer our progress but we successfully ended with a secure end effector. 
+  - While the capacitive sensor provides immediate feedback, the team encountered challenges with data consistency and noise. Factors such as varying soil density and slight changes in insertion depth affected the raw analog readings. To mitigate this, we implemented software-side filtering in the Brain Node, using a moving average or threshold-based logic to reject outliers and ensure that only stable, valid readings were recorded during the sampling process.
 
 These were addressed by the team by hard focusing on the problems that exist on the code. If such problem continued, the team asked for assistance from other teams, the supervisor, and AI assistance whenever possible.
 
