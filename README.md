@@ -463,6 +463,10 @@ To launch the system, run
 ```
 ros2 launch brain system_launch.py
 ```
+This will start all the appropriate files. To test without end effector, change in system_launch.py '/ur_with_endeffector.launch.py' to display.launch.py. Alternatively, run
+```
+ros2 launch brain system_launch.py  use_fake_hardware:=false
+```
 ### Testing Routines
 You can trigger the robot's autonomous routines either via the **rqt GUI** (if configured) or directly via the terminal using `ros2 service call`.
 
@@ -491,14 +495,14 @@ ros2 service call /brain_srv interfaces/srv/BrainCmd "{command: 'soil_sampling'}
 ### 2. Vision vs. Test Mode
 The system can operate in two modes: Live Vision (using the camera) or Test Mode (using hardcoded coordinates for debugging).
 
-To enable Live Vision:
+To disable Live Vision:
 
 Open the desired routine file (e.g., src/brain/src/routines/soil_routine.cpp).
 
 Change the vision flag at the top of the file:
 
 ```
-#define USE_VISION 1
+#define USE_VISION 0
 ```
 Rebuild the package to apply changes:
 
