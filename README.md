@@ -318,13 +318,13 @@ Additionally, a RQT Plot can be opened to display the current readings from the 
 
 #### Contribution to the Overall Task
 - Provides real-time feedback for each individual nodes.
+- These three streams work together to ensure that the visualisation and operation is seamless between both virtual and physical, acting as functional digital twin. 
 
 ### Closed-Loop Operation and Feedback
- describe the feedback method and how it adapts system 
-behaviour in real time.
+Vision feedback continually updates the robot with the current marker positions, ensuring accurate and reliable target localisation. Motion feedback from MoveIt ensures that each planned movement remains safe, feasible, and within joint limits. Finally, the soil-probe sensor provides real-time moisture readings, allowing the robot to confirm successful soil contact before recording data.
 
 #### Closed Loop Pipeline
-The system uses three primary real-time feedback streams being:
+The system uses three primary real-time feedback loops being:
 
 **Computer Vision Feedback (YOLO + Camera)**
 - The vision node continuously detects blue markers and publishes updated centroid pixel coordinates.
@@ -338,7 +338,6 @@ The system uses three primary real-time feedback streams being:
 **End-Effector Sensor Feedback (Teensy Moisture Probe)**
 - During soil measurement, the moisture probe sends continuous analogue readings.
 - The robot waits until a stable reading is detected before lifting and moving to the next point.
-
 
 ## Installation and Setup
 ### Operating System
@@ -595,15 +594,18 @@ The performance testing metrics that the system is scored to are explained as fo
 
 
 ### Robustness, Adaptability, and Innovation
-- Robutstness
-  - Very Robust
+- Robustness
+  - The YOLO trained computer vision model works well in different orienation and lighting. It is able to detect blue markers at a fast refresh rate and exibits high confidence levels.
+  - The end effector, given it's simplistic design and sturdy structure is extremely resistant to breaking or malfunctions.
+  - The ability for the Moveit implementation to repeatedly move the UR5e to accurate coordinates and pose without unexpected behaviours has been achieved through cartestian path planning, meaning any innacuracies or failures have been completely mitigated.
 - Adaptability
   - A majority of the computer vision aspect relies on the realsense camera hardware, as it most of the functions calls from the specs.
-  - Can be changed based on training the data the Yolov11 files to aim for either different coloured markers or to adapt to the changes.
-  - For UR5e related movement it is very adaptable.
-  - Using this as it is in a different environement may yield different results.
+  - Vision is quite adaptable and can be improved upon via the training data in Yolov11 files to aim for either different coloured markers or to different environments.
+  - For moveit, the movement is adaptable within any and all environments, given that the safety planes and constraints have been setup correctly which is relatively simple process.
+  - Works within all environments, as long as the sensor is properly calibrated. The closed loop system offers high levels of adaptability to environmental or physical changes. However, the camera must remain unobstructed.
 - Innovation
   - Although there are some example similar to this project, there have been no example of pure automation of consistent soil detection.
+  - Cartesian movement instead of OMPL-based planners to achieve fast, accurate and responsive movements as compared to OMPL long planning time and random path generation.
   - A critical technical challenge was enabling the robot to stop immediately upon detecting soil contact. In standard ROS 2 architectures, a long-running motion command can block the execution thread, preventing the system from processing new sensor data until the movement is complete. To solve this, we implemented a Multi-Threaded Architecture using ReentrantCallbackGroups. This allows the "Brain Node" to run the motion routine on one thread while simultaneously processing high-frequency sensor data on another. This design ensures that the instant the moisture threshold is breached, the system can interrupt the active move command and trigger an emergency stop, preventing damage to the sensor or the environment.
 
 ## Discussion and Future Work
@@ -611,23 +613,26 @@ Our approach to this project has a simple objective to only detect the soil, whi
 
 ### Engineering Challenges and Solutions
 There were several engineering challenges that were faced during the development of this project. Such challenges faced were:
-- Time
-  - A tight time constraint,
+- Robot Arm Path Planning
+  - Initial Moveit integration into the ROS2 posed a significant challenge as the end result was often unreliable and unpredictable path planning and long planning times. As the end goal of the solution was to allow for rapid and accurate UR5e arm positioning, another method had to be utilised. As such, OMPL was ditched and cartesian path planning was utilised to provide a reliable solution.
+- Robot Kinematic Constraints
+  - On rare occasions, the joint velocity required from moveit's cartesian path planning would excedd the safety limit of the physical UR5e itself. This would always result in a failure and sudden stop during sampling routines and proved catastrophic for operations. This was solved through limiting the joint velocity and acceleration of the planner when conducting certain tasks to ensure that the joint velocity limit does not get exceeded.
 - System Intergration
-  - Multiple errors and fixes had to be made through the process of intergrating the entire system.
-- Utilising Certain programs like Ros2 package, RVIS and Moveit
-  - There were some difficultly in using those programs in terms of difficultly to understand and slow processing speed.
+  - Multiple errors through node and topic name mismatches were encountered when trying to integration each package into a cohesive solution. This was remedied through the creation of a high-level interaction diagram with dedicated topic names and communication methods, to which the team is able to refer to and take references from.
+- Sensor Inaccuracies
+  - The Capacitive Soil sensor v1.2 whilst cheap, is well known to be inaccurate and faulty, as such proper calibration and maintainance was taken to ensure that the readings were as accurate as possible. Further, the outputs were passed through an average filter to ensure that no outliers would trigger and cause unpredictable results.
 
-These were addressed by the team by hard focusing on the problems that exist on the code. If such problem continued, the team asked for assistance from other teams, the supervisor, and AI assistance whenever possible.
+For problems that was outside of the scope of the team's expertise, the solution was to obtain assistance from other teams, the supervisor, and generative AI whenever possible.
 
 ### Opportunities for Improvement
 Due to the simipicty of the project, there are many improvements that can be made.
 
 The following below are some things that can be improved on for "Version 2.0":
 - End effector with different tools on it, where it can switch each tool in and out of use, with the capacity to dig and plant seed. A suggested design would be adding an auger bit as well as a tube to output water.
-- Another improvement is the making the path planning timing more efficient to reduce time delays.
 - A greater dataset could have been made for YOLO11 to ensure it is consistent in detecting all the objects required.
 - Instead of only using blue markers as it's main detection, it could also detect other items, such as plants or rocks in the soil. This would also enable crash avoidance and allow farmers to guide the robot through harsh terrains.
+- A more detailed GUI could be implemented instead of simple buttons.
+- The ability to real-time obstacle detection and avoidance via depth camera.
 
 ## Contributors and Roles
 * Minh: 
